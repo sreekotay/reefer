@@ -6,7 +6,8 @@ Inspired by Vue, Svelte, and (of course) Reef.
 
 Reefer can be used both programatically and declaratively.
 
-**Getting Started**
+# Getting Started
+
 No build is required. Run reeferhello for an example
 Either include:
 ```
@@ -30,7 +31,7 @@ You can conditionally include with this line:
 	  <script>window.MSInputMethodContext && document.documentMode && document.write('<script src="../../public/js/reeferIE11.js"><\x2fscript>');</script>
 ```
 
-**Hello World**
+# Hello World #
 ```
 <html>
 <script src=reefer-min.js></script>
@@ -40,7 +41,7 @@ You can conditionally include with this line:
 <script>
 	reefer.register ('hello', {
 		template: function() {
-			return this.html (0, 'Hello World!')
+			this.html (0, 'Hello World!')
 		}
 	})
 </script>
@@ -57,7 +58,7 @@ and a slightly more complicated example
 	var helloTempl = reefer.template ('name', 'Hello World ${name||""}!')
 	reefer.register ('hello', {
 		template: function() {
-			return this.html (0, helloTempl(this.data.name))
+			this.html (0, helloTempl(this.data.name))
 		}
 	})
 	setTimeout(function () {
@@ -68,7 +69,7 @@ and a slightly more complicated example
 </html>
 ```
 
-**Sections**
+# Sections #
 - data: maybe object or array (will be converted to object)
 - mutate: function
 - template: function(slots) return: string or els --- or call this.html()

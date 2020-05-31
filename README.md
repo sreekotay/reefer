@@ -22,7 +22,7 @@ This will add 3 items to your global namespace.
 ```
 	reefer
 	reeferHTML
-	xs (this is the reactive obsserver used by reefer)
+	xs (this is the reactive observer used by reefer)
 ```
 
 Note that the core of reefer runs with polyfill in IE11.  If you wish to use events, the a polyfill for custom events is required (provided here also.)
@@ -57,6 +57,9 @@ and a slightly more complicated example
 <script>
 	var helloTempl = reefer.template ('name', 'Hello World ${name||""}!')
 	reefer.register ('hello', {
+		data: {
+			name: 'Sree'
+		},
 		template: function() {
 			this.html (0, helloTempl(this.data.name))
 		}
@@ -68,11 +71,13 @@ and a slightly more complicated example
 </body>
 </html>
 ```
+Note that we both passed in the property `name` via HTML, as a default when registering the component and then reactively updated it via JS after a 2 second timeout.
+
 
 # Sections #
-- data: maybe object or array (will be converted to object)
-- mutate: function
-- template: function(slots) return: string or els --- or call this.html()
+- data: maybe object or array (will be converted to object with all properties undefined)
+- mutate: function called whenever data is updates
+- template: function() called when you should render to this.rootEl. The preferred model is to provide a series of html updates via `this.html()`
 - listeners: map of function(props, el) DOM handlers
 - observers: map of callback when props get updated
 - events: array list of events to raise data.prop change (prepended by component-name) (not needed if you specify '--' after the VALUE, which you can you to rename the event also)
@@ -80,32 +85,29 @@ and a slightly more complicated example
 - methods: functions will be bound to this automatically
 - decorators: array list of data to NOT re-render always
 
-**Reef properties**
+# Reefer Component properties#
 - rootEl
 - data
 - observers
 - listeners
 - methods
-- shared
+- shared (globally shared for this component)
 
-**Reef methods**
+# Reefer Component methods #
 - render
-- rerender
 - observe
 - watch 
 - bind
 - emit
 
-**Reefer**
+# Reefer Registiry #
 - register
 - find
 - findAll
 - dotpath
 - emit
 
-
-**Syntax**
-	
+# Syntax #
 - on HTML attributes **reef-p**-PROPERTYNAME = VALUE
 - where PROPERTYNAME is the data name in your javascript.
 - where VALUE is the value
@@ -122,16 +124,10 @@ and a slightly more complicated example
 
 		selector maybe: '.class' '#id' '[attribute...]' or '$json:PATH' or '$html:PATH'
 
-
-	 
-    
-
 reef@EVENTNAME=functionname(LITERAL,...,LITERAL)
 reef@EVENTNAME=property(LITERAL)
 
-
-
-**Slots**
+# Slots #
 - reef-slot -- slots.name.text (for string) or as array for dom elements
 - type='reef()' for compiled function - available as reefFunc
 - otherwise default

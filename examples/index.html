@@ -6,15 +6,15 @@
   <title>Reefer Examples Index</title>
   <body>
     <style>
-       div {
+       .indent-list {
         padding-left: 5px;
         text-indent:-5px;
     }
     </style>
-<div style='display:flex; justify-content: center; margin:0px 24px'>
-  <div>
+<div style='display:flex; align-items: center; flex-direction:column;min-height:100vh; background-color:#fff;'>
+  <div style='flex-grow:1;padding:0px 24px; background-color:#fff;'>
     <h1  style='margin:48px 0;'><a href="https://github.com/sreekotay/reefer"'>reefer</a> examples</h1>
-    <div reef reef-p-links='[
+    <div reef class=indent-list reef-p-links='[
       ["hello", "simple hello world", "/reeferhello.html"],
       ["simple reactive demo", "simple hello world with some examples", "/reeferreactive.html"],
       ["conduit", "real world js framework test", "/conduit/"],
@@ -26,7 +26,11 @@
           <div><b><a href='.${d[2]}'>${d[0]}</a></b> - ${d[1]}</div>
       </script>
     </div>
-</div>
+    <br><div style='opacity:0.35'>(be sure to view source)</div>
+  </div>
+  <div style='opacity: 0.5; padding: 10px'>
+    (c) copyright 2020 Sree Kotay
+  </div>
 </div>
 </body>
 <script>

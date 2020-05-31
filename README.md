@@ -30,6 +30,7 @@ You can conditionally include with this line:
 ```
 	  <script>window.MSInputMethodContext && document.documentMode && document.write('<script src="../../public/js/reeferIE11.js"><\x2fscript>');</script>
 ```
+Check out some examples: <https://github.com/sreekotay/reefer>
 
 # Hello World #
 ```
@@ -108,19 +109,19 @@ Note that we both passed in the property `name` via HTML, as a default when regi
 - emit
 
 # Syntax #
-- on HTML attributes **reef-p**-PROPERTYNAME = VALUE
+- on HTML attributes `reef-p`-PROPERTYNAME` = `VALUE`
 - where PROPERTYNAME is the data name in your javascript.
 - where VALUE is the value
 - or VALUE may specific a refererence instead, if:
-	- of the format **~PROPERTYREFERENCE~LOCATION**
+	- of the format `~PROPERTYREFERENCE~LOCATION`
 		- PROPERTYREFERENCE is the name of the data in other component or store
 		- LOCATION is a css selector to reach that PROPERTYREFERENCE
-		- **~~LOCATION** may be used if if the PROPERTYREFRENCE is the same as the location, e.g:
-		- &lt;div **reef-p-whichtab**="**~~#othertabdiv**">&lt;/div>  
+		- `~~LOCATION` may be used if if the PROPERTYREFRENCE is the same as the location, e.g:
+		- &lt;div `reef-p-whichtab`=`"~~#othertabdiv"`>&lt;/div>  
 	- may end with ::EVENTNAME (where VALUE is literal or a reference
     - note that property events will be preprended by the registered component-name
     - for example, the following will set the initial value to 1, and fire a custom DOM event names **selectedtab** whenever the value **whichtab** changes in the component:
-      -	&lt;div **reef-p-whichtab**="**1::selectedtab**">
+      -	`<div reef-p-whichtab="**1::selectedtab**">`
 
 		selector maybe: '.class' '#id' '[attribute...]' or '$json:PATH' or '$html:PATH'
 

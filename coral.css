@@ -1,0 +1,310 @@
+
+html {
+  font-size: 16px;
+}
+
+html, * {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Helvetica, sans-serif;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  margin: 0;
+}
+
+
+details {
+  display: block;
+}
+
+summary {
+  display: list-item;
+}
+
+abbr[title] {
+  border-bottom: none;
+  text-decoration: underline dotted;
+}
+
+input {
+  overflow: visible;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+table, table.horizontal {
+  border-collapse: collapse;
+  border: 0;
+  width: 100%;
+  display: table;
+}
+
+tr:nth-child(even) {background: #e7e7e7}
+tr:nth-child(odd) {background: #FFF}
+
+th {
+  background-color: #2196F3;
+  color: white;
+  border: none;
+}
+td {
+  border: none;
+}
+
+tr {
+  text-align:left; 
+}
+
+.coraltabs {
+  display: flex;
+  flex-direction: row;
+}
+.coraltabs > label {
+  cursor: pointer;
+  background-color: #2196F3;
+  color: white;
+  _border: 1px solid rgba(0,0,0,0.1);
+  opacity: 0.6;
+  padding: 4px 12px;
+  border: 1px solid #2196F3;
+}
+:checked + label {
+  opacity: 1.0;
+  background-color: #2196F3;
+  color: white;
+}
+.coraltabs > input {
+  display:none;
+}
+.coraltabs.down > label {
+  margin-right: 1px;
+  border-radius: 14px 14px 0 0;
+}
+.coraltabs.up > label {
+  border-radius: 0 0 14px 14px;
+  margin-right: 1px;
+}
+
+
+[type="checkbox"], [type="radio"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  position: relative;
+  height: calc(1rem + 12.5px);
+  width: calc(1rem + 12.5px);
+  vertical-align: text-bottom;
+  padding: 0;
+  flex-basis: calc(1rem + 12.5px) !important;
+  flex-grow: 0 !important;
+  border: 1px solid #2196F3;
+  margin-right: 4px;
+}
+[type="checkbox"]:before, [type="radio"]:before {
+  _border: 1px solid #2196F3;
+}
+
+[type="checkbox"]:hover, [type="radio"]:hover {
+  border: 1px solid black;
+}
+[type="checkbox"]:focus, [type="radio"]:focus {
+  border: 2px solid black;
+  outline: none;
+}
+
+[type="checkbox"]:checked:before, [type="radio"]:checked:before {
+  position: absolute;
+}
+
+[type="checkbox"]:checked:before {
+  content: '';
+  color: #2196F3;
+  font-family: sans-serif;
+  font-size: calc(1rem + 12.5px);
+  top: calc(-0.5rem);
+  left: calc(2.25px);
+  height: 100%;
+}
+
+[type="checkbox"]:checked:before {
+  left: 9px;
+  top: 6px;
+  width: 5px;
+  height: 10px;
+  border: solid #2196F3;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+[type="checkbox"]:_checked:hover:before {
+  left: 8px;
+  top: 7px;
+}
+[type="checkbox"]:checked:focus:before {
+  left: 8px;
+  top: 5px;
+}
+
+[type="radio"] {
+  border-radius: 100%;
+}
+
+[type="radio"]:checked:before {
+  box-sizing: border-box;
+  border-radius: 100%;
+  content: '';
+  background: white;
+  border: 8px solid #2196F3;
+  width: 100%;
+  height: 100%;
+}
+[type="radio"]:checked:focus:before {
+  border-radius: 100%;
+  content: '';
+  background: white;
+  border: 7px solid #2196F3;
+  width: 25px;
+  height: 25px;
+}
+
+
+button {
+  color: #2196F3 !important;
+  border-color: #2196F3 !important;
+
+}
+
+button {
+  text-transform: uppercase;
+  background: #ffffff;
+  padding: 5px 20px;
+  border: 1px solid #20bf6b;
+  border-radius: 8px;
+  display: inline-block;
+  transition: all 0.3s ease 0s;
+  font-weight: bold;
+}
+button:focus {
+  outline: none;
+  border-width: 2px;
+  margin: -1px;
+}
+
+button:hover {
+color: #494949 !important;
+border-radius: 50px;
+border-color: #494949 !important;
+transition: all 0.3s ease 0s;
+}
+
+b, strong {
+  font-weight: 700;
+}
+
+hr {
+  box-sizing: content-box;
+  border: 0;
+  line-height: 1.25em;
+  height: 0.0625rem;
+  background: linear-gradient(to right, transparent, var(--border-color) 20%, var(--border-color) 80%, transparent);
+}
+
+blockquote {
+  display: block;
+  position: relative;
+  font-style: italic;
+  color: var(--secondary-fore-color);
+  padding: calc(3 * var(--universal-padding));
+  border: 0.0625rem solid var(--secondary-border-color);
+  border-left: 0.375rem solid var(--blockquote-color);
+  border-radius: 0 var(--universal-border-radius) var(--universal-border-radius) 0;
+}
+
+blockquote:before {
+  position: absolute;
+  top: calc(0rem - var(--universal-padding));
+  left: 0;
+  font-family: sans-serif;
+  font-size: 3rem;
+  font-weight: 700;
+  content: "\201c";
+  color: var(--blockquote-color);
+}
+
+blockquote[cite]:after {
+  font-style: normal;
+  font-size: 0.75em;
+  font-weight: 700;
+  content: "\a—  " attr(cite);
+  white-space: pre;
+}
+
+code, kbd, pre, samp {
+  font-family: Menlo, Consolas, monospace;
+  font-size: 0.85em;
+}
+
+code {
+  background: var(--secondary-back-color);
+  border-radius: var(--universal-border-radius);
+  padding: calc(var(--universal-padding) / 4) calc(var(--universal-padding) / 2);
+}
+
+kbd {
+  background: var(--fore-color);
+  color: var(--back-color);
+  border-radius: var(--universal-border-radius);
+  padding: calc(var(--universal-padding) / 4) calc(var(--universal-padding) / 2);
+}
+
+pre {
+  overflow: auto;
+  background: var(--secondary-back-color);
+  padding: calc(1.5 * var(--universal-padding));
+  border: 0.0625rem solid var(--secondary-border-color);
+  border-left: 0.25rem solid var(--pre-color);
+  border-radius: 0 var(--universal-border-radius) var(--universal-border-radius) 0;
+}
+
+sup, sub, code, kbd {
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+small, sup, sub, figcaption {
+  font-size: 0.75em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+
+figcaption {
+  color: var(--secondary-fore-color);
+}
+
+a {
+  text-decoration: none;
+  border-bottom: 2px solid #2196F3;
+}
+
+a:link {
+  color: var(--a-link-color);
+}
+
+a:visited {
+  color: var(--a-visited-color);
+}
+
+a:hover, a:focus {
+  text-decoration: underline;
+}
+

@@ -8,7 +8,9 @@ Reefer can be used both programatically and declaratively.
 
 # Getting Started
 
-No build is required. Run reeferhello for an example
+No build is required. 
+Check out some examples: <https://sreekotay.github.io/reefer/examples/>.
+Run reeferhello for an example
 Either include:
 ```
 	<script src=reefer-min.js>
@@ -30,7 +32,6 @@ You can conditionally include with this line:
 ```
 	  <script>window.MSInputMethodContext && document.documentMode && document.write('<script src="../../public/js/reeferIE11.js"><\x2fscript>');</script>
 ```
-Check out some examples: <https://github.com/sreekotay/reefer>
 
 # Hello World #
 ```
@@ -76,15 +77,15 @@ Note that we both passed in the property `name` via HTML, as a default when regi
 
 
 # Sections #
-- data: maybe object or array (will be converted to object with all properties undefined)
-- mutate: function called whenever data is updates
-- template: function() called when you should render to this.rootEl. The preferred model is to provide a series of html updates via `this.html()`
-- listeners: map of function(props, el) DOM handlers
-- observers: map of callback when props get updated
-- events: array list of events to raise data.prop change (prepended by component-name) (not needed if you specify '--' after the VALUE, which you can you to rename the event also)
-- shared: pass through blob every instance of component has access to 
-- methods: functions will be bound to this automatically
-- decorators: array list of data to NOT re-render always
+- `data`: maybe object or array (will be converted to object with all properties undefined)
+- `mutate`: function called whenever data is updates
+- `template`: function() called when you should render to this.rootEl. The preferred model is to provide a series of html updates via `this.html()`
+- `listeners`: map of function(props, el) DOM handlers
+- `observers`: map of callback when props get updated
+- `events`: array list of events to raise data.prop change (prepended by component-name) (not needed if you specify '--' after the VALUE, which you can you to rename the event also)
+- `shared`: pass through blob every instance of component has access to 
+- `methods`: functions will be bound to this automatically
+- `decorators`: array list of data to NOT re-render always
 
 # Reefer Component properties#
 - rootEl
@@ -109,19 +110,19 @@ Note that we both passed in the property `name` via HTML, as a default when regi
 - emit
 
 # Syntax #
-- on HTML attributes `reef-p`-PROPERTYNAME` = `VALUE`
-- where PROPERTYNAME is the data name in your javascript.
-- where VALUE is the value
-- or VALUE may specific a refererence instead, if:
+- on HTML attributes `reef-p-PROPERTYNAME` = `VALUE`
+	- where `PROPERTYNAME` is the data name in your javascript.
+	- where `VALUE` is the value
+- or `VALUE` may specific a refererence instead, if:
 	- of the format `~PROPERTYREFERENCE~LOCATION`
-		- PROPERTYREFERENCE is the name of the data in other component or store
-		- LOCATION is a css selector to reach that PROPERTYREFERENCE
-		- `~~LOCATION` may be used if if the PROPERTYREFRENCE is the same as the location, e.g:
-		- &lt;div `reef-p-whichtab`=`"~~#othertabdiv"`>&lt;/div>  
+		- `PROPERTYREFERENCE` is the name of the data in other component or store
+		- `LOCATION` is a css selector to reach that `PROPERTYREFERENCE`
+		- `~~LOCATION` may be used if if the `PROPERTYREFRENCE` is the same as the location, e.g:
+		- `<div reef-p-whichtab="~~#othertabdiv"></div>`  
 	- may end with ::EVENTNAME (where VALUE is literal or a reference
     - note that property events will be preprended by the registered component-name
-    - for example, the following will set the initial value to 1, and fire a custom DOM event names **selectedtab** whenever the value **whichtab** changes in the component:
-      -	`<div reef-p-whichtab="**1::selectedtab**">`
+    - for example, the following will set the initial value to 1, and fire a custom DOM event names `selectedtab` whenever the value `whichtab` changes in the component:
+      -	`<div reef-p-whichtab="somelabel::selectedtab">`
 
 		selector maybe: '.class' '#id' '[attribute...]' or '$json:PATH' or '$html:PATH'
 

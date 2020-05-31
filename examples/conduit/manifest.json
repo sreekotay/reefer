@@ -1,0 +1,15 @@
+{
+	"background_color": "#ffffff",
+	"theme_color": "#aa1e1e",
+	"name": "Reefer RealWorld",
+	"short_name": "RealWorld",
+	"display": "minimal-ui",
+	"start_url": "/",
+	"icons": [
+		{
+			"src": "_reefer.png",
+			"sizes": "256x256",
+			"type": "image/png"
+		}
+	]
+}

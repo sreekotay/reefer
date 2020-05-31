@@ -269,13 +269,13 @@ ReeferFactory = function (opts) {
     var sh = this.methods; if (sh) for (var k in sh) sh[k] = isfunction(sh[k]) ? sh[k].bind(rf) : sh[k] // bind to reef
     // sh = this.observers; if (sh) for (k in sh) sh[k] = isfunction(sh[k]) ? sh[k].bind(rf) : sh[k] // bind to reef
     this.rootEl = rootEl
-    this.sym = '$' + rf_counter++
     _.obsf = function () { Reefer.prototype.react.apply(rf, arguments) }
     var _d = this.data = xs.observe({}, _.obsf) // public as well -- our main "react" core
     xs.assign(_d, _.decorators, setup.data, localSetup.props) // make our data
     for (k in this.observers) if (!(k in _d)) _d[k] = undefined
     for (k in _.bind) doDataBind(this, 'data.' + k, _.bind[k].selector, _.bind[k].prop)
     _d.__observe__() // trigger observers
+    this.sym = '$' + rf_counter++
     return this
   }
   Reefer.prototype.unmount = function () {
@@ -295,7 +295,6 @@ ReeferFactory = function (opts) {
   // react
   // =============
   Reefer.prototype.react = function (updates) { // core event engine
-    if (!this.sym) return // we are still constructing
     // if (updates.value === updates.prev) return
     updates.reef = this
     var _ = this.__
@@ -336,6 +335,7 @@ ReeferFactory = function (opts) {
     if (updates.value === updates.prev) return
     if (this.mutate) mstatus = this.mutate.call(this, updates)
     var _d = _.decorators
+    if (!this.sym) return // we are still constructing
     if (status !== 'done' && mstatus !== 'done' && (!_d || (!_d[p] && !_d[mp]))) this.rerender() // re-render
   }
   Reefer.prototype.observe = function (k, cb) { var _o = alwaysobj(this, 'observers'); _o[k] = cb; this.__.obsrx = null }

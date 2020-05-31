@@ -1,0 +1,22 @@
+<html>
+  <script src=../xs_observe.js></script>
+  <script src=../reefer.js></script>
+<body>
+example: 
+<div reef=hello reef-p-name='Alice'>
+  <div style='display:inline; color:red'>BRIGHT</div>
+</div>		
+<script>
+  var helloTempl = reefer.template ('name,slot', '<div>Hello ${slot||""} World ${name||""}!</div>')
+  reefer.register ('hello', {
+    template: function() {
+      var slots = this.slots
+      this.html (0, helloTempl(this.data.name, slots.default.text || ''))
+    }
+  })
+  setTimeout(function () {
+    reefer.find('[reef=hello]').data.name = 'BOBBY!'
+  }, 2000)
+</script>
+</body>
+</html>

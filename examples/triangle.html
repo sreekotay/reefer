@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Sierpinski</title>
+  <meta name='viewport' content='width=device-width'>
+  <script src='../xs_observe.js'></script>
+  <script src='../reefer.js'></script>
+  <!--
+  <script src='../dist/js/reefer-min.js'></script>
+  -->
+</head>
+<style>
+[reef=dot] {
+  position: absolute;
+  background: #61dafb;
+  font: normal 15px sans-serif;
+  text-align: center;
+  cursor: pointer;
+} 
+.container {
+  position: absolute;
+  transform-origin: 0 0;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  background: #eee;
+}
+</style>
+<body>
+  <div reef=myapp class=container reef-p-seconds=1></div>
+<script>
+    // =====================
+    // triangle
+    // =====================
+    reefer.register ('myapp',  {
+      data: {
+        seconds: 0,
+        elapsed: 0
+      },
+      template:function () {
+        var elapsed = this.data.elapsed
+        const t = (elapsed / 1000) % 10;
+        const scale = 1 + (t > 5 ? 10 - t : t) / 10;
+        const transform = 'scaleX(' + (scale / 2.1) + ') scaleY(0.7) translateZ(0.1px)';
+        this.rootEl.style.transform = transform
+
+        this.html (0,  '<div reef=triangle reef-p-x=0 reef-p-y=0 reef-p-s=1000 reef-p-seconds=' + (1||this.data.seconds) + '></div>')
+      },
+      observers: {
+        elapsed: function() {this.data.seconds = ((this.data.elapsed/1000)|0) % 10}
+      }
+    })
+
+    var start = new Date().getTime();
+    var doanim = true
+    function update() {
+      var cdiv = reefer.find('.container')
+      cdiv.data.elapsed = new Date().getTime() - start
+      if (doanim) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+    function anim(doit) {
+      doanim = doit 
+      if (doit) update()
+    }
+
+    // =====================
+    // triangle
+    // =====================
+    var targetSize = 25
+    var dottempl = reefer.template ("x, y, targetSize, seconds", 
+                                    "<div reef=dot reef-p-x=${x - targetSize/2} reef-p-y=${y - targetSize /2} reef-p-size=${targetSize} reef-p-text='~data.seconds~.container'></div>")//'${seconds}'></div>") 
+    var tritempl = reefer.template ("x, y, s, seconds", 
+                                    "<div reef=triangle reef-p-x=${x} reef-p-y=${y} reef-p-s=${s}></div>")// reef-p-seconds=${seconds}></div>")
+    reefer.register ('triangle',  {
+      template: function () {
+        var s = this.data.s | 0; var x = this.data.x | 0; var y = this.data.y | 0
+        var seconds = this.data.seconds || '*'
+        if (s <= targetSize) {
+          this.html (0, dottempl (x, y, targetSize, seconds  ))
+          return
+        }
+        s /= 2
+        this.html(0, tritempl(x,y-s/2, s, seconds))
+        this.html(1, tritempl(x-s,y+s/2, s, seconds))
+        this.html(2, tritempl(x+s,y+s/2, s, seconds))
+      }
+    })
+
+    // =====================
+    // dot
+    // =====================
+    reefer.register ('dot', {
+      data: {
+        hover: false
+      }, 
+      methods: {
+        enter: function() {this.data.hover=true},
+        leave: function() {this.data.hover=false}
+      },
+      template: function() {
+        var props = this.data
+        if (!this.rootEl.onmouseenter) { // attaching event handlers is slow
+          this.rootEl.onmouseenter = this.methods.enter
+          this.rootEl.onmouseleave = this.methods.leave
+        }
+        var s = props.size * 1.3;
+        var style = {
+            width: s + 'px', height: s + 'px',
+            left: (props.x) + 'px', top: (props.y) + 'px',
+            borderRadius: (s / 2) + 'px', lineHeight: (s) + 'px',
+            background:  props.hover ? '#ff0' : '#61dafb'
+        }
+        this.styleBag(style)
+        this.html (0, (props.hover ? '*' + props.text + '*' : props.text) + '')
+      }
+
+    })
+
+</script>
+</body>

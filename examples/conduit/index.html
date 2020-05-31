@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Conduit</title>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width'>
+  <meta name='theme-color' content='#aa1e1e'>
+  
+  <script src='../../xs_observe.js'></script>
+  <script src='../../reefer.js'></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.0.0/animate.min.css"/>
+
+  <!--
+  <script src='../../dist/js/reefer-min.js'></script>
+  <script src='../../public/js/xs.js'></script>
+  <script src='../../public/js/xs_linkspeed.js'></script>
+s  -->
+  
+  <!-- Import Ionicon icons & Google Fonts our Bootstrap theme relies on -->
+  <link href="main.css" rel="stylesheet" type="text/css" >
+  <link href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Titillium+Web:700|Source+Serif+Pro:400,700|Merriweather+Sans:400,700|Source+Sans+Pro:400,300,600,700,300italic,400italic,600italic,700italic" rel="stylesheet" type="text/css">
+  <link rel='icon' href='favicon.ico'>
+
+  <script>window.MSInputMethodContext && document.documentMode && document.write('<script src="../../public/js/reeferIE11.js"><\x2fscript>');</script>
+
+
+  <!-- <script src='layout/head.js'></script> -->
+
+</head>
+<body style='overflow-y:scroll'>
+  <script src='layout/header.js'></script>
+  <div reef='switcher' 
+       reef-p-pagedata='~rootEl.innerHTML'
+       reef-o-page='methods.loadPageData'></div>
+  <script src='layout/footer.js'></script>
+  <script>
+  var baseurl = 'https://conduit.productionready.io/api'
+
+  // ============================
+  // our "router"
+  // ============================
+  reefer.register ('switcher', {
+    template: function () {return 'done'},
+    data:['page', 'resource', 'tag'],
+    mutate: function () {
+      if (this.data.page) this.bind ('data.pagedata', '$html:pages/' + this.data.page + '.js') 
+    },
+    listeners: {
+      hashchange: function() {
+        var parts = window.location.hash.split('/')
+        this.data.page = parts[1] || 'home'
+        this.data.resource = parts[2]
+        this.data.tag = getUrlParameter('tag')
+      }, 
+      reefLoadHTMLFail: function () {
+        this.data.pagedata = '<h1 style="justify-content:center; height:300px; align-items:center; display:flex;">404 - dang 😯 it.</h1>'
+      }
+    }
+  })
+
+  function dohashchange(e) {
+    var reef = reefer.find ('[reef=switcher]')
+    if (reef) reefer.emit (reef.rootEl, 'hashchange')
+  }
+  window.addEventListener('hashchange', dohashchange) // since this event is at the window level, reflect it to out component
+
+  // ============================
+  // helper functions
+  // ============================
+  function getUrlParameter(name) {
+    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+    var results = regex.exec(location.hash);
+    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+  }
+
+  reefer.ready(function () {
+    dohashchange() // do this after reefer is ready
+  })
+
+  </script>
+</body>
+
+</html>

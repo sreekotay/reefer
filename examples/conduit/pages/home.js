@@ -48,10 +48,7 @@ reeferHTML(function () { /**
           </ul>
         </div>
         <div reef=articlesList >
-          <reef-helper type='function(d)' reef-slot='test'>
-            if (d && d<3) console.log ('test')
-          </reef-helper>
-          <reef-helper type='template(d)'>
+          <script type='reef-template(d)'>
             <div class="article-preview">
               <div class="article-meta">
                 <a href="profile.html"><img src="${d.author.image}" /></a>
@@ -76,8 +73,8 @@ reeferHTML(function () { /**
                 <span>Read more...</span>
               </a>
             </div>
-          </div>
-        </reef-helper>
+          </script>
+        </div>
       </div>
 
       <div class="col-md-3">
@@ -85,13 +82,12 @@ reeferHTML(function () { /**
           <p>Popular Tags</p>
 
           <div reef class="tag-list" reef-p-datasrc="data.tagsdata.tags" reef-p-tagsdata="~~[reef=articlesList]" >
-            <reef-helper type='template(d)'>
+            <script type='reef-template(d)'>
               <a href='#?tag=${d}'  class="tag-pill tag-default" style='cursor:pointer' >${d}</a>
-            </reef-helper>
+            </script>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 

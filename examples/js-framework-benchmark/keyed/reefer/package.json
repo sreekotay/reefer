@@ -1,0 +1,24 @@
+{
+  "name": "js-framework-benchmark-reefer",
+  "version": "1.1.1",
+  "description": "Reefer JS demo",
+  "main": "index.js",
+  "js-framework-benchmark": {
+    "frameworkVersion": ""
+  },
+  "scripts": {
+    "build-dev": "",
+    "build-prod": ""
+  },
+  "keywords": [
+    "react",
+    "webpack"
+  ],
+  "author": "Sree Kotay",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/krausest/js-framework-benchmark",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/krausest/js-framework-benchmark.git"
+  }
+}

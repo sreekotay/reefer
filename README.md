@@ -10,8 +10,8 @@ Reefer can be used both programatically and declaratively.
 
 No build is required. 
 Check out some examples: <https://sreekotay.github.io/reefer/examples/>.
-Run reeferhello for an example
-Either include:
+
+Simply include:
 ```
 	<script src=reefer-min.js>
 ```

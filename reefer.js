@@ -69,32 +69,33 @@ ReeferFactory = function (opts) {
       var cloneEl = el.cloneNode(true) // deep copy
       if (cloneEl) {
         attrBag = attrBag || {}
-        for (var i = 0; i < cloneEl.childNodes.length; i++) {
-          var slots = alwaysobj(attrBag, 'slots')
-          var c = cloneEl.childNodes[i]
-          var ga = c.getAttribute
-          var attr = (ga && ga.call(c, 'reef-slot')) || 'default'
-          var sa = slots[attr] = slots[attr] || []
-          sa.push(c)
-          sa.text = (sa.text || '') + (ga ? c.outerHTML : c.data) // convenience
-          if (c.nodeName === 'REEF-HELPER') {
-            try {
-              var type = c.getAttribute('type')
-              var args = type.match(/\(([^)]*)\)/)
-              args = args ? args[1] : ''
-              var ftext = c.innerHTML.trim()
-              stripper.innerHTML = ftext
-              ftext = stripper.childNodes.length === 0 ? '' : stripper.childNodes[0].data
-              if (ftext) {
-                switch (type.split('(')[0].trim()) {
-                  case 'function': c.reefScript = new Function(args, ftext); break
-                  case 'template': c.reefScript = templateEngine(args, ftext); break
-                  default: reefWarn('unknown reef slot type')
+        if (cloneEl.children) {
+          for (var i = 0; i < cloneEl.children.length; i++) {
+            var slots = alwaysobj(attrBag, 'slots')
+            var c = cloneEl.children[i]
+            var ga = c.getAttribute
+            var attr = (ga && ga.call(c, 'reef-slot')) || 'default'
+            var sa = slots[attr] = slots[attr] || []
+            sa.push(c)
+            sa.text = (sa.text || '') + (ga ? c.outerHTML : c.data) // convenience
+            if (c.nodeName === 'SCRIPT' && c.type.indexOf('reef-') === 0) {
+              try {
+                var type = c.getAttribute('type')
+                var args = type.match(/\(([^)]*)\)/); args = args ? args[1] : ''
+                var ftext = c.innerHTML.trim()
+                //stripper.innerHTML = ftext
+                //ftext = stripper.children.length === 0 ? '' : stripper.children[0].data
+                if (ftext) {
+                  switch (type.split('(')[0].trim()) {
+                    case 'reef-function': c.reefScript = new Function(args, ftext); break
+                    case 'reef-template': c.reefScript = templateEngine(args, ftext); break
+                    default: reefWarn('unknown reef slot type')
+                  }
                 }
-              }
-            } catch (err) { reefWarn('reef-slot script parsing ERROR:', ftext || c.type, c, err) }
-            if (!('el' in sa)) sa.el = c // convenience
-            if (!('script' in sa) && c.reefScript) sa.script = c.reefScript // convenience
+              } catch (err) { reefWarn('reef-slot script parsing ERROR:', ftext || c.type, c, err) }
+              if (!('el' in sa)) sa.el = c // convenience
+              if (!('script' in sa) && c.reefScript) sa.script = c.reefScript // convenience
+            }
           }
         }
       }
@@ -193,9 +194,15 @@ ReeferFactory = function (opts) {
           for (var i = 0; i < handlers.length; i++) {
             var ev = handlers[i]
             var fn = ev[0].trim()
+            /*
             var func = function (event) { eval(fn) }
             try { func.call(reef, event) } catch (err) { reefWarn('reef@Error') }
             /* // old syntax - you do do prop(value)
+            */
+            var parseArgs = function (str) {
+              var argsets = str.match(/\(([^)]*)\)/)
+              return (argsets && argsets[1]) || ''
+            }
             var args = parseArgs(fn).split(',')
             if (args) {
               fn = fn.split('(')[0]
@@ -208,7 +215,6 @@ ReeferFactory = function (opts) {
               else reef.dotpath(fn, args[0])
               if (rval === 'stop' || ev[1] === 'stop') return
             }
-            */
           }
         }
         var rn = reef && reef.name
@@ -535,17 +541,19 @@ ReeferFactory = function (opts) {
     return c
   }
 
-  Reefer.prototype.htmlUpdate = function (id, htmlGen) {
+  Reefer.prototype.htmlUpdate = function (idx, id, htmlGen) {
     var _ = this.__
     var hm = _.hmap
     var hsh = hash(htmlGen)
+    id = (id === undefined || id === null) ? hsh : id
     if (!(id in hm)) reefError('updateing non-existent element')
-    if (hm[id].hsh === hsh) return
+    if (hm[id].hsh === hsh && idx === hm[id].idx) return
     var root = getAttachPoint(this.rootEl) || this.rootEl
     var div = document.createElement(root.nodeName)
     div.innerHTML = htmlGen
     hm[id].hsh = hsh
-    hm[id].el = applyNodeChanges(root.childNodes[hm[id].idx], div.childNodes[0])
+    hm[id].idx = idx
+    hm[id].el = applyNodeChanges(root.childNodes[idx], div.childNodes[0])
   }
 
   Reefer.prototype.htmlEnd = function () {
@@ -594,14 +602,15 @@ ReeferFactory = function (opts) {
         ha[i].h = null
       }
       if (i !== 0 && prev === null && ha[i].el) reefError('htmlEnd() logic error')
-      if (ha[i].el && ha[i].el.previousSibling !== prev) { // clean up placement
+      c = ha[i].el
+      if (c && (c.parentNode !== root || c.previousSibling !== prev)) { // clean up placement
         if (prev) {
-          prev.parentNode.insertBefore(ha[i].el, prev.nextSibling)
-        } else if (!root.childNodes || root.childNodes[0] !== ha[i].el) {
-          root.insertBefore(ha[i].el, root.childNodes && root.childNodes[0])
+          prev.parentNode.insertBefore(c, prev.nextSibling)
+        } else if (!root.childNodes || root.childNodes[0] !== c) {
+          root.insertBefore(c, root.childNodes && root.childNodes[0])
         }
       }
-      prev = ha[i].el
+      prev = c
     }
     ha.length = fl
 
@@ -690,7 +699,7 @@ ReeferFactory = function (opts) {
     var ret = { value: obj, key: key, obj: ctx }
     return (i === l) ? ret : { last: ret }
   }
-  
+
   function getChildIndex (node) { return [].indexOf.call(node.parentNode.childNodes, node) }
   function saveSelection (rootEl) { // save the text selection (call the ret() as func to retore)
     var ael = document.activeElement

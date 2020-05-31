@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="../coral.css">
   <script src="../xs_observe.js"></script>
   <script src="../reefer.js"></script>
-  <body>
+  <body style='margin:8px 24px'>
     <div style='display:flex; flex-direction:column; align-items: center;'>
       Test - Hello World, Wizard, Typer, and Todos (nested also)
       <div id='hello' reef='hello' reef-p-greeting='Yo :) Yo'>
@@ -12,7 +13,7 @@
       </div>
       <div reef='wizard' reef-p-selected='neville'></div>
       <div reef='typer'></div>
-      <div><h1>To Dos</h1>To Dos
+      <div><h2>To Dos</h2>To Dos
         <div reef='todos'></div>  
       </div>
     </div>
@@ -26,7 +27,7 @@
       template: function (slots) {
         var props = this.data
         slots = slots || {}
-        return '<h1>' + props.greeting + (slots.default.text||'') + props.name + '!</h1>' + (slots.under.text||'');
+        return '<h2>' + props.greeting + (slots.default.text||'') + props.name + '!</h2>' + (slots.under.text||'');
       }
     })
     /*

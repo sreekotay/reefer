@@ -26,7 +26,7 @@ reefer.register('*article', {
 
 reeferHTML(function () { /**
 <div class="article-page" reef=article>
-  <reef-helper type=template(d)>
+  <script type=reef-template(d)>
   <div>
   <div class="banner" >
     <div class="container">
@@ -63,9 +63,9 @@ reeferHTML(function () { /**
 
     <hr />
       <div reef class="tag-list" reef-p-datasrc="data.taglist" reef-p-taglist="~~[reef=article]" >
-        <reef-helper type='template(d)'>
+        <script type='reef-template(d)'>
           <a href='#?tag=\${d}'  class="tag-pill tag-default" >\${d}</a>
-        </reef-helper>
+        <\/script>
       </div>
 
     <div class="article-actions">
@@ -79,7 +79,7 @@ reeferHTML(function () { /**
         <button class="btn btn-sm btn-outline-secondary">
           <i class="ion-plus-round"></i>
           &nbsp;
-          Follow Eric Simons <span class="counter">(10)</span>
+          Follow ${d.author.username} <span class="counter">(${d.favoritesCount})</span>
         </button>
         &nbsp;
         <button class="btn btn-sm btn-outline-primary">
@@ -144,6 +144,6 @@ reeferHTML(function () { /**
 -->
   </div>
   </div>
-  </reef-helper>
+  </script>
 </div>
 `**/ })

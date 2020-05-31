@@ -2,10 +2,18 @@
   <script src='../xs_observe.js'></script>
   <script src='../reefer.js'></script>
   <link rel="stylesheet" type="text/css" href="../coral.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reefer Examples Index</title>
   <body>
-<div style='display:flex; justify-content: center;'>
+    <style>
+       div {
+        padding-left: 5px;
+        text-indent:-5px;
+    }
+    </style>
+<div style='display:flex; justify-content: center; margin:0px 24px'>
   <div>
-    <h1  style='margin:16px 0;'><a href="https://github.com/sreekotay/reefer"'>reefer</a> examples</h1>
+    <h1  style='margin:48px 0;'><a href="https://github.com/sreekotay/reefer"'>reefer</a> examples</h1>
     <div reef reef-p-links='[
       ["hello", "simple hello world", "/reeferhello.html"],
       ["simple reactive demo", "simple hello world with some examples", "/reeferreactive.html"],
@@ -15,7 +23,7 @@
       ]' reef-p-datasrc='data.links'
       >
       <script type='reef-template(d,i)'>
-          <div><a href='.${d[2]}'>${d[0]}</a> - ${d[1]}</div>
+          <div><b><a href='.${d[2]}'>${d[0]}</a></b> - ${d[1]}</div>
       </script>
     </div>
 </div>

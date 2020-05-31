@@ -10,6 +10,12 @@ html, * {
   margin: 0;
 }
 
+h1 {
+  font-size: 42px;
+}
+h1,h2,h3,h4,h5,h6 {
+  font-weight: normal;
+}
 
 details {
   display: block;
@@ -292,21 +298,19 @@ figcaption {
 }
 
 a {
-  text-decoration: none;
-  border-bottom: 2px solid #2196F3;
-  color: #2196F3;
-  font-weight: bold;
+  text-decoration-color: #2196F3;
 }
 
 a:link {
-  color: var(--a-link-color);
+  color: black;
+  color: #2196F3;
 }
 
 a:visited {
-  color: var(--a-visited-color);
+  color: #1174c3;
 }
 
 a:hover, a:focus {
-  text-decoration: underline;
+  text-decoration-style: double;
 }
 

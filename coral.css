@@ -294,6 +294,8 @@ figcaption {
 a {
   text-decoration: none;
   border-bottom: 2px solid #2196F3;
+  color: #2196F3;
+  font-weight: bold;
 }
 
 a:link {

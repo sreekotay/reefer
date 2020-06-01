@@ -6,31 +6,13 @@
 <body>
 
 <style>
-@keyframes heightAppear {
-  0%   { max-height: 0; opacity: 0; }
-  100% { max-height: 200px; opacity: 1;}
-}
-@keyframes heightDisappear {
-  0%   { max-height: 200px; opacity: 1}
-  100% { max-height: 0; opacity: 0;}
-}
-@keyframes leftAppear {
-  0%   { max-height: 0; opacity: 0; left:-100px}
-  100% { max-height: 200px; opacity: 1; left:0}
-}
-@keyframes rightAppear {
-  0%   { max-height: 0; opacity: 0; left:100px}
-  100% { max-height: 200px; opacity: 1; left:0}
-}
-.remove {
-  animation: heightDisappear 1s forwards !important;
-}
-.add {
-  animation: leftAppear 1s forwards !important;
-}
-.redo {
-  animation: rightAppear 1s forwards !important;
-}
+@keyframes heightAppear { 0%   { max-height: 0; opacity: 0; } 100% { max-height: 200px; opacity: 1;} }
+@keyframes heightDisappear { 0%   { max-height: 200px; opacity: 1} 100% { max-height: 0; opacity: 0;} }
+@keyframes leftAppear { 0%   { max-height: 0; opacity: 0; left:-100px} 100% { max-height: 200px; opacity: 1; left:0} }
+@keyframes rightAppear { 0%   { max-height: 0; opacity: 0; left:100px} 100% { max-height: 200px; opacity: 1; left:0} }
+.remove { animation: heightDisappear 1s forwards !important; }
+.add { animation: leftAppear 1s forwards !important; }
+.redo { animation: rightAppear 1s forwards !important; }
 
 [reef=todos] {
   width:50%;

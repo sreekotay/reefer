@@ -20,6 +20,7 @@ ReeferFactory = function (opts) {
   opts = opts || {}
   var rf_counter = 0 // used for 'symbol'
   var rf_listeners = {}
+  var rf_key = 0
   var rf_registry = {
     '': {
       template: function () {
@@ -31,10 +32,15 @@ ReeferFactory = function (opts) {
         var gen = (dl && slots.default) || (slots.empty && slots.empty.text) || { text: '<div></div>' }
         var key = this.data.datakey
         if (!Array.isArray(dl)) dl = [dl]
+        if (slots.header) this.html(-1, slots.header.script ? slots.header(dc) : slots.header.text)
         for (var i = 0; i < dl.length; i++) {
+          var t = typeof (dl[i])
+          var uk = key === undefined ? dl[i].__xs_key__ : dl[i][key]
+          if (uk === undefined &&  t === 'object' ) uk = xs.privateprop(dl[i], '__xs_key__', 'k' + rf_key++)
           var row = gen.script ? gen.script(dl[i], i, dc) : gen.text
-          this.html(key ? dl[i][key] : i, row)
+          this.html(uk || i, row)
         }
+        if (slots.footer) this.html(-2, slots.footer.script ? slots.footer(dc) : slots.footer.text)
       }
     }
   }
@@ -83,8 +89,8 @@ ReeferFactory = function (opts) {
                 var type = c.getAttribute('type')
                 var args = type.match(/\(([^)]*)\)/); args = args ? args[1] : ''
                 var ftext = c.innerHTML.trim()
-                //stripper.innerHTML = ftext
-                //ftext = stripper.children.length === 0 ? '' : stripper.children[0].data
+                // stripper.innerHTML = ftext
+                // ftext = stripper.children.length === 0 ? '' : stripper.children[0].data
                 if (ftext) {
                   switch (type.split('(')[0].trim()) {
                     case 'reef-function': c.reefScript = new Function(args, ftext); break
@@ -190,6 +196,7 @@ ReeferFactory = function (opts) {
         var evvalue = el.getAttribute && el.getAttribute(evattr)
         if (evvalue) { evvalue = evvalue.split('@'); handlers.push(evvalue) }
         var reef = el.reef
+        if (!event.reef) event.reef = reef
         if (reef && handlers.length) { // parse the handler for the event
           for (var i = 0; i < handlers.length; i++) {
             var ev = handlers[i]
@@ -206,8 +213,8 @@ ReeferFactory = function (opts) {
             var args = parseArgs(fn).split(',')
             if (args) {
               fn = fn.split('(')[0]
-              var idx = fn.indexOf('$event') // allow substition
-              if (idx >= 0) fn[idx] = event
+              var idx = args.indexOf('$event') // allow substition
+              if (idx >= 0) args[idx] = event
             }
             var f = reef.dotpath(fn); var rval
             if (f.value !== undefined) {
@@ -348,7 +355,7 @@ ReeferFactory = function (opts) {
   Reefer.prototype.decorate = function (k, set) { var _d = alwaysobj(this, 'decorators'); _d[k] = (set !== false && set !== 0) }
   Reefer.prototype.events = function (k, set) { var _e = alwaysobj(this.__, 'events'); _e[k] = (set !== false && set !== 0 && set); this.__.evrx = null }
   Reefer.prototype.watch = function (k, o) { this.data[k] = o; this.data.__observe__() }
-  Reefer.prototype.bind = function (k, sel, ck) { doDataBind(this, k, sel, ck) }
+  Reefer.prototype.bind = function (k, sel, copyk, ctx) { doDataBind(this, k, sel, copyk, ctx) }
   Reefer.prototype.emit = function (ev, detail) { emit(this.rootEl, ev, detail) }
   function loadData (datapath, url, opts) { // this must be Reefer
     var rf = this
@@ -624,8 +631,14 @@ ReeferFactory = function (opts) {
     for (var i = 0; i < ha.length; i++) {
       hm[ha[i].id] = ha[i]
       ha[i].el = root.childNodes[i]
+      ha[i].idx = i
     }
     return 'done'
+  }
+  Reefer.prototype.htmlKeyToIdx = function (id) {
+    var hm = this.__.hmap
+    if (!hm || !hm[id]) return null
+    return hm[id].idx
   }
 
   Reefer.prototype.html = function (id, htmlGen) {
@@ -730,6 +743,7 @@ ReeferFactory = function (opts) {
     }
   }
 
+  /*
   function createCSS (name, rules) {
     var style = document.createElement('style')
     style.type = 'text/css'
@@ -738,7 +752,7 @@ ReeferFactory = function (opts) {
   }
 
   createCSS('reef-helper', 'display:none;')
-
+*/
   function emit (el, ev, detail) {
     el = resolveEl(el); detail = detail || {}
     if (el) { detail.reefEmitRootEl = el }

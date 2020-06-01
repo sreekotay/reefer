@@ -78,10 +78,6 @@
           <div><em aria-live="polite">' + (props.text.length ? props.text : 'Type something above to change this text') + "</em></div>";
         return html;
       },
-      update_: function (props, el) {
-        var mirror = el.querySelector('#mirror')
-        mirror.nextElementSibling.children[0].textContent = props.text
-      },
       listeners: {
         input: function(e) {var props = this.data; props.text = e.target.value}
       }

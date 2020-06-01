@@ -210,7 +210,7 @@
   }
   function objassign () { var a = arguments; var al = 0; var o = a[0]; while (++al < a.length) o = objmerge(o, a[al]); return o }
   function objclone () { var a = arguments; var al = -1; var o = {}; while (++al < a.length) o = objmerge(o, a[al]); return o }
-  function privateprop (o, k, v, writable) { Object.defineProperty(o, k, { value: v, enumerable: false, configurable: true, writable: !!writable }) }
+  function privateprop (o, k, v, writable) { Object.defineProperty(o, k, { value: v, enumerable: false, configurable: true, writable: !!writable }); return v }
 
   var __gobt; var __gob = {}
   function resolveObserve () {

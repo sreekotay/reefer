@@ -1,0 +1,134 @@
+<html>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src=../xs_observe.js></script>
+  <script src=../reefer.js></script>
+  <link rel="stylesheet" href="../coral.css">
+<body>
+
+<style>
+@keyframes heightAppear {
+  0%   { max-height: 0; opacity: 0}
+  100% { max-height: 200px; opacity: 1; }
+}
+@keyframes heightDisappear {
+  0%   { max-height: 200px; opacity: 1}
+  100% { max-height: 0; opacity: 0;}
+}
+[reef=todos] {
+  width:50%;
+}
+[reef=todos] > div {
+  animation: heightAppear 1s forwards;
+  overflow: hidden;
+
+}
+[reef=todos] label {
+  margin: 4px; 
+  background-color: #f0f0f0;
+  display: flex;
+}
+.remove {
+  animation: heightDisappear 1s forwards !important;
+
+}
+
+
+</style>
+<div class='coral-vertical' style='width:100%; align-items:center; padding-top: 16px;'>
+  <div style='max-width:500px;margin:8px'>
+    <div reef=typer>
+
+    </div>
+    <div class='coral-horizontal' style='margin-top:16px;'> 
+      <div reef=todos id=todo class='coral-vertical' reef-p-targetlist='#done' reef-p-inputtext='~data.target~[reef=typer]' reef@click
+      reef-p-todos='[
+        ["item1"], ["item2"]
+        ]'>
+        <div reef-slot='header'>TODO.</div>
+      </div>
+      <div style='flex-grow:1'></div> 
+      <div reef=todos id=done class='coral-vertical' reef-p-targetlist='#todo' reef-p-checked=true reef@click
+      reef-p-todos='[
+        ["Much longer item that we are using.  But still pretty short in the grand scheme of things"],
+        ["item 4"] 
+        ]'>
+        <div reef-slot='header'>DONE.</div>
+      </div>
+    </div>  
+  </div>
+</div>
+<script>
+    // ================  typer
+    reefer.register('typer', {
+      data: {
+        text: ''
+      },
+      template: function () {
+        var props = this.data
+        return '\<div style="display:flex">\
+          <label for="mirror">New Task </label>\
+          <input style="margin-left: 6px; flex-grow:1" type="text" id="mirror" value="' + props.text +'"> </div>\
+          <div style="text-align:center"><em aria-live="polite">' + (props.text.length ? props.text : 'Type something above to change this text') + "</em></div>";
+        return html;
+      },
+      listeners: {
+        input: function(e) {var props = this.data; props.text = e.target.value},
+        keydown: function (e) {
+          if (e.key==='Enter' && this.data.text && ('target' in this.data)) {
+            this.data.target = this.data.text
+            this.data.text = ''
+          }
+        }
+      }
+    })
+
+    // ================  todos
+    reefer.register ('todos', {
+      data: {
+        todos: [],
+        datasrc: 'data.todos',
+        datactx: 'data.checked',
+       //  datakey: 0,
+        checked: false,
+      },
+      slots: {
+        default: {
+          script: reefer.template('d,i,ctx', "<div><label><input type='checkbox' reef@click='methods.checkAndAssign(${d.__xs_key__||i},$event)' ${ctx ?  'checked' : ''}></input><span>${d[0]}</span></label></div>")
+        }
+      },
+      methods: {
+        checkAndAssign: function (id,event) {
+          var idx = this.htmlKeyToIdx(id)
+          console.log (idx, event)
+          var targetReef = reefer.find (this.data.targetlist)
+          if (!targetReef && targetReef.name!='todos') throw Error ("no target todo list found")
+          idx = idx | 0 
+          var rf = this
+          rf.rootEl.children[idx].classList.add ('remove')
+          var todo = rf.data.todos[idx-1]
+          if (todo.leaving) return 
+          todo.leaving = true
+          setTimeout(function() {
+            var idx = rf.htmlKeyToIdx(id)
+            todo.leaving = false
+            if (idx===null) {
+              debugger;
+              return
+            }
+            targetReef.data.todos.push (todo)
+            rf.data.todos.splice(idx-1, 1)
+          }, 1000)
+        } 
+      },
+      observers: {
+        inputtext: function() {
+          if (!this.data.inputtext) return
+          this.data.todos.push ([this.data.inputtext])
+          this.data.inputtext = ''
+
+        }
+      }      
+    })
+</script>
+</body>
+</html>

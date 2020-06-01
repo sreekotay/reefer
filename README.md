@@ -129,6 +129,9 @@ Note that we both passed in the property `name` via HTML, as a default when regi
 reef@EVENTNAME=functionname(LITERAL,...,LITERAL)
 reef@EVENTNAME=property(LITERAL)
 
+# Events #
+- includes the closest reef as `event.reef`
+
 # Slots #
 - reef-slot -- slots.name.text (for string) or as array for dom elements
 - type='reef()' for compiled function - available as reefFunc

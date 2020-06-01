@@ -107,14 +107,15 @@
         todos: [],
         datasrc: 'data.todos',
         datactx: 'data',
-       //  datakey: 0,
         checked: false,
       },
       slots: {
         default: {
           script: reefer.template('d,i,ctx', 
                                   "<div class='${(d.class&&d.class[ctx.targetlist])||\"\"}'><label>\
-                                      <input type='checkbox' reef@click='methods.checkAndAssign(${d.__key__||i},$event)' ${ctx.checked ?  'checked' : ''}></input>\
+                                      <input type='checkbox' \
+                                             reef@click='methods.checkAndAssign(${d.__key__||i},$event)' \
+                                             ${ctx.checked ?  'checked' : ''}></input>\
                                       <span class=textshadow>${d[0]}</span>\
                                     </label></div>")
         }
@@ -122,39 +123,36 @@
       methods: {
         checkAndAssign: function (id,event) {
           var rf = this
-          var idx = this.htmlKeyToIdx(id)
+          var idx = this.htmlKeyToIdx(id) | 0
           var targetReef = reefer.find (rf.data.targetlist)
           if (!targetReef && targetReef.name!='todos') throw Error ("no target todo list found")
-          idx = idx | 0 
           var todo = rf.data.todos[idx-1]
           if (todo.leaving) return 
+
+          //animating it...
           todo.class = todo.class || {}
           todo.class[this.data.targetlist] = 'remove'
-          var location = 0//targetReef.data.todos.length * Math.random()
-          targetReef.data.todos.splice (location, 0, todo)
           todo.class[targetReef.data.targetlist] = this.data.checkclass
-          //todo.class = 'redo'
+          targetReef.data.todos.splice (0, 0, todo)
           todo.leaving = true
-          setTimeout(function() {
+          setTimeout(function() { // could listen to animation end event also....
             var idx = rf.htmlKeyToIdx(id)
             todo.leaving = false
-            if (idx===null) {
-              debugger;
-              return
-            }
+            if (idx===null) return
             rf.data.todos.splice(idx-1, 1)
-          }, 1000)
+          }, 1000) // matches css animation duration
         } 
       },
       observers: {
         inputtext: function() {
           if (!this.data.inputtext) return
           var todo =  [this.data.inputtext]
-          //todo.class = 'add'
+          this.data.inputtext = ''
+
+          //animating it
           todo.class = todo.class || {}
           todo.class[this.data.targetlist] = 'add'
           this.data.todos.splice (0, 0, todo)
-          this.data.inputtext = ''
 
         }
       }      

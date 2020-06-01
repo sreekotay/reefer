@@ -30,12 +30,12 @@ ReeferFactory = function (opts) {
         var dc = ('datactx' in this.data) ? this.dotpath(this.data.datactx).value : {}
         var dl = ('datasrc' in this.data) ? this.dotpath(this.data.datasrc).value : this
         var gen = (dl && slots.default) || (slots.empty && slots.empty.text) || { text: '<div></div>' }
-        var key = this.data.datakey
+        var key = this.data.datakey; var uk
         if (!Array.isArray(dl)) dl = [dl]
         if (slots.header) this.html(-1, slots.header.script ? slots.header(dc) : slots.header.text)
         for (var i = 0; i < dl.length; i++) {
           var t = typeof (dl[i])
-          var uk = key === undefined ? dl[i].__xs_key__ : dl[i][key]
+          if (dl[i]) uk = key === undefined ? dl[i].__xs_key__ : dl[i][key]
           if (uk === undefined &&  t === 'object' ) uk = xs.privateprop(dl[i], '__xs_key__', 'k' + rf_key++)
           var row = gen.script ? gen.script(dl[i], i, dc) : gen.text
           this.html(uk || i, row)

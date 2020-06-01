@@ -59,6 +59,10 @@ input {
     box-shadow: inset 0 11px 8px -10px #ddd, inset 0 -11px 8px -10px #ddd;
 }
 
+.textshadow {
+  text-shadow: 3px 0px 5px rgba(5, 44, 54,0.2),-3px 0px 5px rgba(5, 44, 54,0.2);  
+}
+
 input:focus {
   outline: none;
 }

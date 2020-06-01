@@ -7,31 +7,43 @@
 
 <style>
 @keyframes heightAppear {
-  0%   { max-height: 0; opacity: 0}
-  100% { max-height: 200px; opacity: 1; }
+  0%   { max-height: 0; opacity: 0; }
+  100% { max-height: 200px; opacity: 1;}
 }
 @keyframes heightDisappear {
   0%   { max-height: 200px; opacity: 1}
   100% { max-height: 0; opacity: 0;}
 }
+@keyframes leftAppear {
+  0%   { max-height: 0; opacity: 0; left:-100px}
+  100% { max-height: 200px; opacity: 1; left:0}
+}
+@keyframes rightAppear {
+  0%   { max-height: 0; opacity: 0; left:100px}
+  100% { max-height: 200px; opacity: 1; left:0}
+}
+.remove {
+  animation: heightDisappear 1s forwards !important;
+}
+.add {
+  animation: leftAppear 1s forwards !important;
+}
+.redo {
+  animation: rightAppear 1s forwards !important;
+}
+
 [reef=todos] {
   width:50%;
 }
 [reef=todos] > div {
-  animation: heightAppear 1s forwards;
+  position: relative; 
   overflow: hidden;
-
 }
 [reef=todos] label {
   margin: 4px; 
   background-color: #f7f7f7;
   display: flex;
 }
-.remove {
-  animation: heightDisappear 1s forwards !important;
-
-}
-
 
 </style>
 <div class='coral-vertical' style='width:100%; align-items:center; padding-top: 16px;'>
@@ -41,14 +53,14 @@
       <span reef-slot='prompttext'>Type something above to change this text</span>
     </div>
     <div class='coral-horizontal' style='margin-top:16px;'> 
-      <div reef=todos id=todo class='coral-vertical' reef-p-targetlist='#done' reef-p-inputtext='~data.target~[reef=typer]' reef@click
+      <div reef=todos id=todo class='coral-vertical' reef-p-targetlist='#done' reef-p-inputtext='~data.target~[reef=typer]' reef@click  reef-p-checkclass = 'add'
       reef-p-todos='[
-        ["item1"], ["item2"]
+        ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"]
         ]'>
         <div reef-slot='header'><b>TODO.</b></div>
       </div>
       <div style='flex-grow:1'></div> 
-      <div reef=todos id=done class='coral-vertical' reef-p-targetlist='#todo' reef-p-checked=true reef@click
+      <div reef=todos id=done class='coral-vertical' reef-p-targetlist='#todo' reef-p-checked=true reef@click reef-p-checkclass = 'redo'
       reef-p-todos='[
         ["Much longer item that we are using.  But still pretty short in the grand scheme of things"],
         ["item 4"] 
@@ -94,13 +106,17 @@
       data: {
         todos: [],
         datasrc: 'data.todos',
-        datactx: 'data.checked',
+        datactx: 'data',
        //  datakey: 0,
         checked: false,
       },
       slots: {
         default: {
-          script: reefer.template('d,i,ctx', "<div><label><input type='checkbox' reef@click='methods.checkAndAssign(${d.__key__||i},$event)' ${ctx ?  'checked' : ''}></input><span>${d[0]}</span></label></div>")
+          script: reefer.template('d,i,ctx', 
+                                  "<div class='${(d.class&&d.class[ctx.targetlist])||\"\"}'><label>\
+                                      <input type='checkbox' reef@click='methods.checkAndAssign(${d.__key__||i},$event)' ${ctx.checked ?  'checked' : ''}></input>\
+                                      <span class=textshadow>${d[0]}</span>\
+                                    </label></div>")
         }
       },
       methods: {
@@ -110,10 +126,14 @@
           var targetReef = reefer.find (rf.data.targetlist)
           if (!targetReef && targetReef.name!='todos') throw Error ("no target todo list found")
           idx = idx | 0 
-          rf.rootEl.children[idx].classList.add ('remove')
           var todo = rf.data.todos[idx-1]
           if (todo.leaving) return 
-          targetReef.data.todos.push (todo)
+          todo.class = todo.class || {}
+          todo.class[this.data.targetlist] = 'remove'
+          var location = 0//targetReef.data.todos.length * Math.random()
+          targetReef.data.todos.splice (location, 0, todo)
+          todo.class[targetReef.data.targetlist] = this.data.checkclass
+          //todo.class = 'redo'
           todo.leaving = true
           setTimeout(function() {
             var idx = rf.htmlKeyToIdx(id)
@@ -129,7 +149,11 @@
       observers: {
         inputtext: function() {
           if (!this.data.inputtext) return
-          this.data.todos.push ([this.data.inputtext])
+          var todo =  [this.data.inputtext]
+          //todo.class = 'add'
+          todo.class = todo.class || {}
+          todo.class[this.data.targetlist] = 'add'
+          this.data.todos.splice (0, 0, todo)
           this.data.inputtext = ''
 
         }

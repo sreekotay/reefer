@@ -65,7 +65,7 @@
       },
       template: function () {
         var props = this.data
-        return '\<div style="display:flex">\
+        return '\<div style="display:flex; align-items:center">\
           <label for="mirror">New Task </label>\
           <input style="margin-left: 6px; flex-grow:1" type="text" id="mirror" value="' + props.text +'"> </div>\
           <div style="text-align:center"><em aria-live="polite">' + (props.text.length ? props.text : 'Type something above to change this text') + "</em></div>";

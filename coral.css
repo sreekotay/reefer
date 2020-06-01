@@ -45,6 +45,25 @@ abbr[title] {
 
 input {
   overflow: visible;
+  border: none;
+  border-bottom: 1px solid #2196F3;
+}
+
+input {
+    border: 1.5px solid #ddd;
+    flex-grow: 1;
+    padding: 4px 8px;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: inset 0 11px 8px -10px #ddd, inset 0 -11px 8px -10px #ddd;
+}
+
+input:focus {
+  outline: none;
+}
+
+input:active {
+  border-top:none;
 }
 
 img {

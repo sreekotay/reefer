@@ -24,7 +24,7 @@
 }
 [reef=todos] label {
   margin: 4px; 
-  background-color: #f0f0f0;
+  background-color: #f7f7f7;
   display: flex;
 }
 .remove {
@@ -44,7 +44,7 @@
       reef-p-todos='[
         ["item1"], ["item2"]
         ]'>
-        <div reef-slot='header'>TODO.</div>
+        <div reef-slot='header'><b>TODO.</b></div>
       </div>
       <div style='flex-grow:1'></div> 
       <div reef=todos id=done class='coral-vertical' reef-p-targetlist='#todo' reef-p-checked=true reef@click
@@ -52,7 +52,7 @@
         ["Much longer item that we are using.  But still pretty short in the grand scheme of things"],
         ["item 4"] 
         ]'>
-        <div reef-slot='header'>DONE.</div>
+        <div reef-slot='header'><b>DONE.</b></div>
       </div>
     </div>  
   </div>
@@ -66,7 +66,7 @@
       template: function () {
         var props = this.data
         return '\<div style="display:flex; align-items:center">\
-          <label for="mirror">New Task </label>\
+          <label for="mirror"><b>New Task</b> </label>\
           <input style="margin-left: 6px; flex-grow:1" type="text" id="mirror" value="' + props.text +'"> </div>\
           <div style="text-align:center"><em aria-live="polite">' + (props.text.length ? props.text : 'Type something above to change this text') + "</em></div>";
         return html;

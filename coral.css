@@ -49,6 +49,7 @@ input {
   border-bottom: 1px solid #2196F3;
 }
 
+/* input:not([type]), input[type='text'], input[type='password'] */
 input {
     border: 1.5px solid #ddd;
     flex-grow: 1;

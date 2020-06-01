@@ -35,8 +35,8 @@ ReeferFactory = function (opts) {
         if (slots.header) this.html(-1, slots.header.script ? slots.header(dc) : slots.header.text)
         for (var i = 0; i < dl.length; i++) {
           var t = typeof (dl[i])
-          if (dl[i]) uk = key === undefined ? dl[i].__xs_key__ : dl[i][key]
-          if (uk === undefined &&  t === 'object' ) uk = xs.privateprop(dl[i], '__xs_key__', 'k' + rf_key++)
+          if (dl[i]) uk = key === undefined ? dl[i].__key__ : dl[i][key]
+          if (uk === undefined && t === 'object') uk = xs.privateprop(dl[i], '__key__', 'k' + rf_key++)
           var row = gen.script ? gen.script(dl[i], i, dc) : gen.text
           this.html(uk || i, row)
         }

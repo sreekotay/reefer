@@ -36,8 +36,9 @@
 </style>
 <div class='coral-vertical' style='width:100%; align-items:center; padding-top: 16px;'>
   <div style='max-width:500px;margin:8px'>
-    <div reef=typer>
-
+    <div reef=typer >
+      <small reef-slot='hinttext' style="margin-left:4px">(press enter to add)</small>
+      <span reef-slot='prompttext'>Type something above to change this text</span>
     </div>
     <div class='coral-horizontal' style='margin-top:16px;'> 
       <div reef=todos id=todo class='coral-vertical' reef-p-targetlist='#done' reef-p-inputtext='~data.target~[reef=typer]' reef@click
@@ -65,20 +66,26 @@
       },
       template: function () {
         var props = this.data
+        var slots = this.slots
+        var hinttext = (slots && slots.hinttext && slots.hinttext.text) || ''
+        var prompttext = (slots && slots.prompttext && slots.prompttext.text ) || ''
         return '\<div style="display:flex; align-items:center">\
           <label for="mirror"><b>New Task</b> </label>\
-          <input style="margin-left: 6px; flex-grow:1" type="text" id="mirror" value="' + props.text +'"> </div>\
-          <div style="text-align:center"><em aria-live="polite">' + (props.text.length ? props.text : 'Type something above to change this text') + "</em></div>";
+          <input style="margin-left: 6px; flex-grow:1" type="text" id="mirror" value="' + props.text +'"> \
+          <button style="margin-left:4px" reef@click="methods.submitInput">Add</button></div>\
+          <div style="text-align:center"><em aria-live="polite">' + (props.text.length ? props.text + hinttext: prompttext) + "</em></div>";
         return html;
+      },
+      methods: {
+        submitInput: function() {
+          if (!this.data.text || !('target' in this.data)) return
+          this.data.target = this.data.text
+          this.data.text = ''
+        }
       },
       listeners: {
         input: function(e) {var props = this.data; props.text = e.target.value},
-        keydown: function (e) {
-          if (e.key==='Enter' && this.data.text && ('target' in this.data)) {
-            this.data.target = this.data.text
-            this.data.text = ''
-          }
-        }
+        keydown: function (e) { if (e.key==='Enter') this.methods.submitInput() }
       }
     })
 
@@ -93,20 +100,20 @@
       },
       slots: {
         default: {
-          script: reefer.template('d,i,ctx', "<div><label><input type='checkbox' reef@click='methods.checkAndAssign(${d.__xs_key__||i},$event)' ${ctx ?  'checked' : ''}></input><span>${d[0]}</span></label></div>")
+          script: reefer.template('d,i,ctx', "<div><label><input type='checkbox' reef@click='methods.checkAndAssign(${d.__key__||i},$event)' ${ctx ?  'checked' : ''}></input><span>${d[0]}</span></label></div>")
         }
       },
       methods: {
         checkAndAssign: function (id,event) {
+          var rf = this
           var idx = this.htmlKeyToIdx(id)
-          console.log (idx, event)
-          var targetReef = reefer.find (this.data.targetlist)
+          var targetReef = reefer.find (rf.data.targetlist)
           if (!targetReef && targetReef.name!='todos') throw Error ("no target todo list found")
           idx = idx | 0 
-          var rf = this
           rf.rootEl.children[idx].classList.add ('remove')
           var todo = rf.data.todos[idx-1]
           if (todo.leaving) return 
+          targetReef.data.todos.push (todo)
           todo.leaving = true
           setTimeout(function() {
             var idx = rf.htmlKeyToIdx(id)
@@ -115,7 +122,6 @@
               debugger;
               return
             }
-            targetReef.data.todos.push (todo)
             rf.data.todos.splice(idx-1, 1)
           }, 1000)
         } 

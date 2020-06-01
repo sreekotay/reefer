@@ -10,7 +10,7 @@
   -->
 </head>
 <style>
-[reef=dot] {
+[reef=dot]  {
   position: absolute;
   background: #61dafb;
   font: normal 15px sans-serif;
@@ -54,8 +54,9 @@
 
     var start = new Date().getTime();
     var doanim = true
+    var cdiv
     function update() {
-      var cdiv = reefer.find('.container')
+      if (!cdiv) cdiv = reefer.find('.container')
       cdiv.data.elapsed = new Date().getTime() - start
       if (doanim) requestAnimationFrame(update);
     }
@@ -105,6 +106,7 @@
           this.rootEl.onmouseenter = this.methods.enter
           this.rootEl.onmouseleave = this.methods.leave
         }
+        
         var s = props.size * 1.3;
         var style = {
             width: s + 'px', height: s + 'px',
@@ -114,8 +116,14 @@
         }
         this.styleBag(style)
         this.html (0, (props.hover ? '*' + props.text + '*' : props.text) + '')
+      },
+      observers: {
+        text: function () {
+          var props = this.data
+          this.htmlUpdate (0, 0, (props.hover ? '*' + props.text + '*' : props.text) + '')
+          return 'done'
+        }
       }
-
     })
 
 </script>

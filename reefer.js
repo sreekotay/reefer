@@ -551,11 +551,14 @@ ReeferFactory = function (opts) {
   Reefer.prototype.htmlUpdate = function (idx, id, htmlGen) {
     var _ = this.__
     var hm = _.hmap
+    if (!hm) return
     var hsh = hash(htmlGen)
     id = (id === undefined || id === null) ? hsh : id
     if (!(id in hm)) reefError('updateing non-existent element')
     if (hm[id].hsh === hsh && idx === hm[id].idx) return
     var root = getAttachPoint(this.rootEl) || this.rootEl
+    var c = hm[id].el
+    if (!c.getAttribute) {if (c.nodeValue !== htmlGen) c.nodeValue = htmlGen; return}
     var div = document.createElement(root.nodeName)
     div.innerHTML = htmlGen
     hm[id].hsh = hsh
@@ -675,12 +678,10 @@ ReeferFactory = function (opts) {
   Reefer.prototype.dotpath = dotpath
   Reefer.prototype.styleBag = function (s) {
     var rel = this.rootEl
-    /*
     var hsh = hash(JSON.stringify(s))
     if (rel.__xs__style === hsh) return
-    */
-   for (var k in s) rel.style[k] = s[k]
-   //rel.__xs__style = hsh
+    for (var k in s) rel.style[k] = s[k]
+    rel.__xs__style = hsh
   }
 
   // ===========

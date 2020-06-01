@@ -520,15 +520,15 @@ ReeferFactory = function (opts) {
     var cc = c.childNodes
     var nc = n.childNodes
     if (!cc || !nc || cc.length !== nc.length || !cc.length) { // different enough - fuck it
-      if (c.getAttribute) c.outerHTML = n.outerHTML; else c.data = n.data
+      if (c.getAttribute) c.outerHTML = n.outerHTML; else c.nodeValue = n.nodeValue
       return
     }
     for (var i = 0; i < cc.length; i++) {
-      var cch = cc[i].data || cc[i].outerHTML
-      var nch = nc[i].data || nc[i].outerHTML
+      var cch = cc[i].nodeValue || cc[i].outerHTML
+      var nch = nc[i].nodeValue || nc[i].outerHTML
       if (cch === nch) continue
       if (!nc[i].childNodes || !nc[i].childNodes.length) {
-        if (cc[i].data !== nc[i].data) { cc[i].data = nc[i].data }
+        if (cc[i].nodeValue !== nc[i].nodeValue) { cc[i].nodeValue = nc[i].nodeValue }
       } else {
         if (nc[i].childNodes.length == cc[i].childNodes.length) {
           for (var k = 0; k < nc[i].childNodes.length; k++) {
@@ -595,7 +595,7 @@ ReeferFactory = function (opts) {
           hta += h
         } else if (c && !c.getAttribute) {
           //          div.innerHTML = h
-          if (c.data !== h) c.data = h
+          if (c.nodeValue !== h) c.nodeValue = h
         } else {
           div.innerHTML = h
           // run(div)
@@ -676,11 +676,11 @@ ReeferFactory = function (opts) {
   Reefer.prototype.styleBag = function (s) {
     var rel = this.rootEl
     /*
-    var j = hash(JSON.stringify(s))
-    if (rel.__xs__style === j) return
+    var hsh = hash(JSON.stringify(s))
+    if (rel.__xs__style === hsh) return
     */
-    for (var k in s) rel.style[k] = s[k]
-    // rel__xs__style = j
+   for (var k in s) rel.style[k] = s[k]
+   //rel.__xs__style = hsh
   }
 
   // ===========

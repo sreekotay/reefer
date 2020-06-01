@@ -30,16 +30,6 @@
         return '<h2>' + props.greeting + (slots.default.text||'') + props.name + '!</h2>' + (slots.under.text||'');
       }
     })
-    /*
-    "\
-          <label for=wizards>Who is the best wizard?</label>\
-          <select>\
-            <option value=${sel('harry')}>Harry</option>\
-            <option value=${sel('hermione')}>Hermione</option>\
-            <option value=${sel('neville')}>Neville</option>\
-          </select>  ${props.selected=='hermione'?'agree!':''}"
-          */
-
     // ================  wizard
     reefer.register('wizard',  {
       data: {

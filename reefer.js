@@ -27,18 +27,20 @@ ReeferFactory = function (opts) {
         var slots = this.slots || {}
         if (!slots.default) return// 'done'
         if (!this.data.datasrc) return 'done'
-        var dc = ('datactx' in this.data) ? this.dotpath(this.data.datactx).value : {}
-        var dl = ('datasrc' in this.data) ? this.dotpath(this.data.datasrc).value : this
-        var gen = (dl && slots.default) || (slots.empty && slots.empty.text) || { text: '<div></div>' }
-        var key = this.data.datakey; var uk
+        var _d = this.data
+        var dc = ('datactx' in _d) ? this.dotpath(_d.datactx).value : {}
+        var dl = ('datasrc' in _d) ? this.dotpath(_d.datasrc).value : this
+        var gk = this.data.genkey
+        var gen = (dl && slots[_d.dataslot || 'default']) || (slots.empty && slots.empty.text) || { text: '<div> </div>' }
+        var key = _d.datakey; var uk
         if (!Array.isArray(dl)) dl = [dl]
         if (slots.header) this.html(-1, slots.header.script ? slots.header(dc) : slots.header.text)
         for (var i = 0; i < dl.length; i++) {
           var t = typeof (dl[i])
           if (dl[i]) uk = key === undefined ? dl[i].__key__ : dl[i][key]
-          if (uk === undefined && t === 'object') uk = xs.privateprop(dl[i], '__key__', 'k' + rf_key++)
+          if (gk && uk === undefined && t === 'object') uk = xs.privateprop(dl[i], '__key__', 'k' + rf_key++)
           var row = gen.script ? gen.script(dl[i], i, dc) : gen.text
-          this.html(uk || i, row)
+          this.html( uk || i, row)
         }
         if (slots.footer) this.html(-2, slots.footer.script ? slots.footer(dc) : slots.footer.text)
       }
@@ -66,7 +68,7 @@ ReeferFactory = function (opts) {
     return r
   }
 
-  var stripper = document.createElement('textarea')
+  // var stripper = document.createElement('textarea')
   function reeferDOM (el, parentReef) {
     if (!el) return null
     var reefName = el.getAttribute('reef')
@@ -516,36 +518,49 @@ ReeferFactory = function (opts) {
     this.__.fcounter = 0
   }
 
-  function applyNodeChanges (c, n, depth) {
+/*  function deepReplaceNode (c, n) {
+    var p = c.previousSibling
+    var pn = p || c.parentNode
     var cc = c.childNodes
     var nc = n.childNodes
-    if (!cc || !nc || cc.length !== nc.length || !cc.length) { // different enough - fuck it
-      if (c.getAttribute) c.outerHTML = n.outerHTML; else c.nodeValue = n.nodeValue
-      return
-    }
-    for (var i = 0; i < cc.length; i++) {
-      var cch = cc[i].nodeValue || cc[i].outerHTML
-      var nch = nc[i].nodeValue || nc[i].outerHTML
-      if (cch === nch) continue
-      if (!nc[i].childNodes || !nc[i].childNodes.length) {
-        if (cc[i].nodeValue !== nc[i].nodeValue) { cc[i].nodeValue = nc[i].nodeValue }
-      } else {
-        if (nc[i].childNodes.length == cc[i].childNodes.length) {
-          for (var k = 0; k < nc[i].childNodes.length; k++) {
-            var nodec = cc[i].childNodes[k]
-            var noden = nc[i].childNodes[k]
-            if (noden.childNodes && noden.childNodes.length) { applyNodeChanges(nodec, noden) } else if (nodec.data !== noden.data) { nodec.data = noden.data }
-          }
-        } else cc[i].outerHTML = nc[i].outerHTML
+    var skipReplace
+    if (nc && cc && nc.length === cc.length && cc.length) {
+      for (var i = 0; i < cc.length; i++) {
+        var cch = cc[i].nodeValue || cc[i].outerHTML
+        var nch = cc[i].nodeValue || nc[i].outerHTML
+        if (cch === nch) continue
+        //replaceNode(cc[i], nch)
+        deepReplaceNode (cc[i], nc[i])
       }
+      c = p ? p.nextSibling : pn.childNodes[0]
+      if (c.outerHTML === n.outerHTML) { skipReplace = true } else { skipReplace = false }
     }
-    if (c.outerHTML !== n.outerHTML) {
-      var pel = c.parentNode
-      var el = c.previousSibling
-      c.outerHTML = n.outerHTML
-      c = el ? el.nextSibling : pel.childNodes[0]
+
+    if (!skipReplace) {
+      if (!c.getAttribute) { c.nodeValue = nch } else 
+      { c.outerHTML = n.outerHTML }
     }
-    return c
+    //c.outerHTML = n.outerHTML
+    return p ? p.nextSibling : pn.childNodes[0]
+  }
+*/
+  function replaceNode (c, nch) {
+    var p = c.previousSibling
+    var pn = p || c.parentNode
+    if (!c.getAttribute) { c.nodeValue = nch } else { c.outerHTML = nch }
+    return p ? p.nextSibling : pn.childNodes[0]
+  }
+
+  function swapNode (c, n) {
+    var p = c.previousSibling
+    var pn = c.parentNode
+    try {
+      pn.insertBefore(n, c)
+    } catch (err) {
+      pn.insertBefore(n, c)
+    }
+    pn.removeChild(c)
+    return p ? p.nextSibling : pn.childNodes[0]
   }
 
   Reefer.prototype.htmlUpdate = function (idx, id, htmlGen) {
@@ -558,12 +573,13 @@ ReeferFactory = function (opts) {
     if (hm[id].hsh === hsh && idx === hm[id].idx) return
     var root = getAttachPoint(this.rootEl) || this.rootEl
     var c = hm[id].el
-    if (!c.getAttribute) {if (c.nodeValue !== htmlGen) c.nodeValue = htmlGen; return}
-    var div = document.createElement(root.nodeName)
-    div.innerHTML = htmlGen
+    if (!c.getAttribute) { if (c.nodeValue !== htmlGen) c.nodeValue = htmlGen; return }
+    // var div = document.createElement(root.nodeName)
+    // div.innerHTML = htmlGen
     hm[id].hsh = hsh
     hm[id].idx = idx
-    hm[id].el = applyNodeChanges(root.childNodes[idx], div.childNodes[0])
+    // hm[id].el = applyNodeChanges(root.childNodes[idx], div.childNodes[0])
+    hm[id].el = replaceNode(root.childNodes[idx], htmlGen)// div.childNodes[0])
   }
 
   Reefer.prototype.htmlEnd = function () {
@@ -590,22 +606,49 @@ ReeferFactory = function (opts) {
 
     var root = getAttachPoint(this.rootEl) || this.rootEl
     var div = document.createElement(root.nodeName)
+
+    var ah = {}
+    var htaa = ''
+    var cnt = 0
+    for (var i = 0; i < fl; i++) {
+      var haa = ha[i]
+      if (!haa.h) {
+        ah[haa.id] = null
+        continue
+      }
+      ah[i] = cnt++
+      htaa += haa.h
+    }
+    if (cnt) div.innerHTML = htaa
+    if (div.childNodes.length !== cnt) {
+      cnt = cnt
+    }
+
+    cnt = 0
     for (var i = 0; i < fl; i++) {
       var c = ha[i].el
       var h = ha[i].h
       if (h) {
         if (i >= root.childNodes.length) {
           hta += h
-        } else if (c && !c.getAttribute) {
+        } else if (0 && c && !c.getAttribute) {
           //          div.innerHTML = h
           if (c.nodeValue !== h) c.nodeValue = h
         } else {
-          div.innerHTML = h
           // run(div)
-          if (div.childNodes.length != 1) reefWarn('must be 1 html() entity')
           if (c) {
-            ha[i].el = applyNodeChanges(c, div.childNodes[0])
+            if (ah[i] !== null) { // } && c.parentNode===root) {
+              //ha[i].el = deepReplaceNode(c, div.childNodes[ah[i]])
+              ha[i].el = swapNode(c, div.childNodes[ah[i]-cnt++])
+            } else if (1) {
+              // div.innerHTML = h
+              ha[i].el = replaceNode(c, h)
+            } /*else {
+              div.innerHTML = h
+              ha[i].el = deepReplaceNode(c, div.children[0])
+            }*/
           } else {
+            div.innerHTML = h
             ha[i].el = div.childNodes[0]
           }
         }
@@ -627,7 +670,7 @@ ReeferFactory = function (opts) {
     if (hta) root.insertAdjacentHTML('beforeend', hta) // end insert
     root = getAttachPoint(this.rootEl)
     if (root && ha.length != root.childNodes.length) {
-      console.error('size delta')
+      console.error('must be 1 html() entity for hmtl()')
       debugger
     }
     hm = {}

@@ -89,6 +89,7 @@
         todos: [],
         datasrc: 'data.todos',
         datactx: 'data',
+        genkey: true,
         checked: false,
       },
       slots: {
@@ -96,7 +97,7 @@
           script: reefer.template('d,i,ctx', 
                                   "<div class='${(d.class&&d.class[ctx.targetlist])||\"\"}'><label>\
                                       <input type='checkbox' \
-                                             reef@click='methods.checkAndAssign(${d.__key__||i},$event)' \
+                                             reef@click='methods.checkAndAssign(${d.__key__},$event)' \
                                              ${ctx.checked ?  'checked' : ''}></input>\
                                       <span class=textshadow>${d[0]}</span>\
                                     </label></div>")
@@ -120,6 +121,7 @@
           setTimeout(function() { // could listen to animation end event also....
             var idx = rf.htmlKeyToIdx(id)
             todo.leaving = false
+            todo.class = todo.class || {}
             if (idx===null) return
             rf.data.todos.splice(idx-1, 1)
           }, 1000) // matches css animation duration

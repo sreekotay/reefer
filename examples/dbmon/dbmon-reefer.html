@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="description" content="DBMON NOT REACT" />
+<link href="styles.css" rel="stylesheet" type="text/css" />
+<title>dbmon</title>
+</head>
+<body>
+  <div id="app" >
+    <table class="table table-striped latest-data" >
+    <tbody id=reeftable 
+          reef
+          reef-p-datasrc='data.w.databases' 
+          _reef-p-w='{"databases":[]}'
+          reef-p-dataslot='row'>
+        <script type='reef-function(db,i,ctx)' reef-slot=row>
+        function f(arr) {
+          var s=''; for (var i=0; i<arr.length; i++) {
+            var q = arr[i]
+            s += "<td class='" + q.elapsedClassName + "'>" + (q.formatElapsed||'') + 
+                 "<div class='popover left'> <div class='popover-content'>" + (q.query || '') + 
+                 "</div><div class='arrow'></div></div></td>"
+          }
+          return s
+        }
+        return '<tr>\
+            <td class="dbname">' + db.dbname + '</td>\
+            <td class="query-count">\
+              <span class="' + db.lastSample.countClassName + '">' + db.lastSample.nbQueries + ' </span>\
+            </td>'+ f(db.lastSample.topFiveQueries) +
+          '</tr>'
+        </script>
+    </tbody>
+  </table>
+
+  </div>
+  <script src='../../xs_observe.js'></script>
+  <script src='../../reefer.js'></script>
+  <script src="ENV.js"></script>
+  <script src="lib/memory-stats.js"></script>
+  <script src="lib/monitor.js"></script>
+  <script src="app.js"></script>
+  <script src="ga.js"></script>
+</body>
+</html>

@@ -88,8 +88,9 @@
       var gf = function () { return v[p] }
       var sf = function (n) {
         var o = v[p]; v[p] = n
-        // if (typeof (n) === 'object' && n!==null && !n.__xs__) deepObserver(n, handler, { o: obj, p: p }, path) // observer it
-        if (typeof (n) === 'object' && n !== null && !n.__xs__) { debounceObserve(_obj.s, obj, function () { deepObserver(n, handler, { o: obj, p: p }, path) }) }
+        if (typeof (n) === 'object' && n !== null && !n.__xs__) { 
+          debounceObserve(_obj.s, obj, function () { deepObserver(n, handler, { o: obj, p: p }, path) }) 
+        }
         trigger('set', obj, p, n, o)
         return n
       }

@@ -40,7 +40,7 @@ ReeferFactory = function (opts) {
           if (dl[i]) uk = key === undefined ? dl[i].__key__ : dl[i][key]
           if (gk && uk === undefined && t === 'object') uk = xs.privateprop(dl[i], '__key__', 'k' + rf_key++)
           var row = gen.script ? gen.script(dl[i], i, dc) : gen.text
-          this.html( uk || i, row)
+          this.html(uk || i, row)
         }
         if (slots.footer) this.html(-2, slots.footer.script ? slots.footer(dc) : slots.footer.text)
       }
@@ -518,7 +518,7 @@ ReeferFactory = function (opts) {
     this.__.fcounter = 0
   }
 
-/*  function deepReplaceNode (c, n) {
+  /*  function deepReplaceNode (c, n) {
     var p = c.previousSibling
     var pn = p || c.parentNode
     var cc = c.childNodes
@@ -537,7 +537,7 @@ ReeferFactory = function (opts) {
     }
 
     if (!skipReplace) {
-      if (!c.getAttribute) { c.nodeValue = nch } else 
+      if (!c.getAttribute) { c.nodeValue = nch } else
       { c.outerHTML = n.outerHTML }
     }
     //c.outerHTML = n.outerHTML
@@ -548,18 +548,6 @@ ReeferFactory = function (opts) {
     var p = c.previousSibling
     var pn = p || c.parentNode
     if (!c.getAttribute) { c.nodeValue = nch } else { c.outerHTML = nch }
-    return p ? p.nextSibling : pn.childNodes[0]
-  }
-
-  function swapNode (c, n) {
-    var p = c.previousSibling
-    var pn = c.parentNode
-    try {
-      pn.insertBefore(n, c)
-    } catch (err) {
-      pn.insertBefore(n, c)
-    }
-    pn.removeChild(c)
     return p ? p.nextSibling : pn.childNodes[0]
   }
 
@@ -613,7 +601,7 @@ ReeferFactory = function (opts) {
     for (var i = 0; i < fl; i++) {
       var haa = ha[i]
       if (!haa.h) {
-        ah[haa.id] = null
+        ah[i] = null
         continue
       }
       ah[i] = cnt++
@@ -637,16 +625,21 @@ ReeferFactory = function (opts) {
         } else {
           // run(div)
           if (c) {
+            ha[i].el = div.childNodes[ah[i] - cnt++]
+            root.replaceChild (ha[i].el, c)
+            //ha[i].el = swapNode(c, ha[i].el)
+            //if (ha[i].el===c) cnt--
+            /*
             if (ah[i] !== null) { // } && c.parentNode===root) {
-              //ha[i].el = deepReplaceNode(c, div.childNodes[ah[i]])
-              ha[i].el = swapNode(c, div.childNodes[ah[i]-cnt++])
+              // ha[i].el = deepReplaceNode(c, div.childNodes[ah[i]])
+              ha[i].el = swapNode(c, div.childNodes[ah[i] - cnt++])
             } else if (1) {
               // div.innerHTML = h
               ha[i].el = replaceNode(c, h)
-            } /*else {
+            } /* else {
               div.innerHTML = h
               ha[i].el = deepReplaceNode(c, div.children[0])
-            }*/
+            } */
           } else {
             div.innerHTML = h
             ha[i].el = div.childNodes[0]

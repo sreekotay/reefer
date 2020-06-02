@@ -533,16 +533,16 @@ ReeferFactory = function (opts) {
         at = na[i]; a[at.name] = true
         if (c.getAttribute(at.name) !== at.value) c.setAttribute(at.name, at.value)
       }
-      var cn = c.getAttributeNames(); var cnl = cn.length
-      if (cnl === nal) return true
-      for (i = 0; i < cnl; i++) {
-        at = cn[i]; if (a[at]) continue
-        c.removeAttribute(at)
+      var ca = c.attributes; var cal = ca.length
+      if (cal === nal) return true
+      for (i = 0; i < cal; i++) {
+        at = ca[i]; if (a[at.name]) continue
+        c.removeAttribute(at.name)
       }
-    } catch (err) {return true}    
+    } catch (err) { return true }
   }
   function attemptMerge (c, n) {
-    if (c.nodeType === 3) {
+    if (c.nodeType === 3 && n.nodeType === 3) {
       c.nodeValue = n.nodeValue
       return true
     }
@@ -557,6 +557,7 @@ ReeferFactory = function (opts) {
         var ccn = cc[i]
         var ncn = nc[i]
         if (ccn.isEqualNode(ncn)) continue
+        if (ccn.nodeType === 3 && ncn.nodeType === 3) { ccn.nodeValue = ncn.nodeValue; continue }
         if (ccn.nodeName !== ncn.nodeName || !attemptMerge(ccn, ncn)) {
           c.replaceChild(ncn, ccn)
         }
@@ -635,32 +636,16 @@ ReeferFactory = function (opts) {
       if (h) {
         if (i >= root.childNodes.length) {
           hta += h
-        } else if (0 && c && !c.getAttribute) {
-          //          div.innerHTML = h
-          if (c.nodeValue !== h) c.nodeValue = h
         } else {
-          // run(div)
-          if (c) {
-            var n = div.childNodes[ah[i] - cnt]
-            if (c.nodeName !== n.nodeName || !attemptMerge(c, n)) {
-              c.parentNode.replaceChild(n, c)
-              ha[i].el = n
-              cnt++
-            }
-
-            // div.innerHTML = h; ha[i].el = mergeNode(c, div.childNodes[0])
-            // ha[i].el = replaceNode (c, h)
-            // ha[i].el = div.childNodes[ah[i] - cnt++]
-            // root.replaceChild (ha[i].el, c)
-            // ha[i].el = mergeNode(c, ha[i].el); if (ha[i].el === c) cnt--
-          } else {
-            div.innerHTML = h
-            ha[i].el = div.childNodes[0]
+          var n = div.childNodes[ah[i] - cnt]
+          if (c) n = mergeNode(c, n)
+          if (n !== c) {
+            ha[i].el = n
+            cnt++
           }
         }
         ha[i].h = null
       }
-      if (i !== 0 && prev === null && ha[i].el) reefError('htmlEnd() logic error')
       c = ha[i].el
       if (c && (c.parentNode !== root || c.previousSibling !== prev)) { // clean up placement
         if (prev) {

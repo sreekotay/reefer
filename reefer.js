@@ -494,7 +494,7 @@ ReeferFactory = function (opts) {
   }
   function getAttachPoint (el) {
     switch (el.nodeName) {
-      case 'TABLE': return el.childNodes ? el.childNodes[0] : el
+      case 'TABLE': return (el.childNodes && el.childNodes[0]) || el
       default: return el
     }
   }
@@ -584,15 +584,15 @@ ReeferFactory = function (opts) {
     id = (id === undefined || id === null) ? hsh : id
     if (!(id in hm)) reefError('updateing non-existent element')
     if (hm[id].hsh === hsh && idx === hm[id].idx) return
-    var root = getAttachPoint(this.rootEl) || this.rootEl
+    var root = getAttachPoint(this.rootEl)
     var c = hm[id].el
-    if (!c.getAttribute) { if (c.nodeValue !== htmlGen) c.nodeValue = htmlGen; return }
-    // var div = document.createElement(root.nodeName)
-    // div.innerHTML = htmlGen
-    // hm[id].el = mergeNode(root.childNodes[idx], div.childNodes[0])
+    if (!c.getAttribute) { if (c.nodeValue !== htmlGen) c.nodeValue = htmlGen; return } // cheat
+    var div = document.createElement(root.nodeName)
+    div.innerHTML = htmlGen
+    hm[id].el = mergeNode(root.childNodes[idx], div.childNodes[0])
+    // hm[id].el = replaceNode(root.childNodes[idx], htmlGen)
     hm[id].hsh = hsh
     hm[id].idx = idx
-    hm[id].el = replaceNode(root.childNodes[idx], htmlGen)
   }
 
   Reefer.prototype.htmlEnd = function () {
@@ -617,7 +617,7 @@ ReeferFactory = function (opts) {
       delete hm[k]
     }
 
-    var root = getAttachPoint(this.rootEl) || this.rootEl
+    var root = getAttachPoint(this.rootEl)
     var div = document.createElement(root.nodeName)
 
     var ah = {}; var htaa = ''; var cnt = 0

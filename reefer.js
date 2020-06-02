@@ -528,26 +528,26 @@ ReeferFactory = function (opts) {
   function copyAttributes (c, n) {
     try {
       var a = {}; var at
-      var na = n.attributes
-      for (var i = 0; i < na.length; i++) {
+      var na = n.attributes; var nal = na.length
+      for (var i = 0; i < nal; i++) {
         at = na[i]; a[at.name] = true
         if (c.getAttribute(at.name) !== at.value) c.setAttribute(at.name, at.value)
       }
-      var cn = c.getAttributeNames()
-      if (cn.length === na.length) return true
-      for (i = 0; i < cn.length; i++) {
+      var cn = c.getAttributeNames(); var cnl = cn.length
+      if (cnl === nal) return true
+      for (i = 0; i < cnl; i++) {
         at = cn[i]; if (a[at]) continue
         c.removeAttribute(at)
       }
-      return true
-    } catch (err) {}
-    return false
+    } catch (err) {return true}    
   }
   function attemptMerge (c, n) {
     if (c.nodeType === 3) {
-      if (c.nodeValue !== n.nodeValue) { c.nodeValue = n.nodeValue }
+      c.nodeValue = n.nodeValue
       return true
     }
+    if ((c.nodeName !== n.nodeName) ||
+        (!copyAttributes(c, n))) return false
     if (c.childNodes.length || n.childNodes.length) {
       var i
       var cc = c.childNodes
@@ -564,7 +564,6 @@ ReeferFactory = function (opts) {
       while (il < cc.length) c.removeChild(cc[il++])
       while (il < nc.length) c.appendChild(nc[il++])
     }
-    if (n.hasAttribute) return copyAttributes(c, n)
     return true
   }
 
@@ -619,7 +618,7 @@ ReeferFactory = function (opts) {
 
     var root = getAttachPoint(this.rootEl) || this.rootEl
     var div = document.createElement(root.nodeName)
-    
+
     var ah = {}; var htaa = ''; var cnt = 0
     for (var i = 0; i < fl; i++) {
       var haa = ha[i]
@@ -642,14 +641,18 @@ ReeferFactory = function (opts) {
         } else {
           // run(div)
           if (c) {
-            //div.innerHTML = h
-            //ha[i].el = mergeNode(c, div.childNodes[0])
-            
+            var n = div.childNodes[ah[i] - cnt]
+            if (c.nodeName !== n.nodeName || !attemptMerge(c, n)) {
+              c.parentNode.replaceChild(n, c)
+              ha[i].el = n
+              cnt++
+            }
+
+            // div.innerHTML = h; ha[i].el = mergeNode(c, div.childNodes[0])
             // ha[i].el = replaceNode (c, h)
-            ha[i].el = div.childNodes[ah[i] - cnt++]
-            //root.replaceChild (ha[i].el, c)
-            ha[i].el = mergeNode(c, ha[i].el); if (ha[i].el === c) cnt--
-            
+            // ha[i].el = div.childNodes[ah[i] - cnt++]
+            // root.replaceChild (ha[i].el, c)
+            // ha[i].el = mergeNode(c, ha[i].el); if (ha[i].el === c) cnt--
           } else {
             div.innerHTML = h
             ha[i].el = div.childNodes[0]

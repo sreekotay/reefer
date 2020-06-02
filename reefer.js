@@ -533,28 +533,26 @@ ReeferFactory = function (opts) {
         at = na[i]; a[at.name] = true
         if (c.getAttribute(at.name) !== at.value) c.setAttribute(at.name, at.value)
       }
-      var ca = c.attributes
-      for (i = 0; i < ca.length; i++) {
-        at = ca[i]; if (a[at.name]) continue
-        c.removeAttribute(at.name)
+      var cn = c.getAttributeNames()
+      if (cn.length === na.length) return true
+      for (i = 0; i < cn.length; i++) {
+        at = cn[i]; if (a[at]) continue
+        c.removeAttribute(at)
       }
       return true
     } catch (err) {}
     return false
   }
   function attemptMerge (c, n) {
-    if (c.nodeName !== n.nodeName) {
-      return false
-    }
-    if (c.nodeValue !== n.nodeValue) {
-      c.nodeValue = n.nodeValue
+    if (c.nodeType === 3) {
+      if (c.nodeValue !== n.nodeValue) { c.nodeValue = n.nodeValue }
       return true
     }
     if (c.childNodes.length || n.childNodes.length) {
+      var i
       var cc = c.childNodes
       var nc = n.childNodes
-      var il = Math.min(cc.length, nc.length)
-      var i = il
+      var il = i = Math.min(cc.length, nc.length)
       while (--i >= 0) {
         var ccn = cc[i]
         var ncn = nc[i]
@@ -563,19 +561,15 @@ ReeferFactory = function (opts) {
           c.replaceChild(ncn, ccn)
         }
       }
-      i = il
-      while (i < cc.length) c.removeChild(cc[i++])
-      while (i < nc.length) c.appendChild(nc[i++])
+      while (il < cc.length) c.removeChild(cc[il++])
+      while (il < nc.length) c.appendChild(nc[il++])
     }
     if (n.hasAttribute) return copyAttributes(c, n)
-    /*   var cl = c.getAttribute('class')
-      if (n.hasAttribute('class')) { if (n.getAttribute('class') !== cl) c.setAttribute('class', n.getAttribute('class')) } else if (cl) c.removeAttribute('class')
-    } */
     return true
   }
 
   function mergeNode (c, n) {
-    if (!attemptMerge(c, n)) {
+    if (c.nodeName !== n.nodeName || !attemptMerge(c, n)) {
       c.parentNode.replaceChild(n, c)
       return n
     }
@@ -625,6 +619,7 @@ ReeferFactory = function (opts) {
 
     var root = getAttachPoint(this.rootEl) || this.rootEl
     var div = document.createElement(root.nodeName)
+    
     var ah = {}; var htaa = ''; var cnt = 0
     for (var i = 0; i < fl; i++) {
       var haa = ha[i]
@@ -647,10 +642,14 @@ ReeferFactory = function (opts) {
         } else {
           // run(div)
           if (c) {
+            //div.innerHTML = h
+            //ha[i].el = mergeNode(c, div.childNodes[0])
+            
             // ha[i].el = replaceNode (c, h)
             ha[i].el = div.childNodes[ah[i] - cnt++]
-            // root.replaceChild (ha[i].el, c)
+            //root.replaceChild (ha[i].el, c)
             ha[i].el = mergeNode(c, ha[i].el); if (ha[i].el === c) cnt--
+            
           } else {
             div.innerHTML = h
             ha[i].el = div.childNodes[0]

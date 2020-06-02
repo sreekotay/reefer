@@ -518,37 +518,50 @@ ReeferFactory = function (opts) {
     this.__.fcounter = 0
   }
 
-  /*  function deepReplaceNode (c, n) {
-    var p = c.previousSibling
-    var pn = p || c.parentNode
-    var cc = c.childNodes
-    var nc = n.childNodes
-    var skipReplace
-    if (nc && cc && nc.length === cc.length && cc.length) {
-      for (var i = 0; i < cc.length; i++) {
-        var cch = cc[i].nodeValue || cc[i].outerHTML
-        var nch = cc[i].nodeValue || nc[i].outerHTML
-        if (cch === nch) continue
-        //replaceNode(cc[i], nch)
-        deepReplaceNode (cc[i], nc[i])
-      }
-      c = p ? p.nextSibling : pn.childNodes[0]
-      if (c.outerHTML === n.outerHTML) { skipReplace = true } else { skipReplace = false }
-    }
-
-    if (!skipReplace) {
-      if (!c.getAttribute) { c.nodeValue = nch } else
-      { c.outerHTML = n.outerHTML }
-    }
-    //c.outerHTML = n.outerHTML
-    return p ? p.nextSibling : pn.childNodes[0]
-  }
-*/
   function replaceNode (c, nch) {
     var p = c.previousSibling
     var pn = p || c.parentNode
     if (!c.getAttribute) { c.nodeValue = nch } else { c.outerHTML = nch }
     return p ? p.nextSibling : pn.childNodes[0]
+  }
+  function attemptMerge (c, n) {
+    if (c.nodeName !== n.nodeName) {
+      return false
+    }
+    if (c.nodeValue !== n.nodeValue) {
+      c.nodeValue = n.nodeValue
+      return true
+    }
+    if (c.childNodes.length || n.childNodes.length) {
+      var cc = c.childNodes
+      var nc = n.childNodes
+      var il = Math.min(cc.length, nc.length)
+      var i = il
+      while (--i >= 0) {
+        var ccn = cc[i]
+        var ncn = nc[i]
+        if (ccn.isEqualNode(ncn)) continue
+        if (ccn.nodeName !== ncn.nodeName || !attemptMerge(ccn, ncn)) {
+          c.replaceChild(ncn, ccn)
+        }
+      }
+      i = il
+      while (i < cc.length) c.removeChild(cc[i++])
+      while (i < nc.length) c.appendChild(nc[i++])
+    }
+    if (n.hasAttribute) {
+      var cl = c.getAttribute('class')
+      if (n.hasAttribute('class')) { if (n.getAttribute('class') !== cl) c.setAttribute('class', n.getAttribute('class')) } else if (cl) c.removeAttribute('class')
+    }
+    return true
+  }
+
+  function mergeNode (c, n) {
+    if (!attemptMerge(c, n)) {
+      c.parentNode.replaceChild(n, c)
+      return n
+    }
+    return c
   }
 
   Reefer.prototype.htmlUpdate = function (idx, id, htmlGen) {
@@ -564,10 +577,10 @@ ReeferFactory = function (opts) {
     if (!c.getAttribute) { if (c.nodeValue !== htmlGen) c.nodeValue = htmlGen; return }
     // var div = document.createElement(root.nodeName)
     // div.innerHTML = htmlGen
+    // hm[id].el = mergeNode(root.childNodes[idx], div.childNodes[0])
     hm[id].hsh = hsh
     hm[id].idx = idx
-    // hm[id].el = applyNodeChanges(root.childNodes[idx], div.childNodes[0])
-    hm[id].el = replaceNode(root.childNodes[idx], htmlGen)// div.childNodes[0])
+    hm[id].el = replaceNode(root.childNodes[idx], htmlGen)
   }
 
   Reefer.prototype.htmlEnd = function () {
@@ -594,23 +607,14 @@ ReeferFactory = function (opts) {
 
     var root = getAttachPoint(this.rootEl) || this.rootEl
     var div = document.createElement(root.nodeName)
-
-    var ah = {}
-    var htaa = ''
-    var cnt = 0
+    var ah = {}; var htaa = ''; var cnt = 0
     for (var i = 0; i < fl; i++) {
       var haa = ha[i]
-      if (!haa.h) {
-        ah[i] = null
-        continue
-      }
+      if (!haa.h) { ah[i] = null; continue }
       ah[i] = cnt++
       htaa += haa.h
     }
     if (cnt) div.innerHTML = htaa
-    if (div.childNodes.length !== cnt) {
-      cnt = cnt
-    }
 
     cnt = 0
     for (var i = 0; i < fl; i++) {
@@ -625,21 +629,10 @@ ReeferFactory = function (opts) {
         } else {
           // run(div)
           if (c) {
+            //ha[i].el = replaceNode (c, h)
             ha[i].el = div.childNodes[ah[i] - cnt++]
-            root.replaceChild (ha[i].el, c)
-            //ha[i].el = swapNode(c, ha[i].el)
-            //if (ha[i].el===c) cnt--
-            /*
-            if (ah[i] !== null) { // } && c.parentNode===root) {
-              // ha[i].el = deepReplaceNode(c, div.childNodes[ah[i]])
-              ha[i].el = swapNode(c, div.childNodes[ah[i] - cnt++])
-            } else if (1) {
-              // div.innerHTML = h
-              ha[i].el = replaceNode(c, h)
-            } /* else {
-              div.innerHTML = h
-              ha[i].el = deepReplaceNode(c, div.children[0])
-            } */
+            // root.replaceChild (ha[i].el, c)
+            ha[i].el = mergeNode(c, ha[i].el); if (ha[i].el === c) cnt--
           } else {
             div.innerHTML = h
             ha[i].el = div.childNodes[0]

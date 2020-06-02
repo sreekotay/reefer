@@ -13,7 +13,6 @@
     handler = attach(handler, obj, path)
 
     // do the work
-    var isArray = Array.isArray(obj)
     var _obj = values(obj)
     var v = _obj.v
     for (var p in v) {
@@ -26,7 +25,7 @@
       propertyObserver(obj, p, handler, path)
     }
 
-    if (isArray) arrayObserverHelper(obj, handler)
+    if (Array.isArray(obj)) arrayObserverHelper(obj, handler)
     if (!obj.__observe__ && path === undefined && ctxobj === undefined) privateprop(obj, '__observe__', deepObserver)
     return obj
   }
@@ -88,8 +87,9 @@
       var gf = function () { return v[p] }
       var sf = function (n) {
         var o = v[p]; v[p] = n
-        if (typeof (n) === 'object' && n !== null && !n.__xs__) { 
-          debounceObserve(_obj.s, obj, function () { deepObserver(n, handler, { o: obj, p: p }, path) }) 
+        if (typeof (n) === 'object' && n !== null && !n.__xs__) {
+          // deepObserver(n, handler, { o: obj, p: p }, path)
+          debounceObserve(_obj.s, obj, function () { deepObserver(n, handler, { o: obj, p: p }, path) }, true)
         }
         trigger('set', obj, p, n, o)
         return n
@@ -102,6 +102,7 @@
 
   var __ghsymbol = 0
   function attach (handler, obj, path) {
+    /*
     if (!handler) return obj
     var sym = obj
     if (typeof (handler) === 'object') {
@@ -109,19 +110,24 @@
       handler = values(handler).h
       if (!handler) return obj // throw new Error('unrecognized event symbol')
     } else if (!Array.isArray(handler)) { handler = [{ rootobj: obj, f: handler, path: path, s: '#' + __ghsymbol++ }] }
+    */
+    if (handler === obj || !handler) return obj
+    if (typeof (handler) === 'object') handler = values(handler).h
+    else handler = [{ rootobj: obj, f: handler, path: path, s: '#' + __ghsymbol++ }]
 
-    var h = values(obj).h
-    if (!h) { h = values(obj).h = [] }
+    var _obj = values(obj)
+    var h = _obj.h = _obj.h || []
     handlerMerge(h, handler, path)
     return obj
   }
 
   function handlerMerge (a, b, path) { // modifies original array
     if (a === b) return
-    var dotpath = (path && path.reduce(function (p, n) { return p + (p && '.') + n.p }, '')) || ''
+    var dotpath = path || ''
     for (var i = 0; i < b.length; i++) {
       var bs = b[i].s
       if (!a[bs]) {
+        if (dotpath === undefined) dotpath = path.reduce(function (p, n) { return p + (p && '.') + n.p }, '')
         a[bs] = true
         a.push({ f: b[i].f, s: b[i].s, path: path, dotpath: dotpath })
       }
@@ -129,7 +135,7 @@
   }
 
   function chainfind (upd, obj) { // for events
-    if (obj == upd.obj) return upd.prop
+    if (obj === upd.obj) return upd.prop
     var uc = upd.chain
     for (var i = 0; i < uc.length; i++) if (uc[i].o === obj) return uc[i].p
     return null

@@ -1,11 +1,15 @@
 
+var anim = true
 var render = function () {
-  var databases = ENV.generateData().toArray()
-  var reef = reefer.find('#reeftable')
-  reef.data.w = { databases: databases }
-  reef.render()
   Monitoring.renderRate.ping()
-  setTimeout(render, ENV.timeout)
+  var databases = ENV.generateData().toArray()
+  Promise.resolve(databases).then(v => {
+    var reef = reefer.find('#reeftable')
+    reef.data.w = { databases: v }
+    reef.render()
+  })
+
+  if (anim) setTimeout(render, ENV.timeout)
 }
 
 reefer.ready(function () {

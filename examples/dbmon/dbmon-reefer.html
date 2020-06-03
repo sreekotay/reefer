@@ -12,24 +12,25 @@
     <tbody id=reeftable 
           reef
           reef-p-datasrc='data.w.databases' 
+          reef-p-datactx='slots'
           _reef-p-w='{"databases":[]}'
           reef-p-dataslot='row'>
-        <script type='reef-function(db,i,ctx)' reef-slot=row>
-        function f(arr) {
+        <script type='reef-function(arr)' reef-slot=samples>
           var s=''; for (var i=0; i<arr.length; i++) {
             var q = arr[i]
             s += "<td class='" + q.elapsedClassName + "'>" + (q.formatElapsed||'') + 
-                 "<div class='popover left'> <div class='popover-content'>" + (q.query || '') + 
-                 "</div><div class='arrow'></div></div></td>"
+                  "<div class='popover left'> <div class='popover-content'>" + (q.query || '') + 
+                  "</div><div class='arrow'></div></div></td>"
           }
-          return s
-        }
-        return '<tr>\
-            <td class="dbname">' + db.dbname + '</td>\
+          return s 
+        </script>
+        <script type='reef-template(db,i,ctx)' reef-slot=row>
+          <tr>
+            <td class="dbname">${db.dbname}</td>
             <td class="query-count">\
-              <span class="' + db.lastSample.countClassName + '">' + db.lastSample.nbQueries + ' </span>\
-            </td>'+ f(db.lastSample.topFiveQueries) +
-          '</tr>'
+              <span class="${db.lastSample.countClassName}">${db.lastSample.nbQueries}</span>
+            </td> ${ctx.samples.script(db.lastSample.topFiveQueries)}
+          </tr>
         </script>
     </tbody>
   </table>

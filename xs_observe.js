@@ -14,6 +14,7 @@
 
     // do the work
     var _obj = values(obj)
+    if (_obj.skip) return
     var v = _obj.v
     for (var p in v) {
       if (p in obj) continue
@@ -46,18 +47,14 @@
     if (arr.__xs__.arrhelpers) return
     arr.__xs__.arrhelpers = true
     var mbind = function (method) {
-      var f = Array.prototype[method]
       var mf = function () {
-        var o = this
-        var _o = o.__xs__
-        _o.pause = true
-        var n = f.apply(o, arguments)
-        _o.pause = false
+        var o = this; var _o = o.__xs__
+        _o.pause = true; var n = Array.prototype[method].apply(o, arguments); _o.pause = false
         trigger(method, o, arguments, o, null)
         debounceObserve(_o.s, o, deepObserver)
         return n
       }
-      privateprop(arr, method, mf)
+      arr[method] = mf
     }
     var m = ['pop', 'push', 'shift', 'unshift', 'splice', 'reverse', 'sort']
     for (var i = 0; i < m.length; i++) mbind(m[i])
@@ -68,9 +65,9 @@
     if (!obj.__xs__) {
       var _w = {
         s: '@' + __gidcounter++,
-        v: {} /*, // values for the object
-        p: {}, // array of property symbols
-        h: [] // handlers */ // but don't allocate them if not needed
+        v: {}, // values for the object
+        h: [], // handlers // but don't allocate them if not needed
+        /*p: {}, // array of property symbols */
       }
       privateprop(obj, '__xs__', _w)
     }
@@ -94,30 +91,20 @@
         trigger('set', obj, p, n, o)
         return n
       }
-      // if (delete obj[p])
-      { Object.defineProperty(obj, p, { get: gf, set: sf, enumerable: true, configurable: true }) }
+      Object.defineProperty(obj, p, { get: gf, set: sf, enumerable: true, configurable: true })
     }
     if (typeof (pv) === 'object') deepObserver(pv, handler, { o: obj, p: p }, path)
   }
 
   var __ghsymbol = 0
   function attach (handler, obj, path) {
-    /*
-    if (!handler) return obj
-    var sym = obj
-    if (typeof (handler) === 'object') {
-      if (handler === sym) return sym
-      handler = values(handler).h
-      if (!handler) return obj // throw new Error('unrecognized event symbol')
-    } else if (!Array.isArray(handler)) { handler = [{ rootobj: obj, f: handler, path: path, s: '#' + __ghsymbol++ }] }
-    */
     if (handler === obj || !handler) return obj
     if (typeof (handler) === 'object') handler = values(handler).h
     else handler = [{ rootobj: obj, f: handler, path: path, s: '#' + __ghsymbol++ }]
 
     var _obj = values(obj)
-    var h = _obj.h = _obj.h || []
-    handlerMerge(h, handler, path)
+    //var h = _obj.h = _obj.h || []
+    handlerMerge(_obj.h , handler, path)
     return obj
   }
 
@@ -171,14 +158,11 @@
       if (!obsobj.__observer__) xs.observe(obsobj)
       var objpd = Object.getOwnPropertyDescriptor(obsobj, obsp)
 
-      // if (delete obsobj[obsp])
-      {
-        Object.defineProperty(obsobj, obsp, {
-          get: function () { return refobj[refp] },
-          set: function (v) { refobj[refp] = v; return objpd.set(v) },
-          enumerable: true,
-          configurable: true })
-      }
+      Object.defineProperty(obsobj, obsp, {
+        get: function () { return refobj[refp] },
+        set: function (v) { refobj[refp] = v; return objpd.set(v) },
+        enumerable: true,
+        configurable: true })
       return null
     }
     if (!(refp in refobj)) refobj[refp] = refobj[refp] // "realize" it
@@ -190,8 +174,7 @@
     var refpd = Object.getOwnPropertyDescriptor(refobj, refp)
     var gf = refpd.get
     var sf = refpd.set
-    // if (delete obsobj[obsp])
-    { Object.defineProperty(obsobj, obsp, { get: gf, set: sf, enumerable: true, configurable: true }) }
+    Object.defineProperty(obsobj, obsp, { get: gf, set: sf, enumerable: true, configurable: true })
 
     return reflect
   }

@@ -261,7 +261,7 @@ ReeferFactory = function (opts) {
       var p = props[i]
       var np = (p in o2) ? o2[p] : o1[p]
       if (np === undefined) continue
-      o[p] = xs.clone(np)
+      o[p] = xs.clone(o1[p], o2[p])
     }
   }
 
@@ -557,7 +557,7 @@ ReeferFactory = function (opts) {
       while (--i >= 0) {
         var ccn = cc[i]
         var ncn = nc[i]
-        if (ccn.nodeType === 3 && ncn.nodeType === 3) { ccn.nodeValue = ncn.nodeValue; continue }
+        if (ccn.nodeType === 3 && ncn.nodeType === 3) { if (ccn.nodeValue !== ncn.nodeValue) ccn.nodeValue = ncn.nodeValue; continue }
         if (ccn.isEqualNode(ncn)) continue
         if (ccn.nodeName !== ncn.nodeName || !attemptMerge(ccn, ncn)) {
           c.replaceChild(ncn, ccn)
@@ -676,7 +676,7 @@ ReeferFactory = function (opts) {
   Reefer.prototype.htmlKeyToIdx = function (id) {
     var hm = this.__.hmap
     if (!hm || !hm[id]) return null
-    return hm[id].idx
+    return hm[id].idx | 0
   }
 
   Reefer.prototype.html = function (id, htmlGen) {

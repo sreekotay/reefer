@@ -2,7 +2,9 @@
 <html>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="../src/coral.css">
-  <script src='../dist/reefer-min.js'></script>
+ <!--<script src='../dist/reefer-min.js'></script>-->
+  <script src='../src/xs-observe.js'></script>
+  <script src='../src/reefer.js'></script>
   <body style='margin:8px 24px'>
     <div style='display:flex; flex-direction:column; align-items: center;'>
       Test - Hello World, Wizard, Typer, and Todos (nested also)
@@ -11,7 +13,7 @@
         <div reef='todos' reef-slot='under'></div>
       </div>
       <div reef='wizard' reef-p-selected='neville'></div>
-      <div reef='typer'></div>
+      <div reef='typer' reef@input></div>
       <div><h2>To Dos</h2>To Dos
         <div reef='todos'></div>  
       </div>
@@ -34,7 +36,7 @@
       data: {
         selected: 'harry'
       },
-      template: function () {
+      template: function () { 
         var props = this.data
         var sel = function (v) { return (props.selected==v) ? '"' + v + '" selected' : '"' + v + '"' } 
         return "\
@@ -63,12 +65,12 @@
         var props = this.data
         return '\
           <label for="mirror">Whatever you type shows up below the field</label>\
-          <input type="text" id="mirror" value="' + props.text +'"> \
+          <input type="text" id="mirror" value="' + props.text +'" reef@input=data.text> \
           <div><em aria-live="polite">' + (props.text.length ? props.text : 'Type something above to change this text') + "</em></div>";
         return html;
       },
       listeners: {
-        input: function(e) {var props = this.data; props.text = e.target.value}
+        input: function(e) {this.data.text = e.target.value}
       }
     })
 

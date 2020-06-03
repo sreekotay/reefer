@@ -28,8 +28,8 @@ ReeferFactory = function (opts) {
         if (!slots.default) return// 'done'
         if (!this.data.datasrc) return 'done'
         var _d = this.data
-        var dc = ('datactx' in _d) ? this.dotpath(_d.datactx).value : {}
-        var dl = ('datasrc' in _d) ? this.dotpath(_d.datasrc).value : this
+        var dc = ('datactx' in _d) ? this.dot(_d.datactx).value : {}
+        var dl = ('datasrc' in _d) ? this.dot(_d.datasrc).value : this
         var gk = this.data.genkey
         var gen = (dl && slots[_d.dataslot || 'default']) || (slots.empty && slots.empty.text) || { text: '<div> </div>' }
         var key = _d.datakey; var uk
@@ -218,10 +218,10 @@ ReeferFactory = function (opts) {
               var idx = args.indexOf('$event') // allow substition
               if (idx >= 0) args[idx] = event
             }
-            var f = reef.dotpath(fn); var rval
+            var f = reef.dot(fn); var rval
             if (f.value !== undefined) {
               if (isfunction(f.value)) rval = f.value.apply(f.obj, args || [event])
-              else reef.dotpath(fn, args[0])
+              else reef.dot(fn, args[0])
               if (rval === 'stop' || ev[1] === 'stop') return
             }
           }
@@ -333,9 +333,9 @@ ReeferFactory = function (opts) {
         if (isfunction(op)) status = op.call(this, updates)
         else {
           if (!updates.path && (updates.action === 'set' || updates.action === 'add')) {
-            var o = this.dotpath(op)
+            var o = this.dot(op)
             if (isfunction(o.value)) o.value.call(this)
-            else o.obj[o.key] = updates.value
+            else o.obj[o.prop] = updates.value
           }
         }
       }
@@ -368,10 +368,10 @@ ReeferFactory = function (opts) {
     { xhr.responseType = opts.responseType || 'json' } */
     xhr.onerror = function (err) { console.log('REEF HTTP LOAD', err); emit(rf.rootEl, 'reefLoadDataFail', { url: url }) }
     xhr.onload = function (ev) {
-      if (this.status == 200) {
+      if (this.status === 200) {
         var res = this.response
         try { res = JSON.parse(res) } catch (err) {}
-        rf.dotpath(datapath, res)
+        rf.dot(datapath, res)
       } else if (this.status) xhr.onerror(ev)
     }
     xhr.open(opts.method || 'GET', url, true)
@@ -390,19 +390,20 @@ ReeferFactory = function (opts) {
       script = script[script.length - 1]
     }
     script.onerror = function (err) { console.log('REEF SCRIPT LOAD', err); script.parentNode.removeChild(script); emit(rf.rootEl, 'reefLoadHTMLFail', { url: url }) }
-    script.reefCB = function (data) { rf.dotpath(datapath, data) }
+    script.reefCB = function (data) { rf.dot(datapath, data) }
     rf_script = script
     return script
   }
 
   function realizeSource (refobj, copyprop) {
-    sp = dotpath(refobj, copyprop)
+    var pp = copyprop.split('.')
+    sp = dot(refobj, pp)
     if (sp.obj) return sp
     var fp = copyprop.split('.'); var oc = refobj
     for (var i = 0; i < fp.length; i++) {
       var nc = oc[fp[i]]; if (nc === undefined || nc === null || typeof (nc) !== 'object') oc[fp[i]] = (i == fp.length - 1 ? undefined : {}); oc = oc[fp[i]]
     }
-    return dotpath(refobj, copyprop)
+    return dot(refobj, pp)
   }
 
   function doDataBind (rf, proppath, sel, copyprop, selctx) {
@@ -438,7 +439,7 @@ ReeferFactory = function (opts) {
         reefError('unknown data bind: ' + proppath + ': ' + sel)
     }
 
-    var dp = dotpath(rf, proppath)
+    var dp = dot(rf, proppath)
     if (!dp.obj) reefError('data bind not found: ' + proppath)
     var f = function (u) {
       if (!rf.rootEl || rf.rootEl.getRootNode() !== document) {
@@ -447,7 +448,7 @@ ReeferFactory = function (opts) {
       }
       rf.react(u)
     }
-    var obsf = xs.alias(dp.obj, dp.key, sp.obj, sp.key, f)
+    var obsf = xs.alias(dp.obj, dp.prop, sp.obj, sp.prop, f)
     _b[proppath] = { proppath: proppath, selector: sel, prop: copyprop, sp: sp, unobs: obsf }
   }
 
@@ -556,8 +557,8 @@ ReeferFactory = function (opts) {
       while (--i >= 0) {
         var ccn = cc[i]
         var ncn = nc[i]
-        if (ccn.isEqualNode(ncn)) continue
         if (ccn.nodeType === 3 && ncn.nodeType === 3) { ccn.nodeValue = ncn.nodeValue; continue }
+        if (ccn.isEqualNode(ncn)) continue
         if (ccn.nodeName !== ncn.nodeName || !attemptMerge(ccn, ncn)) {
           c.replaceChild(ncn, ccn)
         }
@@ -709,9 +710,17 @@ ReeferFactory = function (opts) {
     }
   }
 
-  Reefer.prototype.dotpath = dotpath
-  Reefer.prototype.styleBag = function (s) {
-    var rel = this.rootEl
+  Reefer.prototype.dot = function (path, value) {
+    var v = dot(this, path)
+    if (arguments.length > 1) {
+      if (!v.obj) throw ('chain path missing')
+      v.obj[v.prop] = value
+    }
+    return v
+  }
+  Reefer.prototype.styleBag = function (e, s) {
+    var rel = e instanceof Node ? e : this.rootEl
+    if (rel === this.rootEl) s = e
     var hsh = hash(JSON.stringify(s))
     if (rel.__xs__style === hsh) return
     for (var k in s) rel.style[k] = s[k]
@@ -729,6 +738,7 @@ ReeferFactory = function (opts) {
     xs.privateprop(o, '__hoisted__', true)
     return true
   } */
+  /*
   function dotpath (obj, path, value) {
     if (typeof (obj) === 'string') { value = path; path = obj; obj = this }
     var inobj = obj
@@ -745,6 +755,17 @@ ReeferFactory = function (opts) {
       ctx[key] = value
     }
     var ret = { value: obj, key: key, obj: ctx }
+    return (i === l) ? ret : { last: ret }
+  }
+  */
+  function dot (obj, spl) {
+    if (typeof (spl) === 'string') spl = spl.split('.')
+    var ctx = obj; var l = spl.length; var key
+    for (var i = 0; i < l && (obj !== undefined || !i); i++) {
+      key = spl[i]; ctx = obj
+      obj = (obj && key in obj) ? obj[key] : undefined
+    }
+    var ret = { value: obj, prop: key, obj: ctx }
     return (i === l) ? ret : { last: ret }
   }
 
@@ -821,6 +842,7 @@ ReeferFactory = function (opts) {
     template: templateEngine,
     ready: ready,
     emit: emit,
+    styleBag: Reefer.prototype.styleBag,
     registry: function (name) { return name ? rf_registry[name] : rf_registry },
     find: function (a, ctx) { a = this.findAll(a, ctx); return a ? a[0] : null },
     findAll: function (a, ctx) { a = [].slice.call((ctx || document).querySelectorAll(a)); var j = 0; if (a) for (var i = 0; i < a.length; i++) { a[j] = a[i].reef; j += a[j] ? 1 : 0 } return j ? (a.length = j, a) : null }

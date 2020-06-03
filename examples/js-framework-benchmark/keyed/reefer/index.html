@@ -69,7 +69,7 @@ td_ {
 <script>
     reefer.register ('simple-loop', {
         template: function () {
-            var dl = this.dotpath(this.data.datasrc).value// || this
+            var dl = this.dot(this.data.datasrc).value// || this
             var id = this.data.datakey
             var gen = this.slots['list-generator']
             if (!dl) return ''
@@ -88,7 +88,7 @@ td_ {
                 this.observe (watcher, function(updates) {
                     if (updates.action !== 'set') return
                     if (!this.data.datakey) return
-                    var dl = this.dotpath(datasrc).value
+                    var dl = this.dot(datasrc).value
                     var gen = this.slots['list-generator']
                     var o = updates.find(updates, dl)
                     if (o!==undefined) {

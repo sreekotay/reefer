@@ -1,7 +1,8 @@
 <html>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src=../xs_observe.js></script>
+  <script src=../xs-observe.js></script>
   <script src=../reefer.js></script>
+  <script src=../coral.js></script>
   <link rel="stylesheet" href="../coral.css">
 <body>
 
@@ -40,19 +41,24 @@
         ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"]
         ]'>
         <div reef-slot='header'><b>TODO.</b></div>
+        <div reef-slot='footer'><div id='a'>To do footer.</div></div>
       </div>
       <div style='flex-grow:1'></div> 
       <div reef=todos id=done class='coral-vertical' reef-p-targetlist='#todo' reef-p-checked=true reef@click reef-p-checkclass = 'redo'
       reef-p-todos='[
         ["Much longer item that we are using.  But still pretty short in the grand scheme of things"],
-        ["item 4"] 
+        ["item 4"],
+        ["animated at the top to show animation"],
+        ["animated slowiy to show the intergrity of the animation"] 
         ]'>
         <div reef-slot='header'><b>DONE.</b></div>
+        <div reef-slot='footer'><div id='b'>Done footer.</div></div>
       </div>
     </div>  
   </div>
 </div>
 <script>
+  
     // ================  typer
     reefer.register('typer', {
       data: {
@@ -141,6 +147,151 @@
         }
       }      
     })
+
+
+    function getOffset(el) {
+      if (!el.getClientRects().length) return { top: 0, left: 0 }
+      var rect = el.getBoundingClientRect();
+      var win = el.ownerDocument.defaultView;
+      return {
+        top: rect.top + win.pageYOffset,
+        left: rect.left + win.pageXOffset,
+        width: rect.width,
+        height: rect.height 
+      }   
+    } 
+
+
+    function reanimate_m(target, parent) {
+      duration = duration || 1
+      var elpos = getOffset (el)
+      var tpos = getOffset (target)
+      var ppos = getOffset (el.parentNode)
+      var nel = el.cloneNode (true)
+      var d = el.parentNode.cloneNode (false)
+      var ds =  {
+        position: 'absolute',
+        margin: '0',
+        padding: '0',
+        border: 'none',
+        display: 'block',
+        transition: 'all ' + duration + 's',
+        width: tpos.width + 'px',
+        height: tpos.height + 'px',
+        zIndex: 1000       
+      }
+      nel.removeAttribute ('id')
+      reefer.styleBag (d,ds)
+      el.parentNode.insertBefore (d, el)
+      d.appendChild (nel)
+      var p1 =  {
+        left: 0,
+        top: 0,
+        width: elpos.width + 'px',
+        height: elpos.height + 'px'
+      }
+      reefer.styleBag (d, p1)
+      requestAnimationFrame(function () {
+        var p2 =  {
+          left: (tpos.left - elpos.left) + 'px',
+          top: (tpos.top - elpos.top) + 'px',
+          width: tpos.width + 'px',
+          height: tpos.height + 'px',
+        }
+        reefer.styleBag (d,p2)
+        setTimeout (function () {
+          document.body.removeChild(d)
+        }, (duration*1000)+30)
+      })
+    }
+
+    function reanimate(target, el, duration) {
+      duration = duration || 1
+      var elpos = getOffset (el)
+      var tpos = getOffset (target)
+      var nel1 = el.cloneNode (true)
+      var nel2 = target.cloneNode (true)
+      var d1 = el.parentNode.cloneNode(false)
+      var d2 = target.parentNode.cloneNode(false)
+      var ds =  {
+        margin: '0',
+        padding: '0',
+        border: 'none',
+        display: 'block',
+        transition: 'all ' + duration + 's',
+        zIndex: 1000,
+        overflow: 'hidden'
+      }
+      nel1.removeAttribute ('id')
+      nel2.removeAttribute ('id')
+      reefer.styleBag (d1,ds)
+      reefer.styleBag (d2,ds)
+      document.body.appendChild (d1)
+      document.body.appendChild (d2)
+      d1.appendChild (nel1)
+      d2.appendChild (nel2)
+      var p1 =  {
+        position: 'absolute',
+        left: elpos.left + 'px',
+        top: elpos.top + 'px',
+        width: elpos.width + 'px',
+        height: elpos.height + 'px'
+      }
+      d1.style.opacity = 1
+      d2.style.opacity = 0
+      reefer.styleBag (d1, p1)
+      reefer.styleBag (d2, p1)
+      requestAnimationFrame(function () {
+        var p2 =  {
+          left: tpos.left + 'px',
+          top: tpos.top + 'px',
+          width: tpos.width + 'px',
+          height: tpos.height + 'px',
+        }
+        reefer.styleBag (d1,p2)
+        reefer.styleBag (d2,p2)
+        d1.style.opacity = 0
+        d2.style.opacity = 1
+        setTimeout (function () {
+          document.body.removeChild(d1)
+          document.body.removeChild(d2)
+        }, (duration*1000)+30)
+      })
+    }
+        /*var $element = $(this);
+        
+        newParent = $(newParent); // Allow passing in either a JQuery object or selector
+        var oldOffset = $element.offset();
+        var oldWidth = $element.width();
+        var oldHeight = $element.height();
+        $(this).appendTo(newParent);
+        var newOffset = $element.offset();
+        var newWidth = $element.width();
+        var newHeight = $element.height();
+        
+        var temp = $element.clone().removeAttr('id').appendTo('body');
+        
+        temp.css({
+            'position': 'absolute',
+            'left': oldOffset.left,
+            'top': oldOffset.top,
+            'width': oldWidth,
+            'height': oldHeight,
+            'zIndex': 1000
+        });
+        
+        $element.hide();
+            
+        temp.animate({
+            'top': newOffset.top,
+            'left': newOffset.left,
+            'width': newWidth,
+            'height': newHeight
+        }, duration, function() {
+            $element.show();
+            temp.remove();
+        });
+    }*/
 </script>
 </body>
 </html>

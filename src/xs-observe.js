@@ -51,9 +51,9 @@
         var o = this; var _o = o.__xs__
         _o.pause = true; var n = Array.prototype[method].apply(o, arguments); _o.pause = false
         debounceObserve(_o.s, o, function () {
-          _o.pause = true
+        //  _o.pause = true
           deepObserver(o)
-          _o.pause = false
+        //  _o.pause = false
         })
         trigger(method, o, arguments, o, null)
         return n
@@ -114,7 +114,7 @@
 
   function handlerMerge (a, b, path) { // modifies original array
     if (a === b) return
-    var dotpath = path || ''
+    var dotpath = path ? undefined : ''
     for (var i = 0; i < b.length; i++) {
       var bs = b[i].s
       if (!a[bs]) {

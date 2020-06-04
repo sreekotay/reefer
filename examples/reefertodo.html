@@ -36,7 +36,7 @@
       <span reef-slot='prompttext'>Type something above to change this text</span>
     </div>
     <div class='coral-horizontal' style='margin-top:16px;'> 
-      <div reef=todos id=todo class='coral-vertical' reef-p-targetlist='#done' reef-p-inputtext='~data.target~[reef=typer]' reef@click  reef-p-checkclass = 'add'
+      <div reef=todos id=todo class='coral-vertical' reef-p-targetlist='#done' reef-p-inputtext='~data.target~[reef=typer]' reef@click  reef-p-checkclass = 'redo'
       reef-p-todos='[
         ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"]
         ]'>
@@ -44,7 +44,7 @@
         <div reef-slot='footer'><div id='a'>To do footer.</div></div>
       </div>
       <div style='flex-grow:1'></div> 
-      <div reef=todos id=done class='coral-vertical' reef-p-targetlist='#todo' reef-p-checked=true reef@click reef-p-checkclass = 'redo'
+      <div reef=todos id=done class='coral-vertical' reef-p-targetlist='#todo' reef-p-checked=true reef@click reef-p-checkclass = 'add'
       reef-p-todos='[
         ["Much longer item that we are using.  But still pretty short in the grand scheme of things"],
         ["item 4"],
@@ -97,14 +97,16 @@
         datactx: 'data',
         genkey: true,
         checked: false,
+        addClass: ''
       },
+      decorators: ['addClass'],
       slots: {
         default: {
           script: reefer.template('d,i,ctx', 
-                                  "<div class='${(d.class&&d.class[ctx.targetlist])||\"\"}'><label>\
+                                  "<div class='${(ctx.__hmap__[d.__key__])  ? (d.leaving===ctx.__xs__.s ? 'remove' : '') : ctx.addClass}'><label>\
                                       <input type='checkbox' \
                                              reef@click='methods.checkAndAssign(${d.__key__},$event)' \
-                                             ${ctx.checked ?  'checked' : ''}></input>\
+                                             ${ctx.checked ?  'checked' : ''}></input>${(!ctx.__hmap__[d.__key__]) || 0? '(new)' : '(old)'}\
                                       <span class=textshadow>${d[0]}</span>\
                                     </label></div>")
         }
@@ -112,30 +114,37 @@
       methods: {
         checkAndAssign: function (id,event) {
           var rf = this
-          var idx = this.htmlKeyToIdx(id) | 0
+          var idx = this.htmlKeyToIdx(id)
           var targetReef = reefer.find (rf.data.targetlist)
           if (!targetReef && targetReef.name!='todos') throw Error ("no target todo list found")
           var todo = rf.data.todos[idx-1]
           if (todo.leaving) return 
 
-          //animating it...
-          todo.class = todo.class || {}
-          todo.class[this.data.targetlist] = 'remove'
-          todo.class[targetReef.data.targetlist] = this.data.checkclass
+
+          var elem = this.htmlFromKey(id)
+          if (todo.leaving) 
+            return //already moving
+          todo.leaving = this.data.__xs__.s
+          elem.removeIt = id
           targetReef.data.todos.splice (0, 0, todo)
-          todo.leaving = true
-          setTimeout(function() { // could listen to animation end event also....
-            var idx = rf.htmlKeyToIdx(id)
-            todo.leaving = false
-            todo.class = todo.class || {}
-            if (idx===null) return
-            rf.data.todos.splice(idx-1, 1)
-          }, 1000) // matches css animation duration
+          return
         } 
       },
+      lifecycle: function (name) {
+        if (this.rootEl.id==='done')
+          this.rootEl = this.rootEl
+          if (name==='afterRender') this.data.addClass = this.data.checkclass
+
+      },
       listeners: {
-        animationend: function () {
-          console.log (arguments)
+        animationend: function (event) {
+          var el = event.target
+          if (el && el.removeIt) {
+            var idx = this.data.todos.findIndex (function(e) {return e.__key__==el.removeIt})
+            var todo = this.data.todos[idx]
+            todo.leaving = null
+            if (idx>=0) this.data.todos.splice (idx, 1)
+          }
         }
       },
       observers: {
@@ -145,10 +154,11 @@
           this.data.inputtext = ''
 
           //animating it
-          todo.class = todo.class || {}
-          todo.class[this.data.targetlist] = 'add'
           this.data.todos.splice (0, 0, todo)
-
+          this.data.addClass = 'add'
+        },
+        'todos.*.leaving': function () {
+          return 'done'
         }
       }      
     })
@@ -165,50 +175,6 @@
         height: rect.height 
       }   
     } 
-
-
-    function reanimate_m(target, parent) {
-      duration = duration || 1
-      var elpos = getOffset (el)
-      var tpos = getOffset (target)
-      var ppos = getOffset (el.parentNode)
-      var nel = el.cloneNode (true)
-      var d = el.parentNode.cloneNode (false)
-      var ds =  {
-        position: 'absolute',
-        margin: '0',
-        padding: '0',
-        border: 'none',
-        display: 'block',
-        transition: 'all ' + duration + 's',
-        width: tpos.width + 'px',
-        height: tpos.height + 'px',
-        zIndex: 1000       
-      }
-      nel.removeAttribute ('id')
-      reefer.styleBag (d,ds)
-      el.parentNode.insertBefore (d, el)
-      d.appendChild (nel)
-      var p1 =  {
-        left: 0,
-        top: 0,
-        width: elpos.width + 'px',
-        height: elpos.height + 'px'
-      }
-      reefer.styleBag (d, p1)
-      requestAnimationFrame(function () {
-        var p2 =  {
-          left: (tpos.left - elpos.left) + 'px',
-          top: (tpos.top - elpos.top) + 'px',
-          width: tpos.width + 'px',
-          height: tpos.height + 'px',
-        }
-        reefer.styleBag (d,p2)
-        setTimeout (function () {
-          document.body.removeChild(d)
-        }, (duration*1000)+30)
-      })
-    }
 
     function reanimate(target, el, duration) {
       duration = duration || 1
@@ -263,40 +229,6 @@
         }, (duration*1000)+30)
       })
     }
-        /*var $element = $(this);
-        
-        newParent = $(newParent); // Allow passing in either a JQuery object or selector
-        var oldOffset = $element.offset();
-        var oldWidth = $element.width();
-        var oldHeight = $element.height();
-        $(this).appendTo(newParent);
-        var newOffset = $element.offset();
-        var newWidth = $element.width();
-        var newHeight = $element.height();
-        
-        var temp = $element.clone().removeAttr('id').appendTo('body');
-        
-        temp.css({
-            'position': 'absolute',
-            'left': oldOffset.left,
-            'top': oldOffset.top,
-            'width': oldWidth,
-            'height': oldHeight,
-            'zIndex': 1000
-        });
-        
-        $element.hide();
-            
-        temp.animate({
-            'top': newOffset.top,
-            'left': newOffset.left,
-            'width': newWidth,
-            'height': newHeight
-        }, duration, function() {
-            $element.show();
-            temp.remove();
-        });
-    }*/
 </script>
 </body>
 </html>

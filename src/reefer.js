@@ -494,15 +494,15 @@ ReeferFactory = function (opts) {
     publishLF(this, 'afterRender')
   }
   Reefer.prototype.rerender = function () {
-    this.__.renderflag = (this.__.renderflag || 0) + 1
+ //   this.__.renderflag = (this.__.renderflag || 0) + 1
     xs.debounce(this.sym + '_rr', this, rerender, true)
   }
   function rerender () {
-    if (this.__.renderflag===0) return
+   // if (this.__.renderflag===0) return
     var sel = saveSelection(this.rootEl)
     render.call(this)
     sel()
-    this.__.renderflag = 0
+  //  this.__.renderflag = 0
   }
   function getAttachPoint (el) {
     switch (el.nodeName) {
@@ -707,7 +707,8 @@ ReeferFactory = function (opts) {
 
     if (hm[id]) {
       var hc = hm[id]
-      if (hc.generation === genid) reefError('duplicate html() id')
+      if (hc.generation === genid) 
+        reefError('duplicate html() id')
       hc.generation = genid
       ha[idx] = hc
       if (hc.hsh === hsh) return

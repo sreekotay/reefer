@@ -35,6 +35,8 @@ ReeferFactory = function (opts) {
         var key = _d.datakey; var uk
         if (!Array.isArray(dl)) dl = [dl]
         if (slots.header) this.html(-1, slots.header.script ? slots.header(dc) : slots.header.text)
+        var hm = this.__.hmap || {}
+        dc.__hmap__ = hm
         for (var i = 0; i < dl.length; i++) {
           var t = typeof (dl[i])
           if (dl[i]) uk = key === undefined ? dl[i].__key__ : dl[i][key]
@@ -42,6 +44,7 @@ ReeferFactory = function (opts) {
           var row = gen.script ? gen.script(dl[i], i, dc) : gen.text
           this.html(uk || i, row)
         }
+        delete dc.__hmap__
         if (slots.footer) this.html(-2, slots.footer.script ? slots.footer(dc) : slots.footer.text)
       }
     }
@@ -61,6 +64,7 @@ ReeferFactory = function (opts) {
     for (var i = 0; i < rels.length; i++) {
       if (!rels[i].reef) {
         var rr = reeferDOM(rels[i], d.reef)
+        publishLF(rr, 'mount')
         if (rr) rr.render_()
         r.push(rr)
       }
@@ -68,7 +72,6 @@ ReeferFactory = function (opts) {
     return r
   }
 
-  // var stripper = document.createElement('textarea')
   function reeferDOM (el, parentReef) {
     if (!el) return null
     var reefName = el.getAttribute('reef')
@@ -91,8 +94,6 @@ ReeferFactory = function (opts) {
                 var type = c.getAttribute('type')
                 var args = type.match(/\(([^)]*)\)/); args = args ? args[1] : ''
                 var ftext = c.innerHTML.trim()
-                // stripper.innerHTML = ftext
-                // ftext = stripper.children.length === 0 ? '' : stripper.children[0].data
                 if (ftext) {
                   switch (type.split('(')[0].trim()) {
                     case 'reef-function': c.reefScript = new Function(args, ftext); break
@@ -113,6 +114,10 @@ ReeferFactory = function (opts) {
       reefWarn('Reefer failed to mount: ', reefName, el, err)
     }
     return null
+  }
+
+  function publishLF (reef, lf) {
+    return reef.lifecycle && reef.lifecycle(lf)
   }
   /*
   function parseArgs (str) {
@@ -274,7 +279,7 @@ ReeferFactory = function (opts) {
     var rf = this
     var _ = this.__ = {}
     cif(_, ['template', 'update', 'bind'], setup, localSetup)
-    cif(this, ['methods', 'observers', 'listeners', 'mutate'], setup, localSetup) // intentional shallow copies
+    cif(this, ['methods', 'observers', 'listeners', 'mutate', 'lifecycle'], setup, localSetup) // intentional shallow copies
     if ('shared' in setup) this.shared = setup.shared
     if (setup.events || localSetup.events) _.events = xs.assign({}, arrtoobj(setup.events), localSetup.events)
     if (setup.decorators || localSetup.decorators) _.decorators = xs.assign({}, arrtoobj(setup.decorators), arrtoobj(localSetup.decorators))
@@ -294,6 +299,7 @@ ReeferFactory = function (opts) {
     return this
   }
   Reefer.prototype.unmount = function () {
+    publishLF(this, 'umnount')
     var _ = this.__ || {}
     xs.unobserve(this.data, _.obsf)
     if (_.bind) {
@@ -460,6 +466,7 @@ ReeferFactory = function (opts) {
     xs.debounce(this.sym + '_rr', this, render)
   }
   function render () {
+    publishLF(this, 'beforeRender')
     var t = new Date()
     var rel = this.rootEl
     if (!rel || rel.getRootNode() !== document) {
@@ -484,14 +491,18 @@ ReeferFactory = function (opts) {
       run(rel) // hydrate nested components (should we only do this if we have a template?)
       if (rel.parentNode.classList.contains('container')) { console.log('render', new Date() - t) }
     }
+    publishLF(this, 'afterRender')
   }
   Reefer.prototype.rerender = function () {
+    this.__.renderflag = (this.__.renderflag || 0) + 1
     xs.debounce(this.sym + '_rr', this, rerender, true)
   }
   function rerender () {
+    if (this.__.renderflag===0) return
     var sel = saveSelection(this.rootEl)
     render.call(this)
     sel()
+    this.__.renderflag = 0
   }
   function getAttachPoint (el) {
     switch (el.nodeName) {
@@ -677,6 +688,11 @@ ReeferFactory = function (opts) {
     var hm = this.__.hmap
     if (!hm || !hm[id]) return null
     return hm[id].idx | 0
+  }
+  Reefer.prototype.htmlFromKey = function (id) {
+    var hm = this.__.hmap
+    if (!hm || !hm[id]) return null
+    return hm[id].el
   }
 
   Reefer.prototype.html = function (id, htmlGen) {

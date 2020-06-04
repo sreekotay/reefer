@@ -50,8 +50,12 @@
       var mf = function () {
         var o = this; var _o = o.__xs__
         _o.pause = true; var n = Array.prototype[method].apply(o, arguments); _o.pause = false
+        debounceObserve(_o.s, o, function () {
+          _o.pause = true
+          deepObserver(o)
+          _o.pause = false
+        })
         trigger(method, o, arguments, o, null)
-        debounceObserve(_o.s, o, deepObserver)
         return n
       }
       arr[method] = mf
@@ -66,8 +70,8 @@
       var _w = {
         s: '@' + __gidcounter++,
         v: {}, // values for the object
-        h: [], // handlers // but don't allocate them if not needed
-        /*p: {}, // array of property symbols */
+        h: [] // handlers // but don't allocate them if not needed
+        /* p: {}, // array of property symbols */
       }
       privateprop(obj, '__xs__', _w)
     }
@@ -103,8 +107,8 @@
     else handler = [{ rootobj: obj, f: handler, path: path, s: '#' + __ghsymbol++ }]
 
     var _obj = values(obj)
-    //var h = _obj.h = _obj.h || []
-    handlerMerge(_obj.h , handler, path)
+    // var h = _obj.h = _obj.h || []
+    handlerMerge(_obj.h, handler, path)
     return obj
   }
 
@@ -202,22 +206,30 @@
   function objclone () { var a = arguments; var al = -1; var o = {}; while (++al < a.length) o = objmerge(o, a[al]); return o }
   function privateprop (o, k, v, writable) { Object.defineProperty(o, k, { value: v, enumerable: false, configurable: true, writable: !!writable }); return v }
 
-  var __gobt; var __gob = {}
+  var __gobt; var __gob = { '@': {} }
   function resolveObserve () {
-    __gobt = null; var gob = __gob; __gob = {}
+    __gobt = null; var gob = __gob; __gob = { '@': {} }
+    if (1) {
+      var g = gob['@']
+      gob['@'] = null
+      for (var k in g) { if (g[k]) g[k].f.call(g[k].o, g[k].o) }
+    }
     for (var k in gob) { if (gob[k]) gob[k].f.call(gob[k].o, gob[k].o) }
   }
   function debounceObserve (_s, o, f, delay) {
+    // delay = true
     // f.call(o, o); return true;
+    var g
+    if (_s[0]==='@') g = __gob['@']; else g = __gob
     if (__gobt) {
-      if (!(_s in __gob) && !delay) {
+      if (!(_s in g) && !delay) {
         f.call(o, o)
-        __gob[_s] = null
-      } else __gob[_s] = { f: f, o: o }
+        g[_s] = null
+      } else g[_s] = { f: f, o: o }
       return false
     }
     if (!delay) f.call(o, o)
-    else __gob[_s] = { f: f, o: o }
+    else g[_s] = { f: f, o: o }
     __gobt = setTimeout(resolveObserve, 0)
     return true
   }

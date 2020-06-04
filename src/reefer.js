@@ -19,8 +19,8 @@ window.reeferHTML = function (data) {
 ReeferFactory = function (opts) {
   opts = opts || {}
   var rf_counter = 0 // used for 'symbol'
-  const rf_listeners = {}
-  const rf_key = 0
+  var rf_listeners = {}
+  var rf_key = 0
   const rf_registry = {
     '': {
       template: function () {

@@ -51,9 +51,9 @@
         var o = this; var _o = o.__xs__
         _o.pause = true; var n = Array.prototype[method].apply(o, arguments); _o.pause = false
         debounceObserve(_o.s, o, function () {
-        //  _o.pause = true
+         // _o.pause = true
           deepObserver(o)
-        //  _o.pause = false
+         // _o.pause = false
         })
         trigger(method, o, arguments, o, null)
         return n
@@ -220,7 +220,7 @@
     // delay = true
     // f.call(o, o); return true;
     var g
-    if (_s[0]==='@') g = __gob['@']; else g = __gob
+    if (_s[0] === '@') g = __gob['@']; else g = __gob
     if (__gobt) {
       if (!(_s in g) && !delay) {
         f.call(o, o)

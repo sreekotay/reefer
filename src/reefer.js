@@ -494,15 +494,15 @@ ReeferFactory = function (opts) {
     publishLF(this, 'afterRender')
   }
   Reefer.prototype.rerender = function () {
- //   this.__.renderflag = (this.__.renderflag || 0) + 1
+   this.__.renderflag = (this.__.renderflag || 0) + 1
     xs.debounce(this.sym + '_rr', this, rerender, true)
   }
   function rerender () {
-   // if (this.__.renderflag===0) return
+   if (this.__.renderflag===0) return
     var sel = saveSelection(this.rootEl)
     render.call(this)
     sel()
-  //  this.__.renderflag = 0
+    this.__.renderflag = 0
   }
   function getAttachPoint (el) {
     switch (el.nodeName) {
@@ -533,7 +533,7 @@ ReeferFactory = function (opts) {
   function replaceNode (c, nch) {
     var p = c.previousSibling
     var pn = p || c.parentNode
-    if (!c.getAttribute) { c.nodeValue = nch } else { c.outerHTML = nch }
+    if (!c.getAttribute && 0) { c.nodeValue = nch } else { c.outerHTML = nch }
     return p ? p.nextSibling : pn.childNodes[0]
   }
 
@@ -599,10 +599,7 @@ ReeferFactory = function (opts) {
     var root = getAttachPoint(this.rootEl)
     var c = hm[id].el
     if (!c.getAttribute) { if (c.nodeValue !== htmlGen) c.nodeValue = htmlGen; return } // cheat
-    var div = document.createElement(root.nodeName)
-    div.innerHTML = htmlGen
-    hm[id].el = mergeNode(root.childNodes[idx], div.childNodes[0])
-    // hm[id].el = replaceNode(root.childNodes[idx], htmlGen)
+    hm[id].el = mergeNode(root.childNodes[idx], hydrate(root.nodeName, htmlGen))
     hm[id].hsh = hsh
     hm[id].idx = idx
   }
@@ -634,39 +631,43 @@ ReeferFactory = function (opts) {
 
     var ah = {}; var htaa = ''; var cnt = 0
     for (var i = 0; i < fl; i++) {
-      var haa = ha[i]
-      if (!haa.h) { ah[i] = null; continue }
+      var hc = ha[i]
+      if (!hc.h) { ah[i] = null; continue }
       ah[i] = cnt++
-      htaa += haa.h
+      htaa += hc.h
     }
     if (cnt) div.innerHTML = htaa
 
     cnt = 0
+    var rcl = root.childNodes.length
     for (var i = 0; i < fl; i++) {
-      var c = ha[i].el
-      var h = ha[i].h
+      var hc = ha[i]
+      var c = hc.el
+      var h = hc.h
       if (h) {
-        if (i >= root.childNodes.length) {
+        if (i >= rcl) {
           hta += h
         } else {
           var n = div.childNodes[ah[i] - cnt]
           if (c) n = mergeNode(c, n)
           if (n !== c) {
-            ha[i].el = n
+            hc.el = n
             cnt++
           }
         }
-        ha[i].h = null
+        hc.h = ''
+        c = hc.el
       }
-      c = ha[i].el
-      if (c && (c.parentNode !== root || c.previousSibling !== prev)) { // clean up placement
-        if (prev) {
-          prev.parentNode.insertBefore(c, prev.nextSibling)
-        } else if (!root.childNodes || root.childNodes[0] !== c) {
-          root.insertBefore(c, root.childNodes && root.childNodes[0])
+      if (c) {
+        if (c.parentNode !== root || c.previousSibling !== prev) { // clean up placement
+          if (prev) {
+            prev.parentNode.insertBefore(c, prev.nextSibling)
+          } else if (!root.childNodes || root.childNodes[0] !== c) {
+            root.insertBefore(c, root.childNodes && root.childNodes[0])
+          }
         }
+        prev = c
       }
-      prev = c
     }
     ha.length = fl
 
@@ -678,9 +679,10 @@ ReeferFactory = function (opts) {
     }
     hm = {}
     for (var i = 0; i < ha.length; i++) {
-      hm[ha[i].id] = ha[i]
-      ha[i].el = root.childNodes[i]
-      ha[i].idx = i
+      var hc = ha[i]
+      hm[hc.id] = hc
+      hc.el = root.childNodes[i]
+      hc.idx = i
     }
     return 'done'
   }
@@ -695,6 +697,14 @@ ReeferFactory = function (opts) {
     return hm[id].el
   }
 
+  var typecache = {}
+  function hydrate (type, h) {
+    var t = typecache[type]
+    if (!t) t = typecache[type] = document.createElement(type)
+    if (!h) return t
+    t.innerHTML = h
+    return t.childNodes[0]
+  }
   Reefer.prototype.html = function (id, htmlGen) {
     if (!this.__.harr) this.htmlBegin()
     var _ = this.__
@@ -702,29 +712,58 @@ ReeferFactory = function (opts) {
     var hm = _.hmap
     var idx = _.fcounter++
     var genid = _.hgeneration
-    var hsh = hash(htmlGen)
+    var hsh = hash(htmlGen); var hc
     id = (id === undefined || id === null) ? hsh : id
-
     if (hm[id]) {
-      var hc = hm[id]
-      if (hc.generation === genid) 
-        reefError('duplicate html() id')
+      hc = hm[id]
+      if (hc.generation === genid) reefError('duplicate html() id')
       hc.generation = genid
-      ha[idx] = hc
+      ha[idx] = hc // set the position
       if (hc.hsh === hsh) return
       hc.h = htmlGen
       hc.hsh = hsh
     } else {
-      var o = {
-        h: htmlGen,
-        hsh: hsh,
-        idx: idx,
-        id: id,
-        generation: genid
-      }
-      ha.splice(idx, 0, o)
-      hm[id] = o
+      hc = { h: htmlGen, hsh: hsh, idx: idx, id: id, generation: genid }
+      ha.splice(idx, 0, hc)
+      hm[id] = hc
     }
+
+    /*
+    if (genid === 0) {
+      genid = ++_.hgeneration
+      this.rootEl.innerHTML = '' // do this first
+    }
+    var root = getAttachPoint(this.rootEl)
+    var curchild = root.childNodes.length ? root.childNodes[idx] : null
+
+    if (hm[id]) {
+      var hc = hm[id]
+      if (hc.generation === genid) { reefError('duplicate html() id') }
+      hc.generation = genid
+      if (hc.hsh === hsh && hc.idx === idx) return
+
+      var n = hydrate(root.nodeName, htmlGen)
+      // root.replaceChild(n, hc.el); hc.el = n
+      n = hc.el = mergeNode(hc.el, n)
+      if (curchild) {
+        if (n.prevSibling !== curchild.prevSibling) {
+          root.insertBefore(n, curchild)
+        }
+      } else { root.appendChild(n) }
+      hc.hsh = hsh
+      hc.idx = idx
+      ha[idx] = hc
+    } else {
+      var o = { hsh: hsh, idx: idx, id: id, generation: genid }
+      ha.splice(idx, 0, o)
+      n = hydrate(root.nodeName, htmlGen)
+      if (curchild) {
+        root.insertBefore(n, curchild)
+      } else { root.appendChild(n) }
+      if (!curchild) root = getAttachPoint(this.rootEl)
+      o.el = root.childNodes[idx]
+      hm[id] = o
+    } */
   }
 
   Reefer.prototype.dot = function (path, value) {

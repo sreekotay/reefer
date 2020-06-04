@@ -19,9 +19,9 @@ window.reeferHTML = function (data) {
 ReeferFactory = function (opts) {
   opts = opts || {}
   var rf_counter = 0 // used for 'symbol'
-  var rf_listeners = {}
-  var rf_key = 0
-  var rf_registry = {
+  const rf_listeners = {}
+  const rf_key = 0
+  const rf_registry = {
     '': {
       template: function () {
         var slots = this.slots || {}
@@ -494,11 +494,11 @@ ReeferFactory = function (opts) {
     publishLF(this, 'afterRender')
   }
   Reefer.prototype.rerender = function () {
-   this.__.renderflag = (this.__.renderflag || 0) + 1
+    this.__.renderflag = (this.__.renderflag || 0) + 1
     xs.debounce(this.sym + '_rr', this, rerender, true)
   }
   function rerender () {
-   if (this.__.renderflag===0) return
+    if (this.__.renderflag === 0) return
     var sel = saveSelection(this.rootEl)
     render.call(this)
     sel()
@@ -636,7 +636,14 @@ ReeferFactory = function (opts) {
       ah[i] = cnt++
       htaa += hc.h
     }
-    if (cnt) div.innerHTML = htaa
+    if (cnt) {
+      div.innerHTML = htaa
+      /*
+      __range.selectNode(root)
+      div = __range.createContextualFragment(htaa)
+      if (root.nodeName=='TBODY') div = div.childNodes[0]
+      */
+    }
 
     cnt = 0
     var rcl = root.childNodes.length
@@ -697,14 +704,18 @@ ReeferFactory = function (opts) {
     return hm[id].el
   }
 
-  var typecache = {}
+  // const typecache = {}
+  const __range = document.createRange()
   function hydrate (type, h) {
+    return __range.createContextualFragment(h).childNodes[0]
+    /*
+  }
     var t = typecache[type]
     if (!t) t = typecache[type] = document.createElement(type)
     if (!h) return t
     t.innerHTML = h
     return t.childNodes[0]
-  }
+*/ }
   Reefer.prototype.html = function (id, htmlGen) {
     if (!this.__.harr) this.htmlBegin()
     var _ = this.__

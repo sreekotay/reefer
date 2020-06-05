@@ -826,7 +826,7 @@ ReeferFactory = function (opts) {
         switch (typeof (str[k])) {
           case 'string':
           case 'object':
-            str[k] = sanitize(str[k])
+            str[k] = str[k] ? sanitize(str[k]) : str[k] // to handle null etc
           default: break
         }
       }

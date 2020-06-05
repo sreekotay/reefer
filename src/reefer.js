@@ -218,8 +218,9 @@ ReeferFactory = function (opts) {
               var argsets = str.match(/\(([^)]*)\)/)
               return (argsets && argsets[1]) || ''
             }
-            var args = parseArgs(fn).split(',')
+            var args = parseArgs(fn)
             if (args) {
+              args = args.split(',')
               fn = fn.split('(')[0]
               var idx = args.indexOf('$event') // allow substition
               if (idx >= 0) args[idx] = event
@@ -525,6 +526,7 @@ ReeferFactory = function (opts) {
     this.__.harr = []
     this.__.harr.html = ''
     this.__.harr.htmlIdx = 0
+    this.__.harr.wmap = new WeakMap()
     this.__.hgeneration++
     this.__.fcounter = 0
   }
@@ -580,7 +582,7 @@ ReeferFactory = function (opts) {
   }
 
   function mergeNode (c, n) {
-    if (c.nodeName !== n.nodeName || !attemptMerge(c, n)) {
+    if (1 || c.nodeName !== n.nodeName || !attemptMerge(c, n)) {
       c.parentNode.replaceChild(n, c)
       return n
     }
@@ -654,6 +656,7 @@ ReeferFactory = function (opts) {
       hc.h = ''
       if (c) {
         hc.el = c
+        ha.wmap.set(c, i)
         if (c.parentNode !== root || c.previousSibling !== prev) { // clean up placement
           if (prev) {
             root.insertBefore(c, prev.nextSibling)
@@ -673,9 +676,19 @@ ReeferFactory = function (opts) {
       console.error('must be 1 html() entity for hmtl()')
       debugger
     }
-    for (i = rcl; i < ha.length; i++) { ha[i].el = root.childNodes[i] }
+    for (i = rcl; i < ha.length; i++) { ha[i].el = root.childNodes[i]; ha.wmap.set(ha[i].el, i) }
     return 'done'
   }
+  Reefer.prototype.htmlChild = function (el) {
+    while (el.parentNode !== this.rootEl) el = el.parentNode
+    return el
+  }
+  Reefer.prototype.htmlToIdx = function (el) {
+    while (el.parentNode !== this.rootEl) el = el.parentNode
+    var v = this.__.harr.wmap.get(el)
+    return v === undefined ? -1 : v
+  }
+  /*
   Reefer.prototype.htmlKeyToIdx = function (id) {
     var hm = this.__.hmap
     if (!hm || !hm[id]) return null
@@ -686,7 +699,7 @@ ReeferFactory = function (opts) {
     if (!hm || !hm[id]) return null
     return hm[id].el
   }
-
+*/
   // const typecache = {}
   function hydrate (type, h) {
     rf_range.selectNode(type)
@@ -748,13 +761,20 @@ ReeferFactory = function (opts) {
   // ============================================
   function dot (obj, spl) {
     if (typeof (spl) === 'string') spl = spl.split('.')
-    var ctx = obj; var l = spl.length; var key
+    var l = spl.length
+    for (var i = 0; i < l; i++) {
+      var k = spl[i]; var o = obj; obj = o[k]
+      if (typeof (obj) !== 'object' && i + 1 < l) return { last: { obj: o, prop: k } }
+    }
+    return { value: obj, obj: o, prop: k }
+    /*
     for (var i = 0; i < l && (obj !== undefined || !i); i++) {
       key = spl[i]; ctx = obj
       obj = (obj && key in obj) ? obj[key] : undefined
     }
     var ret = { value: obj, prop: key, obj: ctx }
     return (i === l) ? ret : { last: ret }
+    */
   }
 
   function getChildIndex (node) { return [].indexOf.call(node.parentNode.childNodes, node) }

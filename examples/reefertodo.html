@@ -105,28 +105,27 @@
           script: reefer.template('d,i,ctx', 
                                   "<div class='${(ctx.__hmap__[d.__key__])  ? (d.leaving===ctx.__xs__.s ? 'remove' : '') : ctx.addClass}'><label>\
                                       <input type='checkbox' \
-                                             reef@click='methods.checkAndAssign(${d.__key__},$event)' \
+                                             reef@click='methods.checkAndAssign' \
                                              ${ctx.checked ?  'checked' : ''}></input>${(!ctx.__hmap__[d.__key__]) || 0? '(new)' : '(old)'}\
                                       <span class=textshadow>${d[0]}</span>\
                                     </label></div>")
         }
       },
       methods: {
-        checkAndAssign: function (id,event) {
+        checkAndAssign: function (event) {
           var rf = this
-          var idx = this.htmlKeyToIdx(id)
+          var idx = this.htmlToIdx(event.target) - 1
           var targetReef = reefer.find (rf.data.targetlist)
           if (!targetReef && targetReef.name!='todos') throw Error ("no target todo list found")
-          var todo = rf.data.todos[idx-1]
+          var todo = rf.data.todos[idx]
           if (todo.leaving) return 
 
 
-          var elem = this.htmlFromKey(id)
+          var elem = this.htmlChild(event.target)
           if (todo.leaving) 
             return //already moving
           todo.leaving = this.data.__xs__.s
           xs.observe (todo)
-          elem.removeIt = id
           targetReef.data.todos.splice (0, 0, todo)
           return
         } 
@@ -138,10 +137,10 @@
       },
       listeners: {
         animationend: function (event) {
-          var el = event.target
-          if (el && el.removeIt) {
-            var idx = this.data.todos.findIndex (function(e) {return e.__key__==el.removeIt})
+          var idx = this.htmlToIdx (event.target) - 1
+          if (idx>=0) {
             var todo = this.data.todos[idx]
+            if (todo.leaving!==this.data.__xs__.s) return
             todo.leaving = null
             if (idx>=0) this.data.todos.splice (idx, 1)
           }
@@ -158,7 +157,7 @@
           this.data.addClass = 'add'
         },
         'todos.*.leaving': function () {
-          //Sreturn 'done'
+          //return 'done'
         }
       }      
     })

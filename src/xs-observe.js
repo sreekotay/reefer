@@ -49,7 +49,7 @@
         trigger(method, o, arguments, o, null)
         return n
       }
-      arr[method] = mf
+      privateprop (arr, method, mf)
     }
     var m = ['pop', 'push', 'shift', 'unshift', 'splice', 'reverse', 'sort']
     for (var i = 0; i < m.length; i++) mbind(m[i])

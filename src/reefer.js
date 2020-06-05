@@ -526,6 +526,8 @@ ReeferFactory = function (opts) {
       this.__.hgeneration = -1
     }
     this.__.harr = []
+    this.__.harr.html = ''
+    this.__.harr.htmlIdx = 0
     this.__.hgeneration++
     this.__.fcounter = 0
   }
@@ -599,7 +601,7 @@ ReeferFactory = function (opts) {
     var root = getAttachPoint(this.rootEl)
     var c = hm[id].el
     if (!c.getAttribute) { if (c.nodeValue !== htmlGen) c.nodeValue = htmlGen; return } // cheat
-    hm[id].el = mergeNode(root.childNodes[idx], hydrate(root.nodeName, htmlGen))
+    hm[id].el = mergeNode(root.childNodes[idx], hydrate(root, htmlGen).firstChild)
     hm[id].hsh = hsh
     hm[id].idx = idx
   }
@@ -618,7 +620,7 @@ ReeferFactory = function (opts) {
       this.rootEl.innerHTML = ''
       return
     }
-    if (genid === 0 || fl === 0) this.rootEl.innerHTML = '' // do this first
+    if (genid === 0) this.rootEl.innerHTML = '' // do this first
     for (var k in hm) { // delete untouched
       var hc = hm[k]
       if (hc.generation === genid) continue
@@ -629,46 +631,42 @@ ReeferFactory = function (opts) {
     var root = getAttachPoint(this.rootEl)
     var div = document.createElement(root.nodeName)
 
-    var ah = {}; var htaa = ''; var cnt = 0
-    for (var i = 0; i < fl; i++) {
-      var hc = ha[i]
-      if (!hc.h) { ah[i] = null; continue }
-      ah[i] = cnt++
-      htaa += hc.h
-    }
-    if (cnt) {
-      div.innerHTML = htaa
+    if (ha.html) {
       /*
-      __range.selectNode(root)
-      div = __range.createContextualFragment(htaa)
-      if (root.nodeName=='TBODY') div = div.childNodes[0]
+      div.innerHTML = ha.html
       */
+      div = hydrate(root, ha.html)
+      /*
+      rf_range.selectNode(root)
+      div = rf_range.createContextualFragment(ha.html)
+      if (root.nodeName === 'TBODY') div = div.childNodes[0]
+      */
+     ha.html = ''
     }
 
-    cnt = 0
-    var rcl = root.childNodes.length
+    var cnt = 0
     for (var i = 0; i < fl; i++) {
-      var hc = ha[i]
+      hc = ha[i]
       var c = hc.el
       var h = hc.h
-      if (h) {
-        if (i >= rcl) {
-          hta += h
-        } else {
-          var n = div.childNodes[ah[i] - cnt]
-          if (c) n = mergeNode(c, n)
-          if (n !== c) {
-            hc.el = n
-            cnt++
-          }
+      if (typeof (h) === 'number') {
+        var n = div.childNodes[hc.h - cnt]
+        n = mergeNode(c, n)
+        if (n !== c) {
+          hc.el = c = n
+          cnt++
         }
-        hc.h = ''
-        c = hc.el
+      } else if (h) {
+        if (i >= root.childNodes.length) hta += h
+        else hc.el = c = hydrate(root, h).firstChild
       }
+      hc.idx = i
+      hc.h = ''
       if (c) {
+        hc.el = c
         if (c.parentNode !== root || c.previousSibling !== prev) { // clean up placement
           if (prev) {
-            prev.parentNode.insertBefore(c, prev.nextSibling)
+            root.insertBefore(c, prev.nextSibling)
           } else if (!root.childNodes || root.childNodes[0] !== c) {
             root.insertBefore(c, root.childNodes && root.childNodes[0])
           }
@@ -678,19 +676,14 @@ ReeferFactory = function (opts) {
     }
     ha.length = fl
 
+    var rcl = root.childNodes.length
     if (hta) root.insertAdjacentHTML('beforeend', hta) // end insert
     root = getAttachPoint(this.rootEl)
-    if (root && ha.length != root.childNodes.length) {
+    if (root && ha.length !== root.childNodes.length) {
       console.error('must be 1 html() entity for hmtl()')
       debugger
     }
-    hm = {}
-    for (var i = 0; i < ha.length; i++) {
-      var hc = ha[i]
-      hm[hc.id] = hc
-      hc.el = root.childNodes[i]
-      hc.idx = i
-    }
+    for (i = rcl; i < ha.length; i++) { ha[i].el = root.childNodes[i] }
     return 'done'
   }
   Reefer.prototype.htmlKeyToIdx = function (id) {
@@ -704,16 +697,21 @@ ReeferFactory = function (opts) {
     return hm[id].el
   }
 
-  const typecache = {}
-  const __range = document.createRange()
+  //const typecache = {}
+  const rf_range = document.createRange()
   function hydrate (type, h) {
-    //return __range.createContextualFragment(h)
+    rf_range.selectNode(type) 
+    var el = rf_range.createContextualFragment(h)
+    return type.nodeName === 'TBODY' ? el.childNodes[0] : el
+    /*
+    type = type.nodeName
     var t = typecache[type]
-    if (!t) t = typecache[type] = document.createElement(type)
+    if (!t) t = typecache[type] = document.createElement(type.nodeName)
     if (!h) return t
     t.innerHTML = h
     return t.childNodes[0]
-}
+    */
+  }
   Reefer.prototype.html = function (id, htmlGen) {
     if (!this.__.harr) this.htmlBegin()
     var _ = this.__
@@ -729,10 +727,12 @@ ReeferFactory = function (opts) {
       hc.generation = genid
       ha[idx] = hc // set the position
       if (hc.hsh === hsh) return
-      hc.h = htmlGen
+      hc.h = ha.htmlIdx++
+      // hc.h = htmlGen
+      ha.html += htmlGen
       hc.hsh = hsh
     } else {
-      hc = { h: htmlGen, hsh: hsh, idx: idx, id: id, generation: genid }
+      hc = { h: htmlGen, hsh: hsh, idx: idx, id: id, generation: genid, el: null }
       ha.splice(idx, 0, hc)
       hm[id] = hc
     }
@@ -751,7 +751,7 @@ ReeferFactory = function (opts) {
       hc.generation = genid
       if (hc.hsh === hsh && hc.idx === idx) return
 
-      var n = hydrate(root.nodeName, htmlGen)
+      var n = hydrate(root, htmlGen).firstChild
       // root.replaceChild(n, hc.el); hc.el = n
       n = hc.el = mergeNode(hc.el, n)
       if (curchild) {
@@ -765,7 +765,7 @@ ReeferFactory = function (opts) {
     } else {
       var o = { hsh: hsh, idx: idx, id: id, generation: genid }
       ha.splice(idx, 0, o)
-      n = hydrate(root.nodeName, htmlGen)
+      n = hydrate(root, htmlGen).firstChild
       if (curchild) {
         root.insertBefore(n, curchild)
       } else { root.appendChild(n) }
@@ -778,7 +778,7 @@ ReeferFactory = function (opts) {
   Reefer.prototype.dot = function (path, value) {
     var v = dot(this, path)
     if (arguments.length > 1) {
-      if (!v.obj) throw ('chain path missing')
+      if (!v.obj) throw Error('chain path missing')
       v.obj[v.prop] = value
     }
     return v

@@ -1,4 +1,7 @@
 ;(function () {
+  // ===================================
+  // observer
+  // ===================================
   function deepObserver (obj, handler, ctxobj, path) {
     if (obj instanceof Node) return
     if (!obj && this.__xs__) obj = this // called via obj.__observe__()
@@ -31,18 +34,6 @@
     return obj
   }
 
-  function deepUnobserver (obj, handler) {
-    if (!obj.__xs__) return
-    var h = obj.__xs__.h
-    for (var i = h.length - 1; i >= 0; i--) {
-      var ha = h[i]
-      if (ha.f === handler) {
-        h.splice(i, 1)
-      }
-    }
-    for (var p in obj) if (typeof (p) === 'object' && p !== null) deepUnobserver(p[obj], handler)
-  }
-
   function arrayObserverHelper (arr, handler) {
     if (arr.__xs__.arrhelpers) return
     arr.__xs__.arrhelpers = true
@@ -51,9 +42,9 @@
         var o = this; var _o = o.__xs__
         _o.pause = true; var n = Array.prototype[method].apply(o, arguments); _o.pause = false
         debounceObserve(_o.s, o, function () {
-         // _o.pause = true
+          // _o.pause = true
           deepObserver(o)
-         // _o.pause = false
+          // _o.pause = false
         })
         trigger(method, o, arguments, o, null)
         return n
@@ -62,20 +53,6 @@
     }
     var m = ['pop', 'push', 'shift', 'unshift', 'splice', 'reverse', 'sort']
     for (var i = 0; i < m.length; i++) mbind(m[i])
-  }
-
-  var __gidcounter = 0
-  function values (obj) {
-    if (!obj.__xs__) {
-      var _w = {
-        s: '@' + __gidcounter++,
-        v: {}, // values for the object
-        h: [] // handlers // but don't allocate them if not needed
-        /* p: {}, // array of property symbols */
-      }
-      privateprop(obj, '__xs__', _w)
-    }
-    return obj.__xs__
   }
 
   function propertyObserver (obj, p, handler, path) {
@@ -100,6 +77,35 @@
     if (typeof (pv) === 'object') deepObserver(pv, handler, { o: obj, p: p }, path)
   }
 
+  function deepUnobserver (obj, handler) {
+    if (!obj.__xs__) return
+    var h = obj.__xs__.h
+    for (var i = h.length - 1; i >= 0; i--) {
+      var ha = h[i]
+      if (ha.f === handler) {
+        h.splice(i, 1)
+      }
+    }
+    for (var p in obj) if (typeof (p) === 'object' && p !== null) deepUnobserver(p[obj], handler)
+  }
+
+  // ===================================
+  // internals
+  // ===================================
+  var __gidcounter = 0
+  function values (obj) {
+    if (!obj.__xs__) {
+      var _w = {
+        s: '@' + __gidcounter++,
+        v: {}, // values for the object
+        h: [] // handlers // but don't allocate them if not needed
+        /* p: {}, // array of property symbols */
+      }
+      privateprop(obj, '__xs__', _w)
+    }
+    return obj.__xs__
+  }
+
   var __ghsymbol = 0
   function attach (handler, obj, path) {
     if (handler === obj || !handler) return obj
@@ -120,14 +126,17 @@
       if (!a[bs]) {
         if (dotpath === undefined) dotpath = path.reduce(function (p, n) { return p + (p && '.') + n.p }, '')
         a[bs] = true
-        a.push({ f: b[i].f, s: b[i].s, path: path, dotpath: dotpath })
+        a.push({ f: b[i].f, s: b[i].s, path: path, dotpath: dotpath, root: path ? path[0].p : undefined })
       }
     }
   }
 
-  function chainfind (upd, obj) { // for events
-    if (obj === upd.obj) return upd.prop
-    var uc = upd.chain
+  // ===================================
+  // notification
+  // ===================================
+  function chainfind (obj) { // for events
+    if (obj === this.obj) return this.prop
+    var uc = this.chain
     for (var i = 0; i < uc.length; i++) if (uc[i].o === obj) return uc[i].p
     return null
   }
@@ -138,11 +147,14 @@
     var h = _obj.h
     for (var i = 0; i < h.length; i++) {
       var ha = h[i]
-      var upd = { rootobj: ha.rootobj, obj: obj, action: action, prop: p, value: n, prev: o, chain: ha.path, path: ha.dotpath ? ha.dotpath + '.' + p : undefined, find: chainfind }
+      var upd = { rootobj: ha.rootobj, obj: obj, action: action, prop: p, value: n, prev: o, chain: ha.path, root: ha.root || p, path: ha.dotpath ? ha.dotpath + '.' + p : p, find: chainfind }
       ha.f.call(obj, upd)
     }
   }
 
+  // ===================================
+  // alias
+  // ===================================
   function alias (obsobj, obsp, refobj, refp, listener) {
     var reflect = function (updates) {
       if (updates.chain && updates.chain.length && updates.chain[0].p === refp) {
@@ -152,9 +164,9 @@
         updates.chain[0].p = refp // set it back
       } else if (!updates.chain && updates.prop === refp) {
         if (updates.value !== obsobj[obsp]) { obsobj[obsp] = updates.value }
-        updates.prop = obsp // alias it
+        updates.prop = updates.path = updates.root = obsp // alias it
         listener(updates)
-        updates.prop = refp
+        updates.prop = updates.path = updates.root = refp
       }
     }
     if (refobj instanceof Node) {

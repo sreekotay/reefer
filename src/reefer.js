@@ -1,23 +1,31 @@
-var legacy = !document.currentScript
-var rf_script = null
-window.reeferHTML = function (data) {
-  function isfunction (obj) { return !!(obj && obj.constructor && obj.call && obj.apply) }
-  if (isfunction(data)) data = data.toString().split('\n').slice(1, -1).join('\n')
-  var dsc = legacy ? null : document.currentScript
-  if (!dsc) dsc = rf_script
-  if (!dsc) { // IE11 support
-    dsc = document.getElementsByTagName('script')
-    dsc = dsc[dsc.length - 1]
+// ===================================
+// reeferHTML ()
+// ===================================
+;(function () {
+  var rf_script = null
+  window.reeferHTML = function (data) {
+    function isfunction (obj) { return !!(obj && obj.constructor && obj.call && obj.apply) }
+    if (isfunction(data)) data = data.toString().split('\n').slice(1, -1).join('\n')
+    var dsc = document.currentScript
+    if (!dsc) dsc = rf_script
+    if (!dsc) { // IE11 support
+      dsc = document.getElementsByTagName('script')
+      dsc = dsc[dsc.length - 1]
+    }
+    rf_script = null
+    var cb = dsc.reefCB
+    if (cb === undefined) dsc.outerHTML = data
+    else cb(data)
+    if (dsc.parentNode) dsc.parentNode.removeChild(dsc)
   }
-  rf_script = null
-  var cb = dsc.reefCB
-  if (cb === undefined) dsc.outerHTML = data
-  else cb(data)
-  if (dsc.parentNode) dsc.parentNode.removeChild(dsc)
-}
+})()
 
+// ===================================
+// ReeferFactory
+// ===================================
 ReeferFactory = function (opts) {
   opts = opts || {}
+  var rf_range = document.createRange()
   var rf_counter = 0 // used for 'symbol'
   var rf_listeners = {}
   var rf_key = 0
@@ -289,10 +297,11 @@ ReeferFactory = function (opts) {
     var sh = this.methods; if (sh) for (var k in sh) sh[k] = isfunction(sh[k]) ? sh[k].bind(rf) : sh[k] // bind to reef
     // sh = this.observers; if (sh) for (k in sh) sh[k] = isfunction(sh[k]) ? sh[k].bind(rf) : sh[k] // bind to reef
     this.rootEl = rootEl
-    _.obsf = function () { Reefer.prototype.react.apply(rf, arguments) }
+    // _.obsf = function () { Reefer.prototype.react.apply(rf, arguments) }
+    _.obsf = Reefer.prototype.react.bind(rf)
     var _d = this.data = xs.observe({}, _.obsf) // public as well -- our main "react" core
     xs.assign(_d, _.decorators, setup.data, localSetup.props) // make our data
-    for (k in this.observers) if (!(k in _d)) _d[k] = undefined
+    //for (k in this.observers) if (!(k in _d)) _d[k] = undefined
     for (k in _.bind) doDataBind(this, 'data.' + k, _.bind[k].selector, _.bind[k].prop)
     _d.__observe__() // trigger observers
     this.sym = '$' + rf_counter++
@@ -316,45 +325,42 @@ ReeferFactory = function (opts) {
   // react
   // =============
   Reefer.prototype.react = function (updates) { // core event engine
-    // if (updates.value === updates.prev) return
     updates.reef = this
     var _ = this.__
     var status
-    var p = updates.root = updates.path ? updates.path.split('.')[0] : updates.prop
+    var p = updates.root// = updates.path.split('.')[0]//updates.path ? updates.path.split('.')[0] : updates.prop
     var _obs = this.observers
-    if (_obs) {
-      _.obsrx = _.obsrx || regexprep(_obs)
-      if (updates.path) {
-        var str = '(:xs:((' + updates.path.replace(/\./g, '\\.)|(\\*\\.))*((') + ')|(\\*)))\n'
-        var regx = new RegExp(str, 'g')
-        var m = _.obsrx.match(regx)
-        if (m) {
-          var mp = m[0]
-          for (var i = 1; i < m.length; i++) if (m[i].length > mp.length) mp = m[i]
-          p = mp.substring(4, mp.length - 1) // skipe the ':xs:
-        }
+    var _ev = _.events
+    var rx = _.proprx = _.proprx || ((_obs ? regexprep(_obs) : '') + (_ev ? regexprep(_ev) : ''))
+    if (rx) {
+      var str = '(:xs:((' + updates.path/*.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')*/.replace(/\./g, '\\.)|(\\*\\.))*((') + ')|(\\*)))\n'
+      var regx = new RegExp(str, 'g')
+      var m = rx.match(regx)
+      if (m) {
+        var mp = m[0]
+        for (var i = 1; i < m.length; i++) if (m[i].length > mp.length) mp = m[i]
+        p = mp.substring(4, mp.length - 1) // skipe the ':xs:
       }
-      var op = _obs[p]
-      if (op) {
-        if (isfunction(op)) status = op.call(this, updates)
-        else {
-          if (!updates.path && (updates.action === 'set' || updates.action === 'add')) {
-            var o = this.dot(op)
-            if (isfunction(o.value)) o.value.call(this)
-            else o.obj[o.prop] = updates.value
-          }
+    }
+    var op = _obs && _obs[p]
+    if (op) { // observers
+      if (isfunction(op)) status = op.call(this, updates)
+      else {
+        if (!updates.path && (updates.action === 'set' || updates.action === 'add')) {
+          var o = this.dot(op)
+          if (isfunction(o.value)) o.value.call(this)
+          else o.obj[o.prop] = updates.value
         }
       }
     }
-    var _ev = _.events
-    if (_ev && _ev[p]) {
+    if (_ev && _ev[p]) { // events
       var e = _.name + '.' + (_ev[p] === true ? p : _ev[p])
       emit(this.rootEl, e, updates)
     }
 
     var mstatus
     if (updates.value === updates.prev) return
-    if (this.mutate) mstatus = this.mutate.call(this, updates)
+    if (this.mutate) mstatus = this.mutate(this, updates)
     var _d = _.decorators
     if (!this.sym) return // we are still constructing
     if (status !== 'done' && mstatus !== 'done' && (!_d || (!_d[p] && !_d[mp]))) this.rerender() // re-render
@@ -632,16 +638,9 @@ ReeferFactory = function (opts) {
     var div = document.createElement(root.nodeName)
 
     if (ha.html) {
-      /*
-      div.innerHTML = ha.html
-      */
+      // div.innerHTML = ha.html
       div = hydrate(root, ha.html)
-      /*
-      rf_range.selectNode(root)
-      div = rf_range.createContextualFragment(ha.html)
-      if (root.nodeName === 'TBODY') div = div.childNodes[0]
-      */
-     ha.html = ''
+      ha.html = ''
     }
 
     var cnt = 0
@@ -697,10 +696,9 @@ ReeferFactory = function (opts) {
     return hm[id].el
   }
 
-  //const typecache = {}
-  const rf_range = document.createRange()
+  // const typecache = {}
   function hydrate (type, h) {
-    rf_range.selectNode(type) 
+    rf_range.selectNode(type)
     var el = rf_range.createContextualFragment(h)
     return type.nodeName === 'TBODY' ? el.childNodes[0] : el
     /*
@@ -895,7 +893,7 @@ ReeferFactory = function (opts) {
   }
 
   opts.use = opts.use || Reefer
-  var templateEngine = legacy ? templateGeneratorES5 : templateGenerator
+  var templateEngine = document.currentScript ? templateGenerator : templateGeneratorES5 // proxy for literal support
 
   // ===========
   // exports

@@ -88,7 +88,7 @@ td_ {
                     if (!this.data.datakey) return
                     var dl = this.dot(datasrc).value
                     var gen = this.slots['list-generator']
-                    var o = updates.find(updates, dl)
+                    var o = updates.find(dl)
                     if (o!==undefined) {
                         o = o | 0
                         this.htmlUpdate (o, this.data.datakey && dl[o][this.data.datakey], gen.script.call(this, dl[o], o))   

@@ -131,11 +131,10 @@
           return
         } 
       },
-      lifecycle: function (name) {
-        if (this.rootEl.id==='done')
-          this.rootEl = this.rootEl
-          if (name==='afterRender') this.data.addClass = this.data.checkclass
-
+      lifecycle: {
+        afterRender: function () {
+          this.data.addClass = this.data.checkclass
+        }
       },
       listeners: {
         animationend: function (event) {

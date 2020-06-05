@@ -41,7 +41,7 @@
       var mf = function () {
         var o = this; var _o = o.__xs__
         _o.pause = true; var n = Array.prototype[method].apply(o, arguments); _o.pause = false
-        debounceObserve(_o.s, o, function () {
+        tick(_o.s, o, function () {
           // _o.pause = true
           deepObserver(o)
           // _o.pause = false
@@ -67,7 +67,7 @@
         var o = v[p]; v[p] = n
         if (typeof (n) === 'object' && n !== null && !n.__xs__) {
           // deepObserver(n, handler, { o: obj, p: p }, path)
-          debounceObserve(_obj.s, obj, function () { deepObserver(n, handler, { o: obj, p: p }, path) }, true)
+          tick(_obj.s, obj, function () { deepObserver(n, handler, { o: obj, p: p }, path) }, true)
         }
         trigger('set', obj, p, n, o)
         return n
@@ -219,16 +219,13 @@
   function privateprop (o, k, v, writable) { Object.defineProperty(o, k, { value: v, enumerable: false, configurable: true, writable: !!writable }); return v }
 
   var __gobt; var __gob = { '@': {} }
-  function resolveObserve () {
+  function resolveTick () {
     __gobt = null; var gob = __gob; __gob = { '@': {} }
-    if (1) {
-      var g = gob['@']
-      gob['@'] = null
-      for (var k in g) { if (g[k]) g[k].f.call(g[k].o, g[k].o) }
-    }
-    for (var k in gob) { if (gob[k]) gob[k].f.call(gob[k].o, gob[k].o) }
+    var g = gob['@']; gob['@'] = null
+    for (var k in g) { if (g[k]) g[k].f.call(g[k].o, g[k].o) }
+    for (k in gob) { if (gob[k]) gob[k].f.call(gob[k].o, gob[k].o) }
   }
-  function debounceObserve (_s, o, f, delay) {
+  function tick (_s, o, f, delay) {
     // delay = true
     // f.call(o, o); return true;
     var g
@@ -242,7 +239,7 @@
     }
     if (!delay) f.call(o, o)
     else g[_s] = { f: f, o: o }
-    __gobt = setTimeout(resolveObserve, 0)
+    __gobt = setTimeout(resolveTick, 0)
     return true
   }
 
@@ -254,6 +251,6 @@
   exp.xs.alias = alias
   exp.xs.assign = objassign
   exp.xs.clone = objclone
-  exp.xs.debounce = debounceObserve
+  exp.xs.tick = tick
   exp.xs.privateprop = privateprop
 }).call(this)

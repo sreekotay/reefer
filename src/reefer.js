@@ -1,6 +1,6 @@
-// ===================================
+// ============================================
 // reeferHTML ()
-// ===================================
+// ============================================
 ;(function () {
   var rf_script = null
   window.reeferHTML = function (data) {
@@ -20,9 +20,9 @@
   }
 })()
 
-// ===================================
+// ============================================
 // ReeferFactory
-// ===================================
+// ============================================
 ReeferFactory = function (opts) {
   opts = opts || {}
   var rf_range = document.createRange()
@@ -62,9 +62,9 @@ ReeferFactory = function (opts) {
   function reefError () { console.error(arguments); throw Error('REEF FAULT') }
   function alwaysobj (rf, n) { rf[n] = rf[n] || {}; return rf[n] }
 
-  // ===========
+  // ============================================
   // dom
-  // ===========
+  // ============================================
   function run (arg) {
     var d = (arg || document)
     var r = []
@@ -124,15 +124,8 @@ ReeferFactory = function (opts) {
     return null
   }
 
-  function publishLF (reef, lf) {
-    return reef.lifecycle && reef.lifecycle(lf)
-  }
-  /*
-  function parseArgs (str) {
-    var argsets = str.match(/\(([^)]*)\)/)
-    return (argsets && argsets[1]) || ''
-  }
-*/
+  function publishLF (reef, lf) { return reef.lifecycle && reef.lifecycle[lf] && reef.lifecycle[lf].call(reef) }
+
   function getAttributes (el) {
     var attrBag
     var attrlist = el.attributes
@@ -263,9 +256,9 @@ ReeferFactory = function (opts) {
     return true
   }
 
-  // ===========
+  // ============================================
   // Reefer - helpers
-  // ===========
+  // ============================================
   function resolveEl (el, ctx) { if (typeof (el) !== 'string') return el; return resolveEl(ctx || document).querySelector(el) }
   function isfunction (obj) { return !!(obj && obj.constructor && obj.call && obj.apply) }
   function arrtoobj (arr, v) { if (!Array.isArray(arr)) return arr; var o = {}; for (var i = 0; i < arr.length; i++) o[arr[i]] = (arguments.length <= 1 ? true : v); return o }
@@ -278,9 +271,9 @@ ReeferFactory = function (opts) {
     }
   }
 
-  // =============
+  // ============================================
   // Reefer - constructor
-  // =============
+  // ============================================
   function Reefer (rootEl, setup, localSetup) {
     setup = setup || {}
     localSetup = localSetup || {}
@@ -295,15 +288,14 @@ ReeferFactory = function (opts) {
     if ('super' in setup) this.super = rf_registry[setup.super]
 
     var sh = this.methods; if (sh) for (var k in sh) sh[k] = isfunction(sh[k]) ? sh[k].bind(rf) : sh[k] // bind to reef
-    // sh = this.observers; if (sh) for (k in sh) sh[k] = isfunction(sh[k]) ? sh[k].bind(rf) : sh[k] // bind to reef
+
     this.rootEl = rootEl
-    // _.obsf = function () { Reefer.prototype.react.apply(rf, arguments) }
     _.obsf = Reefer.prototype.react.bind(rf)
     var _d = this.data = xs.observe({}, _.obsf) // public as well -- our main "react" core
     xs.assign(_d, _.decorators, setup.data, localSetup.props) // make our data
-    //for (k in this.observers) if (!(k in _d)) _d[k] = undefined
+    // for (k in this.observers) if (!(k in _d)) _d[k] = undefined
     for (k in _.bind) doDataBind(this, 'data.' + k, _.bind[k].selector, _.bind[k].prop)
-    _d.__observe__() // trigger observers
+    xs.observe(_d) // trigger observers
     this.sym = '$' + rf_counter++
     return this
   }
@@ -319,11 +311,10 @@ ReeferFactory = function (opts) {
     }
   }
 
-  function regexprep (o) { var s = ''; for (var k in o) { s += ':xs:' + k + '\n' }; return s }
-
-  // =============
+  // ============================================
   // react
-  // =============
+  // ============================================
+  function regexprep (o) { var s = ''; for (var k in o) { s += ':xs:' + k + '\n' }; return s }
   Reefer.prototype.react = function (updates) { // core event engine
     updates.reef = this
     var _ = this.__
@@ -333,7 +324,7 @@ ReeferFactory = function (opts) {
     var _ev = _.events
     var rx = _.proprx = _.proprx || ((_obs ? regexprep(_obs) : '') + (_ev ? regexprep(_ev) : ''))
     if (rx) {
-      var str = '(:xs:((' + updates.path/*.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')*/.replace(/\./g, '\\.)|(\\*\\.))*((') + ')|(\\*)))\n'
+      var str = '(:xs:((' + updates.path/* .replace(/[.*+?^${}()|[\]\\]/g, '\\$&') */.replace(/\./g, '\\.)|(\\*\\.))*((') + ')|(\\*)))\n'
       var regx = new RegExp(str, 'g')
       var m = rx.match(regx)
       if (m) {
@@ -464,12 +455,12 @@ ReeferFactory = function (opts) {
     _b[proppath] = { proppath: proppath, selector: sel, prop: copyprop, sp: sp, unobs: obsf }
   }
 
-  // =============
+  // ============================================
   // render
-  // =============
+  // ============================================
   Reefer.prototype.render_ = render
   Reefer.prototype.render = function () {
-    xs.debounce(this.sym + '_rr', this, render)
+    xs.tick(this.sym + '_rr', this, render)
   }
   function render () {
     publishLF(this, 'beforeRender')
@@ -501,7 +492,7 @@ ReeferFactory = function (opts) {
   }
   Reefer.prototype.rerender = function () {
     this.__.renderflag = (this.__.renderflag || 0) + 1
-    xs.debounce(this.sym + '_rr', this, rerender, true)
+    xs.tick(this.sym + '_rr', this, rerender, true)
   }
   function rerender () {
     if (this.__.renderflag === 0) return
@@ -602,7 +593,7 @@ ReeferFactory = function (opts) {
     if (!hm) return
     var hsh = hash(htmlGen)
     id = (id === undefined || id === null) ? hsh : id
-    if (!(id in hm)) reefError('updateing non-existent element')
+    if (!(id in hm)) reefError('updating non-existent element')
     if (hm[id].hsh === hsh && idx === hm[id].idx) return
     var root = getAttachPoint(this.rootEl)
     var c = hm[id].el
@@ -726,7 +717,6 @@ ReeferFactory = function (opts) {
       ha[idx] = hc // set the position
       if (hc.hsh === hsh) return
       hc.h = ha.htmlIdx++
-      // hc.h = htmlGen
       ha.html += htmlGen
       hc.hsh = hsh
     } else {
@@ -734,43 +724,6 @@ ReeferFactory = function (opts) {
       ha.splice(idx, 0, hc)
       hm[id] = hc
     }
-
-    /*
-    if (genid === 0) {
-      genid = ++_.hgeneration
-      this.rootEl.innerHTML = '' // do this first
-    }
-    var root = getAttachPoint(this.rootEl)
-    var curchild = root.childNodes.length ? root.childNodes[idx] : null
-
-    if (hm[id]) {
-      var hc = hm[id]
-      if (hc.generation === genid) { reefError('duplicate html() id') }
-      hc.generation = genid
-      if (hc.hsh === hsh && hc.idx === idx) return
-
-      var n = hydrate(root, htmlGen).firstChild
-      // root.replaceChild(n, hc.el); hc.el = n
-      n = hc.el = mergeNode(hc.el, n)
-      if (curchild) {
-        if (n.prevSibling !== curchild.prevSibling) {
-          root.insertBefore(n, curchild)
-        }
-      } else { root.appendChild(n) }
-      hc.hsh = hsh
-      hc.idx = idx
-      ha[idx] = hc
-    } else {
-      var o = { hsh: hsh, idx: idx, id: id, generation: genid }
-      ha.splice(idx, 0, o)
-      n = hydrate(root, htmlGen).firstChild
-      if (curchild) {
-        root.insertBefore(n, curchild)
-      } else { root.appendChild(n) }
-      if (!curchild) root = getAttachPoint(this.rootEl)
-      o.el = root.childNodes[idx]
-      hm[id] = o
-    } */
   }
 
   Reefer.prototype.dot = function (path, value) {
@@ -790,37 +743,9 @@ ReeferFactory = function (opts) {
     rel.__xs__style = hsh
   }
 
-  // ===========
+  // ============================================
   // utilities
-  // ===========
-  /*
-  function hoist (o, f) {
-    if (o[f].__hoisted__) return false
-    var _f = function () { f.apply(p, arguments) }
-    o[f] = _f
-    xs.privateprop(o, '__hoisted__', true)
-    return true
-  } */
-  /*
-  function dotpath (obj, path, value) {
-    if (typeof (obj) === 'string') { value = path; path = obj; obj = this }
-    var inobj = obj
-    var spl = path.split('.')
-    var l = spl.length
-    var ctx = obj; var key
-    for (var i = 0; i < l && (obj !== undefined || !i); i++) {
-      key = spl[i]
-      ctx = obj
-      obj = (obj && key in obj) ? obj[key] : undefined
-    }
-    if (arguments.length > (inobj === this ? 1 : 2)) {
-      if (i !== l) throw Error('full chain path does not exist')
-      ctx[key] = value
-    }
-    var ret = { value: obj, key: key, obj: ctx }
-    return (i === l) ? ret : { last: ret }
-  }
-  */
+  // ============================================
   function dot (obj, spl) {
     if (typeof (spl) === 'string') spl = spl.split('.')
     var ctx = obj; var l = spl.length; var key
@@ -895,9 +820,9 @@ ReeferFactory = function (opts) {
   opts.use = opts.use || Reefer
   var templateEngine = document.currentScript ? templateGenerator : templateGeneratorES5 // proxy for literal support
 
-  // ===========
+  // ============================================
   // exports
-  // ===========
+  // ============================================
   return {
     register: register,
     mount: mount,

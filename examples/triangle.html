@@ -75,15 +75,10 @@
         var s = this.data.s | 0; var x = this.data.x | 0; var y = this.data.y | 0
         var seconds = this.data.seconds || '*'
         if (s <= targetSize) {
-          this.rootEl.outerHTML= dottempl (x, y, targetSize, seconds  )
+          this.html (0, dottempl (x, y, targetSize, seconds  ))
           return
         }
         s /= 2
-        this.rootEl.outerHTML= tritempl(x,y-s/2, s, seconds) + 
-                                tritempl(x-s,y+s/2, s, seconds) + 
-                                tritempl(x+s,y+s/2, s, seconds)
-        reefer.run()
-                                return
         this.html(0, tritempl(x,y-s/2, s, seconds))
         this.html(1, tritempl(x-s,y+s/2, s, seconds))
         this.html(2, tritempl(x+s,y+s/2, s, seconds))
@@ -118,7 +113,7 @@
         this.styleBag(style)
         this.html (0, (props.hover ? '*' + props.text + '*' : props.text) + '')
       },
-      observers_: {
+      observers: {
         text: function () {
           var props = this.data
           this.htmlUpdate (0, 0, (props.hover ? '*' + props.text + '*' : props.text) + '')

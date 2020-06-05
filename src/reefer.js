@@ -375,6 +375,7 @@ ReeferFactory = function (opts) {
       if (this.status === 200) {
         var res = this.response
         try { res = JSON.parse(res) } catch (err) {}
+        if (opts.sanitize) res = sanitize(res)
         rf.dot(datapath, res)
       } else if (this.status) xhr.onerror(ev)
     }
@@ -431,12 +432,13 @@ ReeferFactory = function (opts) {
         sp = realizeSource(refobj, copyprop)
         break
       case '$':
-        el = sel.substring(1, 6)
+        el = sel.split(':')[0]
         var url = sel.substring(6)
         _b[proppath] = { proppath: proppath, selector: sel, prop: copyprop }
         switch (el) {
-          case 'json:': return loadData.call(rf, proppath, url)
-          case 'html:': return loadHTML.call(rf, proppath, url)
+          case '$json': return loadData.call(rf, proppath, url, { sanitize: true })
+          case '$json-raw': return loadData.call(rf, proppath, url)
+          case '$html': return loadHTML.call(rf, proppath, url)
         }
         // fall through
       default:
@@ -530,14 +532,14 @@ ReeferFactory = function (opts) {
     this.__.hgeneration++
     this.__.fcounter = 0
   }
-
+  /*
   function replaceNode (c, nch) {
     var p = c.previousSibling
     var pn = p || c.parentNode
     if (!c.getAttribute && 0) { c.nodeValue = nch } else { c.outerHTML = nch }
     return p ? p.nextSibling : pn.childNodes[0]
   }
-
+*/
   function copyAttributes (c, n) {
     try {
       var a = {}; var at
@@ -764,7 +766,7 @@ ReeferFactory = function (opts) {
     var l = spl.length
     for (var i = 0; i < l; i++) {
       var k = spl[i]; var o = obj; obj = o[k]
-      if (typeof (obj) !== 'object' && i + 1 < l) return { last: { obj: o, prop: k } }
+      if ((!obj || typeof (obj) !== 'object') && i + 1 < l) return { last: { obj: o, prop: k } }
     }
     return { value: obj, obj: o, prop: k }
     /*
@@ -817,6 +819,23 @@ ReeferFactory = function (opts) {
 
   createCSS('reef-helper', 'display:none;')
 */
+  var rf_s
+  function sanitize (str) {
+    if (typeof (str) === 'object') {
+      for (var k in str) {
+        switch (typeof (str[k])) {
+          case 'string':
+          case 'object':
+            str[k] = sanitize(str[k])
+          default: break
+        }
+      }
+      return str
+    }
+    rf_s = rf_s || document.createElement('div')
+    rf_s.textContent = str
+    return rf_s.innerHTML
+  }
   function emit (el, ev, detail) {
     el = resolveEl(el); detail = detail || {}
     if (el) { detail.reefEmitRootEl = el }
@@ -850,6 +869,7 @@ ReeferFactory = function (opts) {
     template: templateEngine,
     ready: ready,
     emit: emit,
+    sanitize: sanitize,
     styleBag: Reefer.prototype.styleBag,
     registry: function (name) { return name ? rf_registry[name] : rf_registry },
     find: function (a, ctx) { a = this.findAll(a, ctx); return a ? a[0] : null },

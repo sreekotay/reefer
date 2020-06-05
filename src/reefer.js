@@ -704,18 +704,16 @@ ReeferFactory = function (opts) {
     return hm[id].el
   }
 
-  // const typecache = {}
+  const typecache = {}
   const __range = document.createRange()
   function hydrate (type, h) {
-    return __range.createContextualFragment(h).childNodes[0]
-    /*
-  }
+    //return __range.createContextualFragment(h)
     var t = typecache[type]
     if (!t) t = typecache[type] = document.createElement(type)
     if (!h) return t
     t.innerHTML = h
     return t.childNodes[0]
-*/ }
+}
   Reefer.prototype.html = function (id, htmlGen) {
     if (!this.__.harr) this.htmlBegin()
     var _ = this.__

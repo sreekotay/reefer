@@ -2,7 +2,11 @@
 //
 //  coral.q() .... function (selector) || (elem, selector) || (array)
 //       .f() .... function (dotpath) || (dotpath, setvalue) || (func, 'dotpath')
-//       .o   .... property - alias to first item
+//       .o   .... property - alias to first item in arry
+//
+//  coral.dot()
+//  coral.t()
+//
 // ===================================================================================
 
 (function () {
@@ -13,15 +17,14 @@
   // ====================================
   function dot (obj, spl) {
     if (typeof (spl) === 'string') spl = spl.split('.')
-    var ctx = obj; var l = spl.length; var key
-    for (var i = 0; i < l && (obj !== undefined || !i); i++) {
-      key = spl[i]; ctx = obj
-      obj = (obj && key in obj) ? obj[key] : undefined
+    var l = spl.length
+    for (var i = 0; i < l; i++) {
+      var k = spl[i]; var o = obj; obj = o[k]
+      if ((!obj || typeof (obj) !== 'object') && i + 1 < l) return { last: { obj: o, prop: k } }
     }
-    var ret = { value: obj, prop: key, obj: ctx }
-    return (i === l) ? ret : { last: ret }
+    return { value: obj, obj: o, prop: k }
   }
-  xs_dot = dot
+  xs.dot = dot
 
   // ====================================
   // ==================================== q --- query
@@ -149,4 +152,63 @@
   xs.T = Tweener
 
   xs.apply = function (o) { for (var k in o) if (this[k] !== o[k]) this[k] = o[k] }
+
+
+
+  // ====================================
+  // ====================================  HTML parser
+  // ====================================
+  var autoclose = ['<html', '<head', '<body', '<p', '<dt', '<dd', '<li', '<option',
+    '<thead', '<th', '<tbody', '<tr', '<td', '<tfoot', '<colgroup', 
+    '<h1', '<h2', '<h3', '<h4', '<h5', '<h6', '<a', '<i', '<b', '<s' '<button', '<video']
+  var noclose = ['<img', '<input', '<br', '<meta', '<area', '<base', '<input', '<col', '<hr', '<embed', '<link', '<param', '<track', '<wbr', '<source']
+  var nocloseend
+  function arrtoobj_ (arr) { var o = {}; for (var i = 0; i < arr.length; i++) o[arr[i]] = true; return o }
+  function filltags () {
+    autoclose = arrtoobj_(autoclose)
+    noclose = arrtoobj_(noclose)
+    nocloseend = {}; for (var k in noclose) nocloseend[k[0] + '/' + k.substring(1)] = true
+  }
+  function pushel (f, t) {
+    var td = t && t.trim()
+    if (!td) return f
+    var tag = (td[0] === '<') && td.split(' ')[0]
+    // tag = tag && tag.split('/')[0] // ugh for self-closing - skip for now
+    var el = { d: t, p: f.p, tag: tag, c: null } // el
+    if (el.d[0] !== '<' || noclose[tag]) { // add it
+      f.push(el)
+      return f
+    }
+    if (el.d[1] === '/') {
+      if (nocloseend[tag]) return f // skip it if it's a no-op
+      return f.p // pop parent
+    }
+    var ac = autoclose[tag]
+    if (ac && f.tag === tag) f = f.p // check autoclose
+    el.c = [] // new parent
+    el.c.p = f
+    el.c.tag = tag
+    f.push(el)
+    return el.c
+  }
+  xs.parseHTML = function (s, mode) {
+    if (!nocloseend) filltags()
+    s = s.split('</')
+    var f = []
+    var r = f
+    for (var i = 0; i < s.length; i++) {
+      var t = (((i > 0) ? '</' : '') + s[i]).split('>')
+      for (var j = 0; j < t.length; j++) {
+        var tt = (mode === 'ws') ? t[j] : t[j].trim()
+        if (!tt || tt[0] === '<') {
+          if (tt) f = pushel(f, tt)
+          continue
+        }
+        tt = tt.split('<')
+        f = pushel(f, tt[0])
+        f = pushel(f, tt[1] && ('<' + tt[1].trim()))
+      }
+    }
+    return r // root
+  }  
 })()

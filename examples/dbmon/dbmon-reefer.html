@@ -27,7 +27,7 @@
         <script type='reef-template(db,i,ctx)' reef-slot=row>
           <tr>
             <td class="dbname">${db.dbname}</td>
-            <td class="query-count">\
+            <td class="query-count">
               <span class="${db.lastSample.countClassName}">${db.lastSample.nbQueries}</span>
             </td> ${ctx.samples.script(db.lastSample.topFiveQueries)}
           </tr>

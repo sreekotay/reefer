@@ -101,6 +101,7 @@ function ReeferFactory (opts) {
                 var type = c.getAttribute('type')
                 var args = type.match(/\(([^)]*)\)/); args = args ? args[1] : ''
                 var ftext = c.innerHTML.trim()
+
                 if (ftext) {
                   switch (type.split('(')[0].trim()) {
                     case 'reef-function': c.reefScript = new Function(args, ftext); break
@@ -509,12 +510,10 @@ function ReeferFactory (opts) {
     }
   }
   function hash (str) {
-    var hash = 0
-    var l = str.length
-    for (var i = 0; i < l; i++) {
-      var char = str.charCodeAt(i)
-      hash = ((hash << 5) - hash) + char
-      hash = hash | 0
+    var hash = 0; var len = str.length
+    for (var i = 0; i < len; i++) {
+      hash = hash * 31 + str.charCodeAt(i)
+      hash = hash & hash
     }
     return hash
   }
@@ -679,6 +678,11 @@ function ReeferFactory (opts) {
     for (i = rcl; i < ha.length; i++) { ha[i].el = root.childNodes[i]; ha.wmap.set(ha[i].el, i) }
     return 'done'
   }
+
+  Reefer.prototype.htmlFromIdx = function (idx) {
+    var root = getAttachPoint(this.rootEl)
+    return root.childNodes[idx]
+  }
   Reefer.prototype.htmlChild = function (el) {
     while (el.parentNode !== this.rootEl) el = el.parentNode
     return el
@@ -732,6 +736,7 @@ function ReeferFactory (opts) {
       hc.h = ha.htmlIdx++
       ha.html += htmlGen
       hc.hsh = hsh
+      // hc.split = splitter(htmlGen)
     } else {
       hc = { h: htmlGen, hsh: hsh, idx: idx, id: id, generation: genid, el: null }
       ha.splice(idx, 0, hc)

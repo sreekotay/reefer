@@ -584,7 +584,7 @@ ReeferFactory = function (opts) {
   }
 
   function mergeNode (c, n) {
-    if (1 || c.nodeName !== n.nodeName || !attemptMerge(c, n)) {
+    if (c.nodeName !== n.nodeName || !attemptMerge(c, n)) {
       c.parentNode.replaceChild(n, c)
       return n
     }

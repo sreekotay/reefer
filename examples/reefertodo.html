@@ -27,19 +27,30 @@
   background-color: #f7f7f7;
   display: flex;
 }
+[reef=typer] {
+  padding: 12px 0px;
+  background-color: rgb(255,255,255, 0.9);
+}
+[reef=typer].reef-stuck {
+  border-bottom: 1px solid #ddd;
+}
 
 </style>
 <div class='coral-vertical' style='width:100%; align-items:center; padding-top: 16px;'>
-  <div style='max-width:500px;margin:8px'>
-    <div reef=typer >
+  <div style='max-width:500px;margin:8px; overflow: auto; height: 500px'>
+    <div reef=typer class='reef-sticky''>
       <small reef-slot='hinttext' style="margin-left:4px">(press enter to add)</small>
       <span reef-slot='prompttext'>Type something above to change this text</span>
     </div>
     <div class='coral-horizontal' style='margin-top:16px;'> 
       <div reef=todos id=todo class='coral-vertical' reef-p-targetlist='#done' reef-p-inputtext='~data.target~[reef=typer]' reef@click  reef-p-checkclass = 'redo'
       reef-p-todos='[
-        ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"]
-        ]'>
+      ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"],
+      ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"],
+      ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"],
+      ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"],
+      ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"]
+      ]'>
         <div reef-slot='header'><b>TODO.</b></div>
         <div reef-slot='footer'><div id='a'>To do footer.</div></div>
       </div>
@@ -55,6 +66,9 @@
         <div reef-slot='footer'><div id='b'>Done footer.</div></div>
       </div>
     </div>  
+  </div>
+  <div style='background-color:red; height:1000px; width: 40px'>
+
   </div>
 </div>
 <script>
@@ -88,6 +102,88 @@
         keydown: function (e) { if (e.key==='Enter') this.methods.submitInput() }
       }
     })
+
+    function verifyAfterElement (el, eof) {
+      var a = el.nextSibling 
+      if (!a || !a.reefHolder) {
+        var d = document.createElement ('div')
+        d.style.margin = d.style.padding = 0 
+        d.style.display = 'none'
+        d.style.border = 'none'
+        d.reefHolder = true
+        if (a) a.parentNode.insertBefore (d, a)
+        else e.parentNode.appendChild (d)
+        a = d
+      }
+      if (!eof) eof = e.lgetBoundingClientRect()
+      a.style.width = eof.width
+      a.style.height = eof.height
+      return a
+    }
+    function reefStickyScroll() {
+      var els = document.getElementsByClassName ('reef-sticky')
+      for (var i=0; i<els.length; i++) {
+        var el = els[i]
+        var pel = el.parentNode
+        var eof = el.getBoundingClientRect()
+        var pof = pel.getBoundingClientRect()
+        var ael = verifyAfterElement (el, eof)
+        var npos = Math.min (Math.max(pof.top, 0), pof.bottom - eof.height)
+        if (ael.style.display === 'none') {
+          if (eof.top < npos) {
+            ael.style.display = 'block'
+            if (!el.stickyInfo) {
+              el.stickyInfo = {}
+              el.stickyInfo.position = el.style.position
+              el.stickyInfo.zIndex = el.style.zIndex
+              el.stickyInfo.top = el.style.top
+              el.stickyInfo.width = el.style.width
+            }
+            el.style.position = 'fixed'
+            el.style.width = eof.width
+            el.style.zIndex = 1000
+            el.classList.add ('reef-stuck')
+          }
+        } else {
+          var aof = ael.getBoundingClientRect()
+          if (aof.top > npos) {
+            ael.style.display = 'none'
+            el.style.position = el.stickyInfo.position
+            el.style.zIndex = el.stickyInfo.zIndex
+            el.style.top = el.stickyInfo.top
+            el.style.width = el.stickyInfo.width
+            el.classList.remove ('reef-stuck')
+          } 
+        }
+        if (el.style.top !== npos) el.style.top = npos
+      }
+    }
+    reefStickyScroll.listener = function () {
+      if (!reefStickyScroll.ticking) {
+        window.requestAnimationFrame(function() {
+          reefStickyScroll.ticking = false;
+          reefStickyScroll()
+        });
+        reefStickyScroll.ticking = true;
+      }
+    }
+    reefStickyScroll.apply = function (el) {
+      reefStickyScroll.wm = new WeakMap()
+      var els = el ? (Array.isArray(el) ? el : [el]) : document.getElementsByClassName ('reef-sticky')
+      for (var i=0; i<els.length; i++) {
+        var el = els[i]
+        while (el) {
+          if (!reefStickyScroll.wm.has(el)) {
+            reefStickyScroll.wm.set(el)
+            el.addEventListener('scroll', reefStickyScroll.listener)
+          }
+
+          el = el.parentNode
+          if (el===document.body) el = window
+        }
+      }
+    }
+    reefStickyScroll.apply()
 
     // ================  todos
     reefer.register ('todos', {

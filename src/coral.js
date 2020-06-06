@@ -160,7 +160,7 @@
   // ====================================
   var autoclose = ['<html', '<head', '<body', '<p', '<dt', '<dd', '<li', '<option',
     '<thead', '<th', '<tbody', '<tr', '<td', '<tfoot', '<colgroup', 
-    '<h1', '<h2', '<h3', '<h4', '<h5', '<h6', '<a', '<i', '<b', '<s' '<button', '<video']
+    '<h1', '<h2', '<h3', '<h4', '<h5', '<h6', '<a', '<i', '<b', '<s', '<button', '<video']
   var noclose = ['<img', '<input', '<br', '<meta', '<area', '<base', '<input', '<col', '<hr', '<embed', '<link', '<param', '<track', '<wbr', '<source']
   var nocloseend
   function arrtoobj_ (arr) { var o = {}; for (var i = 0; i < arr.length; i++) o[arr[i]] = true; return o }

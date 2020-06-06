@@ -37,8 +37,9 @@
 
 </style>
 <div class='coral-vertical' style='width:100%; align-items:center; padding-top: 16px;'>
+  <div style='background-color:red; height:100px; width: 40px'></div>
   <div style='max-width:500px;margin:8px; overflow: auto; height: 500px'>
-    <div reef=typer class='reef-sticky''>
+    <div reef=typer class='reef-sticky' reef-sticky-y=50>
       <small reef-slot='hinttext' style="margin-left:4px">(press enter to add)</small>
       <span reef-slot='prompttext'>Type something above to change this text</span>
     </div>
@@ -67,9 +68,7 @@
       </div>
     </div>  
   </div>
-  <div style='background-color:red; height:1000px; width: 40px'>
-
-  </div>
+  <div style='background-color:red; height:1000px; width: 40px'></div>
 </div>
 <script>
   
@@ -116,7 +115,7 @@
         a = d
       }
       if (!eof) eof = e.lgetBoundingClientRect()
-      a.style.width = eof.width
+      //a.style.width = eof.width
       a.style.height = eof.height
       return a
     }
@@ -128,7 +127,9 @@
         var eof = el.getBoundingClientRect()
         var pof = pel.getBoundingClientRect()
         var ael = verifyAfterElement (el, eof)
-        var npos = Math.min (Math.max(pof.top, 0), pof.bottom - eof.height)
+        var off = el.getAttribute('reef-sticky-y') | 0
+        var npos = Math.min (Math.max(pof.top, off), pof.bottom - eof.height)
+        var aof 
         if (ael.style.display === 'none') {
           if (eof.top < npos) {
             ael.style.display = 'block'
@@ -139,14 +140,17 @@
               el.stickyInfo.top = el.style.top
               el.stickyInfo.width = el.style.width
             }
+            el.style.width
             el.style.position = 'fixed'
             el.style.width = eof.width
             el.style.zIndex = 1000
             el.classList.add ('reef-stuck')
+            aof = ael.getBoundingClientRect()
+            aof.width = window.getComputedStyle(ael).width
           }
         } else {
-          var aof = ael.getBoundingClientRect()
-          if (aof.top > npos) {
+          aof = ael.getBoundingClientRect()
+          if (aof.top >= npos) {
             ael.style.display = 'none'
             el.style.position = el.stickyInfo.position
             el.style.zIndex = el.stickyInfo.zIndex
@@ -155,7 +159,10 @@
             el.classList.remove ('reef-stuck')
           } 
         }
-        if (el.style.top !== npos) el.style.top = npos
+        if (ael.style.display !== 'none') {
+          if (el.style.top !== npos) el.style.top = npos
+          if (aof) el.style.width = aof.width
+        }
       }
     }
     reefStickyScroll.listener = function () {
@@ -176,13 +183,70 @@
           if (!reefStickyScroll.wm.has(el)) {
             reefStickyScroll.wm.set(el)
             el.addEventListener('scroll', reefStickyScroll.listener)
+            if (el!==window) window.addResizeListener (el, reefStickyScroll.listener)
           }
 
           el = el.parentNode
           if (el===document.body) el = window
         }
       }
-    }
+      reefStickyScroll()
+    };
+    (function(){
+      var attachEvent = document.attachEvent;
+      var isIE = navigator.userAgent.match(/Trident/);
+      var requestFrame = window.requestAnimationFrame
+      var cancelFrame = window.cancelAnimationFrame
+      
+      function resizeListener(e){
+        var win = e.target || e.srcElement;
+        if (win.__resizeRAF__) cancelFrame(win.__resizeRAF__);
+        win.__resizeRAF__ = requestFrame(function(){
+          var trigger = win.__resizeTrigger__;
+          trigger.__resizeListeners__.forEach(function(fn){
+            fn.call(trigger, e);
+          });
+        });
+      }
+      
+      function objectLoad(e){
+        this.contentDocument.defaultView.__resizeTrigger__ = this.__resizeElement__;
+        this.contentDocument.defaultView.addEventListener('resize', resizeListener);
+      }
+      
+      window.addResizeListener = function(element, fn){
+        if (!element.__resizeListeners__) {
+          element.__resizeListeners__ = [];
+          if (attachEvent) {
+            element.__resizeTrigger__ = element;
+            element.attachEvent('onresize', resizeListener);
+          }
+          else {
+            if (getComputedStyle(element).position == 'static') element.style.position = 'relative';
+            var obj = element.__resizeTrigger__ = document.createElement('object'); 
+            obj.setAttribute('style', 'display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; pointer-events: none; z-index: -1;');
+            obj.__resizeElement__ = element;
+            obj.onload = objectLoad;
+            obj.type = 'text/html';
+            if (isIE) element.appendChild(obj);
+            obj.data = 'about:blank';
+            if (!isIE) element.appendChild(obj);
+          }
+        }
+        element.__resizeListeners__.push(fn);
+      };
+      
+      window.removeResizeListener = function(element, fn){
+        element.__resizeListeners__.splice(element.__resizeListeners__.indexOf(fn), 1);
+        if (!element.__resizeListeners__.length) {
+          if (attachEvent) element.detachEvent('onresize', resizeListener);
+          else {
+            element.__resizeTrigger__.contentDocument.defaultView.removeEventListener('resize', resizeListener);
+            element.__resizeTrigger__ = !element.removeChild(element.__resizeTrigger__);
+          }
+        }
+      }
+    })();
     reefStickyScroll.apply()
 
     // ================  todos

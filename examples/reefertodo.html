@@ -39,7 +39,7 @@
 <div class='coral-vertical' style='width:100%; align-items:center; padding-top: 16px;'>
   <div style='background-color:red; height:100px; width: 40px'></div>
   <div style='max-width:500px;margin:8px; overflow: auto; height: 500px'>
-    <div reef=typer class='reef-sticky' reef-sticky-y=50>
+    <div reef=typer class='reef-sticky' reef-sticky-y=50 reef-sticky-class='test1 test2'>
       <small reef-slot='hinttext' style="margin-left:4px">(press enter to add)</small>
       <span reef-slot='prompttext'>Type something above to change this text</span>
     </div>
@@ -145,6 +145,8 @@
             el.style.width = eof.width
             el.style.zIndex = 1000
             el.classList.add ('reef-stuck')
+            var cl = el.getAttribute ('reef-sticky-class')
+            if (cl) el.classList.add.apply (el.classList, cl.split(' '))
             aof = ael.getBoundingClientRect()
             aof.width = window.getComputedStyle(ael).width
           }
@@ -157,6 +159,8 @@
             el.style.top = el.stickyInfo.top
             el.style.width = el.stickyInfo.width
             el.classList.remove ('reef-stuck')
+            var cl = el.getAttribute ('reef-sticky-class')
+            if (cl) el.classList.remove.apply (el.classList, cl.split(' '))
           } 
         }
         if (ael.style.display !== 'none') {

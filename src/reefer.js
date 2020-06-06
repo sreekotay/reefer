@@ -2,17 +2,15 @@
 // reeferHTML ()
 // ============================================
 ;(function () {
-  var rf_script = null
   window.reeferHTML = function (data) {
     function isfunction (obj) { return !!(obj && obj.constructor && obj.call && obj.apply) }
     if (isfunction(data)) data = data.toString().split('\n').slice(1, -1).join('\n')
-    var dsc = document.currentScript
-    if (!dsc) dsc = rf_script
+    var dsc = document.currentScript || window.rf_script
     if (!dsc) { // IE11 support
       dsc = document.getElementsByTagName('script')
       dsc = dsc[dsc.length - 1]
     }
-    rf_script = null
+    if (window.rf_script) window.rf_script = null
     var cb = dsc.reefCB
     if (cb === undefined) dsc.outerHTML = data
     else cb(data)
@@ -23,8 +21,9 @@
 // ============================================
 // ReeferFactory
 // ============================================
-ReeferFactory = function (opts) {
+function ReeferFactory (opts) {
   opts = opts || {}
+  var xs = window.xs
   var rf_range = document.createRange()
   var rf_counter = 0 // used for 'symbol'
   var rf_listeners = {}
@@ -366,7 +365,6 @@ ReeferFactory = function (opts) {
   function loadData (datapath, url, opts) { // this must be Reefer
     var rf = this
     opts = opts || {}
-    var rf = this
     var xhr = opts.xhr || new XMLHttpRequest()
     /* if (!opts.xhr || opts.responseType) // either it's new or it's passed in
     { xhr.responseType = opts.responseType || 'json' } */
@@ -395,14 +393,14 @@ ReeferFactory = function (opts) {
       script = script[script.length - 1]
     }
     script.onerror = function (err) { console.log('REEF SCRIPT LOAD', err); script.parentNode.removeChild(script); emit(rf.rootEl, 'reefLoadHTMLFail', { url: url }) }
-    script.reefCB = function (data) { rf.dot(datapath, data) }
-    rf_script = script
+    script.reefCB = (function (data) { rf.dot(datapath, data) }
+    (document.currentScript || (window.rf_script = script)))
     return script
   }
 
   function realizeSource (refobj, copyprop) {
     var pp = copyprop.split('.')
-    sp = dot(refobj, pp)
+    var sp = dot(refobj, pp)
     if (sp.obj) return sp
     var fp = copyprop.split('.'); var oc = refobj
     for (var i = 0; i < fp.length; i++) {

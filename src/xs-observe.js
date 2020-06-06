@@ -244,13 +244,12 @@
   }
 
   // export
-  var exp = window
-  exp.xs = exp.xs || {}
-  exp.xs.observe = deepObserver
-  exp.xs.unobserve = deepUnobserver
-  exp.xs.alias = alias
-  exp.xs.assign = objassign
-  exp.xs.clone = objclone
-  exp.xs.tick = tick
-  exp.xs.privateprop = privateprop
+  var xs = window.xs = window.xs || {}
+  xs.observe = deepObserver
+  xs.unobserve = deepUnobserver
+  xs.alias = alias
+  xs.assign = objassign
+  xs.clone = objclone
+  xs.tick = tick
+  xs.privateprop = privateprop
 }).call(this)

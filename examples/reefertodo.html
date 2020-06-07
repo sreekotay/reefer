@@ -30,16 +30,17 @@
 [reef=typer] {
   padding: 12px 0px;
   background-color: rgb(255,255,255, 0.9);
+  border-bottom: 1px solid #fff;
 }
 [reef=typer].reef-stuck {
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 </style>
 <div class='coral-vertical' style='width:100%; align-items:center; padding-top: 16px;'>
   <div style='background-color:red; height:100px; width: 40px'></div>
   <div style='max-width:500px;margin:8px; overflow: auto; height: 500px'>
-    <div reef=typer class='reef-sticky' reef-sticky-y=50 reef-sticky-class='test1 test2'>
+    <div reef=typer class='reef-sticky' reef-sticky-y=0 reef-sticky-class='' style='margin:10px; padding:15px'>
       <small reef-slot='hinttext' style="margin-left:4px">(press enter to add)</small>
       <span reef-slot='prompttext'>Type something above to change this text</span>
     </div>
@@ -106,9 +107,7 @@
       var a = el.nextSibling 
       if (!a || !a.reefHolder) {
         var d = document.createElement ('div')
-        d.style.margin = d.style.padding = 0 
-        d.style.display = 'none'
-        d.style.border = 'none'
+        d.setAttribute ('style', 'padding:0;margin:0;border:none;display:none;')
         d.reefHolder = true
         if (a) a.parentNode.insertBefore (d, a)
         else e.parentNode.appendChild (d)
@@ -119,62 +118,97 @@
       a.style.height = eof.height
       return a
     }
+    function topAdjust(el) {
+      var cs = window.getComputedStyle(el)
+      return parseInt(cs.marginTop)
+    }
+    function bottomAdjust(el) {
+      var cs = window.getComputedStyle(el)
+      return parseInt(cs.marginBottom)
+    }
+    function widthAdjust(el) {
+      var cs = window.getComputedStyle(el)
+      return parseInt(cs.borderLeftWidth) + parseInt(cs.borderRightWidth) + parseInt(cs.paddingLeft) + parseInt(cs.paddingRight)
+    }
+    function widthMargin(el) {
+      var cs = window.getComputedStyle(el)
+      return parseInt(cs.marginLeft) + parseInt(cs.marginRight) 
+    }
     function reefStickyScroll() {
       var els = document.getElementsByClassName ('reef-sticky')
       for (var i=0; i<els.length; i++) {
         var el = els[i]
         var pel = el.parentNode
+        if (!el.getBoundingClientRect)
+        debugger;
         var eof = el.getBoundingClientRect()
         var pof = pel.getBoundingClientRect()
         var ael = verifyAfterElement (el, eof)
-        var off = el.getAttribute('reef-sticky-y') | 0
-        var npos = Math.min (Math.max(pof.top, off), pof.bottom - eof.height)
+        var offx = el.getAttribute('reef-sticky-x') | 0
+        var offy = el.getAttribute('reef-sticky-y') | 0
+        var nposx = Math.min (Math.max(pof.leftt, offx), pof.right - eof.width)
+        var nposy = Math.min (Math.max(pof.top, offy) + topAdjust(el), pof.bottom - eof.height - bottomAdjust(el))
         var aof 
         if (ael.style.display === 'none') {
-          if (eof.top < npos) {
+          if (eof.top < nposy) {
             ael.style.display = 'block'
             if (!el.stickyInfo) {
-              el.stickyInfo = {}
-              el.stickyInfo.position = el.style.position
-              el.stickyInfo.zIndex = el.style.zIndex
-              el.stickyInfo.top = el.style.top
-              el.stickyInfo.width = el.style.width
+              var es = el.stickyInfo = {}
+              es.position = el.style.position
+              es.zIndex = el.style.zIndex
+              es.top = el.style.top
+              es.width = el.style.width
+              es.left = el.style.left
+              es.height = el.style.height
             }
-            el.style.width
             el.style.position = 'fixed'
-            el.style.width = eof.width
+            el.style.width = eof.width - widthAdjust(el)
+            //el.style.height = eof.height
             el.style.zIndex = 1000
             el.classList.add ('reef-stuck')
             var cl = el.getAttribute ('reef-sticky-class')
             if (cl) el.classList.add.apply (el.classList, cl.split(' '))
             aof = ael.getBoundingClientRect()
             aof.width = window.getComputedStyle(ael).width
+            ael.style.margin = window.getComputedStyle(el).margin
           }
         } else {
           aof = ael.getBoundingClientRect()
-          if (aof.top >= npos) {
+          if (aof.top >= nposy) {
             ael.style.display = 'none'
-            el.style.position = el.stickyInfo.position
-            el.style.zIndex = el.stickyInfo.zIndex
-            el.style.top = el.stickyInfo.top
-            el.style.width = el.stickyInfo.width
+            var es = el.stickyInfo 
+            var elsty = el.style
+            elsty.position = es.position
+            elsty.zIndex = es.zIndex
+            elsty.top = es.top
+            elsty.width = es.width
+            elsty.left = es.left
+            elsty.height = es.height
             el.classList.remove ('reef-stuck')
             var cl = el.getAttribute ('reef-sticky-class')
             if (cl) el.classList.remove.apply (el.classList, cl.split(' '))
           } 
         }
         if (ael.style.display !== 'none') {
-          if (el.style.top !== npos) el.style.top = npos
-          if (aof) el.style.width = aof.width
+          if (el.style.left !== nposx) el.style.left = nposx
+          if (el.style.top !== nposy) el.style.top = nposy - topAdjust(el)
+          if (aof) {
+            el.style.width = aof.width- widthAdjust(el)
+          }
+          //if (aof) el.style.height = aof.height
         }
       }
     }
     reefStickyScroll.listener = function () {
+      reefStickyScroll()
       if (!reefStickyScroll.ticking) {
+        reefStickyScroll()
+        reefStickyScroll.ticking = false;
+/*
         window.requestAnimationFrame(function() {
           reefStickyScroll.ticking = false;
           reefStickyScroll()
-        });
+        });*/
         reefStickyScroll.ticking = true;
       }
     }

@@ -5,11 +5,11 @@
   <script src='../src/reefer.js'></script>
   <script src='../src/csi-coral-header.js'></script>
   <style>
-    .block {padding-left: 8px;}
+    .block {padding: 0 8px; padding-bottom:8px; border-left:1px dotted #ccc; }
     .block:before { content: ''; width:0;}
-    .coral-card img {max-height:128px; max-width:50%;}
+    .coral-card img {max-height:128px; max-width:50%; margin-right:8px;}
     .coral-card { min-width: 128px }
-    article {min-width:128px;}
+    a:link {font-weight: 700; font-style:normal; color:maroon;}
 
   </style>
   <script>
@@ -23,8 +23,8 @@
     }
   </script>
   <body class='coral-horizontal' style='justify-content: center;overflow-y:scroll;'>
-    <div class='coral-vertical' style='width:calc(100vw - 16px); max-width:640px'>
-        <h2 id='duckduckgo' class='coral-horizontal coral-center coral-space-children'>
+    <div class='coral-vertical' style='width:calc(100% - 16px); max-width:640px'>
+        <h2 id='duckduckgo' class='coral-horizontal coral-center coral-space-children' style='font-variant:small-caps'>
           <a href='http://duckduckgo.com style='font-variant:small-caps;''>DuckDuckGo </a>
           <a href='http://duckduckgo.com'><img for='duckduckgo' width=64 src='img/duckduckgo.png'> </a>
           <input placeholder='Search for anything' onkeyup="updateSearch(this.value)"></input>
@@ -32,20 +32,20 @@
         <div reef 
              reef-p-answer='~~$json-raw$https://api.duckduckgo.com/?q=simpsons+characters&format=json'
              reef-p-datasrc='data.answer.RelatedTopics'
-             reef-p-datakey='d.FirstURL'
+             reef-p-datakey='FirstURL'
              class='coral-vertical coral-space-children'>
           <script type='reef-template(d, i, ctx)'>
-            <div class='coral-card coral-horizontal coral-anim coral-anim-add'style='overflow:auto;'>
+            <div class='coral-card coral-horizontal coral-anim coral-anim-add'style='overflow:auto; overflow-y:hidden'>
               <img src=${(d.Icon && d.Icon.URL) || ''}>
-              <blockquote class='block' style='${d.Result ? '' : 'font-weight:700'}'>
-              ${d.Result || d.Name}
-              ${d.Topics ? "<div class='coral-horizontal'>" + d.Topics.map(function(d) { return `
+              <${d.Result ? 'blockquote' : 'article'} class='block' >
+                <div style='${d.Result ? '' : 'font-weight:700; margin-bottom:8px;'}'>${(d.Result || d.Name || '').replace(/<br>/g, '')}</div>
+                ${d.Topics ? "<div class='coral-horizontal'>" + d.Topics.map(function(d) { return `
                 <div class='coral-vertical '>
-                  <img src=${(d.Icon && d.Icon.URL) || ''}>
                   <article class='block'  style='font-size:12px;font-weight:200; font-style:normal'>${d.Result || d.Text}</article>
+                  <img src=${(d.Icon && d.Icon.URL) || ''}>
                 </div>`
               }).join() + '</div>': ''}
-              </blockquote>
+              </${d.Result ? 'blockquote' : 'article'} >
             </div>
           </script>
         </div>

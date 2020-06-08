@@ -11,7 +11,7 @@
   justify-content: center;
 }
 
-@keyframes coral-keys-appear { 0%   { max-height: 0; opacity: 0; } 100% { max-height: 800px; opacity: 1;} }
+@keyframes coral-keys-appear { 0%   { max-height: 0; opacity: 1; } 100% { max-height: 800px; opacity: 1;} }
 @keyframes coral-keys-disappear { 0%   { max-height: 200px; opacity: 1} 100% { max-height: 0; opacity: 0;} }
 @keyframes coral-keys-left-appear { 0%   { max-height: 0; opacity: 0; left:-100px} 100% { max-height: 200px; opacity: 1; left:0} }
 @keyframes coral-keys-right-appear { 0%   { max-height: 0; opacity: 0; left:100px} 100% { max-height: 200px; opacity: 1; left:0} }
@@ -22,7 +22,7 @@
 .coral-card {
   align-items: flex-start;
   padding: 12px; 
-  border: 1px dashed #ddd;
+  border: 1px dotted #ddd;
   font-size: 14px;
   overflow: hidden;
   min-width:64px;
@@ -36,6 +36,7 @@
   position: relative; 
   animation-duration: 1s;
   animation-fill-mode: forwards;
+  will-change: auto;
 }
 
 .coral-vertical.coral-space-children > * {
@@ -296,13 +297,12 @@ hr {
   border: 1px dashed #2196F3;
   margin: 8px 0;
   line-height: 1.25em;
-  height: 0.0625rem;
   background: linear-gradient(to right, transparent, var(--border-color) 20%, var(--border-color) 80%, transparent);
 }
 
 blockquote {
   display: block;
-  width:100%;
+  flex-grow:1;
   position: relative;
   font-style: italic;
   color: #444;
@@ -310,16 +310,16 @@ blockquote {
   padding-left:32px;
   padding-right: 8px;
   border: none;
-  border-right: 6px solid #ddd;
+  border-left: 3px solid #ddd;
   border-color: #ccc;
 }
 
 blockquote:before {
   position: absolute;
   top: -12px;
-  left: -4px;
+  left: 4px;
   font-family: sans-serif;
-  font-size: 3rem;
+  font-size: 2rem;
   font-weight: 700;
   color: attr(border-color color);
   content: "\201c";

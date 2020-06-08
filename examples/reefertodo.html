@@ -45,6 +45,7 @@
       <small reef-slot='hinttext' style="margin-left:4px">(press enter to add)</small>
       <span reef-slot='prompttext'>Type something above to change this text</span>
     </div>
+    <hr>
     <blockquote>
       Nixalar has made a huge difference to our business with his good work and knowledge of SEO and business to business marketing techniques. Our search engine rankings are better than ever and we are getting more people contacting us thanks to Jomer’s knowledge and hard work.
 
@@ -187,7 +188,7 @@
         var offx = el.getAttribute('reef-sticky-x') | 0
         var offy = el.getAttribute('reef-sticky-y') | 0
         var nposx = Math.min (Math.max(pof.leftt, offx), pof.right - eof.width)
-        var nposy = Math.min (Math.max(pof.top, offy) + topAdjust(el) + startY, pof.bottom - (endY-startY) + topAdjust(el))// - bottomAdjust(el))
+        var nposy = Math.min (Math.max(0, pof.top, offy) + topAdjust(el) + startY, pof.bottom - (endY-startY) + topAdjust(el))// - bottomAdjust(el))
         var aof 
         if (ael.style.display === 'none') {
           if (eof.top < nposy) {

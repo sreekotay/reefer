@@ -9,8 +9,8 @@
     .block:before { content: ''; width:0;}
     .coral-card img {max-height:128px; max-width:50%; margin-right:8px;}
     .coral-card { min-width: 128px }
-    .list {font-weight:700; margin-bottom:8px;}
-    a:link {font-weight: 700; font-style:normal; color:maroon;}
+    .list {font-style:normal; margin-bottom:8px; color:#E37151; font-size:16px;}
+    a:link {font-weight: 500; font-style:normal; color:#E37151;}
     article {font-size:13px; font-weight:200; font-style:italic;}
     input {margin:8px; min-width:280px;}
   </style>
@@ -40,11 +40,11 @@
              class='coral-vertical coral-space-children'>
           <script type='reef-template(d, i, ctx)'>
             <div class='coral-card coral-horizontal coral-anim coral-anim-add'style='overflow:auto; overflow-y:hidden'>
-              <img src=${(d.Icon && d.Icon.URL) || ''}>
+              <img style='max-width:20%' src=${(d.Icon && d.Icon.URL) || ''}>
               <article class='${d.Result && d.Icon && d.Icon.URL ? 'block' : ''}' >
                 <div class='${d.Result ? '' : 'list'}'>${(d.Result || d.Name || '').replace(/<br>/g, '')}</div>
                 ${d.Topics ? "<div class='coral-horizontal'>" + d.Topics.map(function(dd) { return `
-                <div class='coral-vertical '>
+                <div class='coral-vertical ' style='align-items:flex-start'>
                   <article class='${dd.Result ? 'block' : ''}'>${dd.Result || dd.Text}</article>
                   <img src=${(dd.Icon && dd.Icon.URL) || ''}>
                 </div>`

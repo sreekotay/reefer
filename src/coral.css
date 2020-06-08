@@ -29,7 +29,8 @@
 .coral-card {
   align-items: flex-start;
   padding: 6px; 
-  border: 1px dotted #ddd;
+  border: 1px dotted #ccc;
+  border-radius: 4px;
   font-size: 14px;
   overflow: hidden;
   min-width:64px;
@@ -41,7 +42,7 @@
 
 .coral-anim {
   position: relative; 
-  animation-duration: 1s;
+  animation-duration: 1.25s;
   animation-fill-mode: forwards;
   will-change: auto;
 }

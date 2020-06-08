@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <link href="../src/coral.css" rel="stylesheet" type="text/css" >
+  <script src='../src/xs-observe.js'></script>
+  <script src='../src/reefer.js'></script>
+  <script src='../src/csi-coral-header.js'></script>
+  <style>
+    .block {padding-left: 8px;}
+    .block:before { content: ''; width:0;}
+    .coral-card img {max-height:128px; max-width:50%;}
+    .coral-card { min-width: 128px }
+    article {min-width:128px;}
+
+  </style>
+  <script>
+    function updateSearch(value) {
+      if (value && value.length>2) {
+        reefer.find('*').bind ('data.answer', '$js$https://api.duckduckgo.com/?q=' + encodeURIComponent(value) + '&format=json&callback=loadjson')
+      }
+    }
+    function loadjson (data) {  
+      if (data && data.RelatedTopics && data.RelatedTopics.length) reefer.find('*').data.answer = data 
+    }
+  </script>
+  <body class='coral-horizontal' style='justify-content: center;overflow-y:scroll;'>
+    <div class='coral-vertical' style='width:calc(100vw - 16px); max-width:640px'>
+        <h2 id='duckduckgo' class='coral-horizontal coral-center coral-space-children'>
+          <a href='http://duckduckgo.com style='font-variant:small-caps;''>DuckDuckGo </a>
+          <a href='http://duckduckgo.com'><img for='duckduckgo' width=64 src='img/duckduckgo.png'> </a>
+          <input placeholder='Search for anything' onkeyup="updateSearch(this.value)"></input>
+        </h2>
+        <div reef 
+             reef-p-answer='~~$json-raw$https://api.duckduckgo.com/?q=simpsons+characters&format=json'
+             reef-p-datasrc='data.answer.RelatedTopics'
+             reef-p-datakey='d.FirstURL'
+             class='coral-vertical coral-space-children'>
+          <script type='reef-template(d, i, ctx)'>
+            <div class='coral-card coral-horizontal coral-anim coral-anim-add'style='overflow:auto;'>
+              <img src=${(d.Icon && d.Icon.URL) || ''}>
+              <blockquote class='block' style='${d.Result ? '' : 'font-weight:700'}'>
+              ${d.Result || d.Name}
+              ${d.Topics ? "<div class='coral-horizontal'>" + d.Topics.map(function(d) { return `
+                <div class='coral-vertical '>
+                  <img src=${(d.Icon && d.Icon.URL) || ''}>
+                  <article class='block'  style='font-size:12px;font-weight:200; font-style:normal'>${d.Result || d.Text}</article>
+                </div>`
+              }).join() + '</div>': ''}
+              </blockquote>
+            </div>
+          </script>
+        </div>
+
+    </div>
+  </body>
+</html>

@@ -6,7 +6,47 @@
   display: flex;
   flex-direction: row;
 }
+.coral-center {
+  align-items:center;
+  justify-content: center;
+}
 
+@keyframes coral-keys-appear { 0%   { max-height: 0; opacity: 0; } 100% { max-height: 800px; opacity: 1;} }
+@keyframes coral-keys-disappear { 0%   { max-height: 200px; opacity: 1} 100% { max-height: 0; opacity: 0;} }
+@keyframes coral-keys-left-appear { 0%   { max-height: 0; opacity: 0; left:-100px} 100% { max-height: 200px; opacity: 1; left:0} }
+@keyframes coral-keys-right-appear { 0%   { max-height: 0; opacity: 0; left:100px} 100% { max-height: 200px; opacity: 1; left:0} }
+.coral-anim-remove { animation-name: coral-keys-disappear; }
+.coral-anim-add { animation-name: coral-keys-appear; }
+.coral-anim-redo { animation-name: coral-keys-right-appear; }
+
+.coral-card {
+  align-items: flex-start;
+  padding: 12px; 
+  border: 1px dashed #ddd;
+  font-size: 14px;
+  overflow: hidden;
+  min-width:64px;
+  flex-grow:1;
+}
+.coral-card img {
+  max-width: 100%;
+}
+
+.coral-anim {
+  position: relative; 
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+}
+
+.coral-vertical.coral-space-children > * {
+  margin-bottom: 8px;
+}
+.coral-horizontal.coral-space-children > * {
+  margin-right: 8px;
+}
+.coral-space-children > *:last-child {
+  margin: 0;
+}
 
 html {
   font-size: 16px;
@@ -262,11 +302,13 @@ hr {
 
 blockquote {
   display: block;
+  width:100%;
   position: relative;
   font-style: italic;
   color: #444;
   padding: 0;
   padding-left:32px;
+  padding-right: 8px;
   border: none;
   border-right: 6px solid #ddd;
   border-color: #ccc;
@@ -343,6 +385,7 @@ figcaption {
 
 a {
   text-decoration-color: #2196F3;
+  margin-right: 8px;
 }
 
 a:link {

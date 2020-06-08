@@ -24,7 +24,7 @@ reefer.register('*article', {
   }
 })
 
-coral.ui.clientSideInclude (function (d) {return  /*
+coral.ui.clientSideInclude(function (d) { /*
 <div class="article-page" reef=article>
   <script type=reef-template(d)>
   <div>
@@ -146,4 +146,4 @@ coral.ui.clientSideInclude (function (d) {return  /*
   </div>
   </script>
 </div>
-*/})
+*/ })

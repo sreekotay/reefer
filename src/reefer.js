@@ -445,14 +445,16 @@ function ReeferFactory (opts) {
         var els = sel.split('$')
         _b[proppath] = { proppath: proppath, selector: sel, prop: copyprop }
         switch (els[1]) {
-          case 'json': loadData.call(rf, proppath, els[2], { sanitize: true }); break
+          case 'data':
+          case 'html':
           case 'json-raw': loadData.call(rf, proppath, els[2]); break
+          case 'json': loadData.call(rf, proppath, els[2], { sanitize: true }); break
           case 'js': loadHTML.call(rf, proppath, els[2]); break
           default:
             reefError('unknown data bind: ' + proppath + ': ' + sel)
         }
-        if (copyprop === proppath) return
         sp = realizeSource(rf, copyprop)
+        if (copyprop === proppath) return
         break
         // fall through
     }
@@ -781,7 +783,7 @@ function ReeferFactory (opts) {
     var l = spl.length
     for (var i = 0; i < l; i++) {
       var k = spl[i]; var o = obj; obj = o[k]
-      if ((!obj || typeof (obj) !== 'object') && i + 1 < l) return { last: { obj: o, prop: k } }
+      if ((!obj || typeof (obj) !== 'object') && ((i + 1 < l) || (!(k in o)))) return { last: { obj: o, prop: k } }
     }
     return { value: obj, obj: o, prop: k }
     /*

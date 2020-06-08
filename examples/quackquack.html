@@ -25,7 +25,8 @@
     }
   </script>
   <body class='coral-horizontal' style='justify-content: center;overflow-y:scroll;'>
-    <div class='coral-vertical' style='width:calc(100% - 16px); max-width:640px'>
+    <div class='coral-vertical' style='max-width:calc(100vw - 16px); width:640px; overflow: auto;'
+    >
         <h2 id='duckduckgo' class='coral-wide coral-center coral-space-children' style='font-variant:small-caps'>
           <a href='http://duckduckgo.com' style='font-variant:small-caps;''>DuckDuckGo </a>
           <input placeholder='Type here - powered by Instant Answers' onkeyup="updateSearch(this.value)" 
@@ -38,7 +39,7 @@
              reef-p-datakey='FirstURL'
              class='coral-vertical coral-space-children'>
           <script type='reef-template(d, i, ctx)'>
-            <div class='coral-card coral-horizontal coral-anim 'style='overflow:auto; overflow-y:hidden'>
+            <div class='coral-card coral-horizontal coral-anim coral-anim-add'style='overflow:auto; overflow-y:hidden'>
               <img src=${(d.Icon && d.Icon.URL) || ''}>
               <article class='${d.Result && d.Icon && d.Icon.URL ? 'block' : ''}' >
                 <div class='${d.Result ? '' : 'list'}'>${(d.Result || d.Name || '').replace(/<br>/g, '')}</div>

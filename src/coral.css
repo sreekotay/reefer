@@ -7,8 +7,8 @@
   flex-direction: row;
 }
 .coral-center {
-  align-items:center;
-  justify-content: center;
+  align-items:center  !important;
+  justify-content: center !important;
 }
 
 @media screen and (max-width: 600px) {

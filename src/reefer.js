@@ -2,7 +2,8 @@
 // reeferHTML ()
 // ============================================
 ;(function () {
-  window.reeferHTML = function (data) {
+  var coral = window.coral = window.coral || {}; coral.ui = coral.ui || {}
+  coral.ui.clientSideInclude = function (data) {
     function isfunction (obj) { return !!(obj && obj.constructor && obj.call && obj.apply) }
     if (isfunction(data)) data = data.toString().split('\n').slice(1, -1).join('\n')
     var dsc = document.currentScript || window.rf_script
@@ -31,14 +32,15 @@ function ReeferFactory (opts) {
   const rf_registry = {
     '': {
       template: function () {
-        var slots = this.slots || {}
-        if (!slots.default) return// 'done'
-        if (!this.data.datasrc) return 'done'
         var _d = this.data
+        var slots = this.slots || {}
+        var slot = slots[_d.dataslot || 'default']
+        if (!slot) return 'done'
+        if (!this.data.datasrc) return 'done'
         var dc = ('datactx' in _d) ? this.dot(_d.datactx).value : {}
         var dl = ('datasrc' in _d) ? this.dot(_d.datasrc).value : this
         var gk = this.data.genkey
-        var gen = (dl && slots[_d.dataslot || 'default']) || (slots.empty && slots.empty.text) || { text: '<div> </div>' }
+        var gen = (dl && slot) || (slots.empty && slots.empty.text) || { text: '<div> </div>' }
         var key = _d.datakey; var uk
         if (!Array.isArray(dl)) dl = [dl]
         if (slots.header) this.html(-1, slots.header.script ? slots.header(dc) : slots.header.text)
@@ -79,6 +81,27 @@ function ReeferFactory (opts) {
     return r
   }
 
+  function parseScript (attrBag, c) {
+    try {
+      var type = c.getAttribute('type')
+      var args = type.match(/\(([^)]*)\)/); args = args ? args[1] : ''
+      var ftext = c.innerHTML.trim()
+      var props = attrBag.props = attrBag.props || {}
+
+      if (ftext) {
+        switch (type.split('(')[0].trim()) {
+          case 'reef-function': c.reefScript = new Function(args, ftext); break
+          case 'reef-template': c.reefScript = templateEngine(args, ftext); break
+          default:
+            var p = type.split('reef-p-')[1]
+            if (p) { try { ftext = JSON.parse(ftext) } catch (err) {} props[p.trim()] = ftext; return true }
+            reefWarn('unknown reef slot type')
+            break
+        }
+      }
+    } catch (err) { reefWarn('reef-slot script parsing ERROR:', ftext || c.type, c, err) }
+  }
+
   function reeferDOM (el, parentReef) {
     if (!el) return null
     var reefName = el.getAttribute('reef')
@@ -93,26 +116,14 @@ function ReeferFactory (opts) {
             var c = cloneEl.children[i]
             var ga = c.getAttribute
             var attr = (ga && ga.call(c, 'reef-slot')) || 'default'
+            if (c.nodeName === 'SCRIPT' && c.type.indexOf('reef-') === 0) {
+              if (parseScript(attrBag, c)) continue
+            }
             var sa = slots[attr] = slots[attr] || []
             sa.push(c)
             sa.text = (sa.text || '') + (ga ? c.outerHTML : c.data) // convenience
-            if (c.nodeName === 'SCRIPT' && c.type.indexOf('reef-') === 0) {
-              try {
-                var type = c.getAttribute('type')
-                var args = type.match(/\(([^)]*)\)/); args = args ? args[1] : ''
-                var ftext = c.innerHTML.trim()
-
-                if (ftext) {
-                  switch (type.split('(')[0].trim()) {
-                    case 'reef-function': c.reefScript = new Function(args, ftext); break
-                    case 'reef-template': c.reefScript = templateEngine(args, ftext); break
-                    default: reefWarn('unknown reef slot type')
-                  }
-                }
-              } catch (err) { reefWarn('reef-slot script parsing ERROR:', ftext || c.type, c, err) }
-              if (!('el' in sa)) sa.el = c // convenience
-              if (!('script' in sa) && c.reefScript) sa.script = c.reefScript // convenience
-            }
+            if (!('el' in sa)) sa.el = c // convenience
+            if (!('script' in sa) && c.reefScript) sa.script = c.reefScript // convenience
           }
         }
       }
@@ -394,8 +405,8 @@ function ReeferFactory (opts) {
       script = script[script.length - 1]
     }
     script.onerror = function (err) { console.log('REEF SCRIPT LOAD', err); script.parentNode.removeChild(script); emit(rf.rootEl, 'reefLoadHTMLFail', { url: url }) }
-    script.reefCB = (function (data) { rf.dot(datapath, data) }
-    (document.currentScript || (window.rf_script = script)))
+    script.reefCB = function (data) { rf.dot(datapath, data) }
+    if (!document.currentScript) window.rf_script = script
     return script
   }
 
@@ -430,18 +441,20 @@ function ReeferFactory (opts) {
         if (!refobj) reefError('unable to locate reef for bind')
         sp = realizeSource(refobj, copyprop)
         break
-      case '$':
-        el = sel.split(':')[0]
-        var url = sel.substring(6)
-        _b[proppath] = { proppath: proppath, selector: sel, prop: copyprop }
-        switch (el) {
-          case '$json': return loadData.call(rf, proppath, url, { sanitize: true })
-          case '$json-raw': return loadData.call(rf, proppath, url)
-          case '$html': return loadHTML.call(rf, proppath, url)
-        }
-        // fall through
       default:
-        reefError('unknown data bind: ' + proppath + ': ' + sel)
+        var els = sel.split('$')
+        _b[proppath] = { proppath: proppath, selector: sel, prop: copyprop }
+        switch (els[1]) {
+          case 'json': loadData.call(rf, proppath, els[2], { sanitize: true }); break
+          case 'json-raw': loadData.call(rf, proppath, els[2]); break
+          case 'js': loadHTML.call(rf, proppath, els[2]); break
+          default:
+            reefError('unknown data bind: ' + proppath + ': ' + sel)
+        }
+        if (copyprop === proppath) return
+        sp = realizeSource(rf, copyprop)
+        break
+        // fall through
     }
 
     var dp = dot(rf, proppath)
@@ -672,8 +685,7 @@ function ReeferFactory (opts) {
     if (hta) root.insertAdjacentHTML('beforeend', hta) // end insert
     root = getAttachPoint(this.rootEl)
     if (root && ha.length !== root.childNodes.length) {
-      console.error('must be 1 html() entity for hmtl()')
-      debugger
+      console.error('inconsistent count - must be 1 html() entity for hmtl()')
     }
     for (i = rcl; i < ha.length; i++) { ha[i].el = root.childNodes[i]; ha.wmap.set(ha[i].el, i) }
     return 'done'
@@ -814,10 +826,14 @@ function ReeferFactory (opts) {
 
   /*
   function createCSS (name, rules) {
-    var style = document.createElement('style')
-    style.type = 'text/css'
-    document.getElementsByTagName('head')[0].appendChild(style)
-    if (!(style.sheet || {}).insertRule) { (style.styleSheet || style.sheet).addRule(name, rules) } else { style.sheet.insertRule(name + '{' + rules + '}', 0) }
+    var style = document.getElementById ('__dynamic_styles__')
+    if (!style) {
+      style = document.createElement('style');
+      style.id = '__dynamic_styles__'; style.type = 'text/css'
+      document.getElementsByTagName('head')[0].appendChild(style)
+    }
+    var sheet = style.sheet
+    sheet.insertRule(name + '{' + rules + '}', 0)
   }
 
   createCSS('reef-helper', 'display:none;')

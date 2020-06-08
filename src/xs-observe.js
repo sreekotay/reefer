@@ -49,7 +49,7 @@
         trigger(method, o, arguments, o, null)
         return n
       }
-      privateprop (arr, method, mf)
+      privateprop(arr, method, mf)
     }
     var m = ['pop', 'push', 'shift', 'unshift', 'splice', 'reverse', 'sort']
     for (var i = 0; i < m.length; i++) mbind(m[i])
@@ -156,6 +156,7 @@
   // alias
   // ===================================
   function alias (obsobj, obsp, refobj, refp, listener) {
+    if (obsobj === refobj && obsp === refp) return null
     var reflect = function (updates) {
       if (updates.chain && updates.chain.length && updates.chain[0].p === refp) {
         if (updates.chain.length === 1 && obsobj[obsp] !== updates.obj) obsobj[obsp] = updates.obj

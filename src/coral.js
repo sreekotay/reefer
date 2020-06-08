@@ -153,13 +153,11 @@
 
   xs.apply = function (o) { for (var k in o) if (this[k] !== o[k]) this[k] = o[k] }
 
-
-
   // ====================================
   // ====================================  HTML parser
   // ====================================
   var autoclose = ['<html', '<head', '<body', '<p', '<dt', '<dd', '<li', '<option',
-    '<thead', '<th', '<tbody', '<tr', '<td', '<tfoot', '<colgroup', 
+    '<thead', '<th', '<tbody', '<tr', '<td', '<tfoot', '<colgroup',
     '<h1', '<h2', '<h3', '<h4', '<h5', '<h6', '<a', '<i', '<b', '<s', '<button', '<video']
   var noclose = ['<img', '<input', '<br', '<meta', '<area', '<base', '<input', '<col', '<hr', '<embed', '<link', '<param', '<track', '<wbr', '<source']
   var nocloseend
@@ -191,6 +189,18 @@
     f.push(el)
     return el.c
   }
+
+  xs.createCSS = function (name, rules) {
+    var style = document.getElementById('__dynamic_styles__')
+    if (!style) {
+      style = document.createElement('style') 
+      style.id = '__dynamic_styles__'; style.type = 'text/css'
+      document.getElementsByTagName('head')[0].appendChild(style)
+    }
+    var sheet = style.sheet
+    sheet.insertRule(name + '{' + rules + '}', 0)
+  }
+
   xs.parseHTML = function (s, mode) {
     if (!nocloseend) filltags()
     s = s.split('</')
@@ -210,5 +220,5 @@
       }
     }
     return r // root
-  }  
+  }
 })()

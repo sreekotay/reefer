@@ -11,16 +11,18 @@
 @keyframes heightDisappear { 0%   { max-height: 200px; opacity: 1} 100% { max-height: 0; opacity: 0;} }
 @keyframes leftAppear { 0%   { max-height: 0; opacity: 0; left:-100px} 100% { max-height: 200px; opacity: 1; left:0} }
 @keyframes rightAppear { 0%   { max-height: 0; opacity: 0; left:100px} 100% { max-height: 200px; opacity: 1; left:0} }
-.remove { animation: heightDisappear 0.25s forwards !important; }
-.add { animation: leftAppear 0.25s forwards !important; }
-.redo { animation: rightAppear 0.25s forwards !important; }
+.remove { animation-name: heightDisappear; }
+.add { animation-name: leftAppear; }
+.redo { animation-name: rightAppear; }
 
 [reef=todos] {
-  width:50%;
+  width: 50%;
 }
 [reef=todos] > div {
   position: relative; 
-  overflow: hidden;
+  _overflow: hidden;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
 }
 [reef=todos] label {
   margin: 4px; 
@@ -35,35 +37,43 @@
 [reef=typer].reef-stuck {
   border-bottom: 1px solid #f0f0f0;
 }
-
 </style>
 <div class='coral-vertical' style='width:100%; align-items:center; padding-top: 16px;'>
   <div style='background-color:red; height:100px; width: 40px'></div>
-  <div style='max-width:500px;margin:8px; overflow: auto; height: 500px'>
+  <div style='max-width:500px;margin:8px; overflow:visible'>
     <div reef=typer class='reef-sticky' reef-sticky-y=0 reef-sticky-class='' style='margin:5px; padding:10px'>
       <small reef-slot='hinttext' style="margin-left:4px">(press enter to add)</small>
       <span reef-slot='prompttext'>Type something above to change this text</span>
     </div>
+    <blockquote>
+      Nixalar has made a huge difference to our business with his good work and knowledge of SEO and business to business marketing techniques. Our search engine rankings are better than ever and we are getting more people contacting us thanks to Jomer’s knowledge and hard work.
+
+    </blockquote>
+    <hr>
     <div class='coral-horizontal' style='margin-top:16px;'> 
-      <div reef=todos id=todo class='coral-vertical' reef-p-targetlist='#done' reef-p-inputtext='~data.target~[reef=typer]' reef@click  reef-p-checkclass = 'redo'
-      reef-p-todos='[
-      ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"],
-      ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"],
-      ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"],
-      ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"],
-      ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"]
-      ]'>
-        <div reef-slot='header' class='reef-sticky_'><b>TODO.</b></div>
-        <div reef-slot='footer'><div id='a'>To do footer.</div></div>
+      <div reef=todos id=todo class='coral-vertical' reef-p-targetlist='#done' _reef-p-inputtext='~data.target~[reef=typer]' reef@click  reef-p-checkclass = 'redo'>
+        <script type='reef-p-todos'>
+          [
+          ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"],
+          ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"],
+          ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"],
+          ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"],
+          ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"]
+          ]        
+        </script>
+        <div reef-slot='header' ><b class='reef-sticky'>TODO.</b></div>
+        <div reef-slot='footer'><div id='b'>Done footer.</div></div>
       </div>
       <div style='flex-grow:1'></div> 
-      <div reef=todos id=done class='coral-vertical' reef-p-targetlist='#todo' reef-p-checked=true reef@click reef-p-checkclass = 'add'
-      reef-p-todos='[
-        ["Much longer item that we are using.  But still pretty short in the grand scheme of things"],
-        ["item 4"],
-        ["animated at the top to show animation"],
-        ["animated slowly to show the intergrity of the animation"] 
-        ]'>
+      <div reef=todos id=done class='coral-vertical' reef-p-targetlist='#todo' reef-p-checked=true reef@click reef-p-checkclass = 'add'>
+        <script type='reef-p-todos'> 
+          [
+          ["Much longer item that we are using.  But still pretty short in the grand scheme of things"],
+          ["item 4"],
+          ["animated at the top to show animation"],
+          ["animated slowly to show the intergrity of the animation"]
+          ]
+        </script>
         <div reef-slot='header'><b>DONE.</b></div>
         <div reef-slot='footer'><div id='b'>Done footer.</div></div>
       </div>
@@ -104,13 +114,12 @@
     })
 
     function verifyAfterElement (el, eof) {
-      var a = el.nextSibling 
+      var a = el.previousSibling 
       if (!a || !a.reefHolder) {
         var d = document.createElement ('div')
         d.setAttribute ('style', 'padding:0;margin:0;border:none;display:none;')
         d.reefHolder = true
-        if (a) a.parentNode.insertBefore (d, a)
-        else e.parentNode.appendChild (d)
+        el.parentNode.insertBefore (d, el)
         a = d
       }
       if (!eof) eof = e.lgetBoundingClientRect()
@@ -134,20 +143,51 @@
       var cs = window.getComputedStyle(el)
       return parseInt(cs.marginLeft) + parseInt(cs.marginRight) 
     }
-    function reefStickyScroll() {
+    function heightMargin(el) {
+      var cs = window.getComputedStyle(el)
+      return parseInt(cs.marginTop) + parseInt(cs.marginBottom) 
+    }
+    function clippedParent(el) {
+      var iel = el
+      do {
+        if (!el.style) break
+        if (el.style.overflow) return el
+        el = el.parentNode 
+      } while (el)
+      return document.body
+    }
+    var genid = 0
+    function reefStickyScroll(event) {
       var els = document.getElementsByClassName ('reef-sticky')
+      var parmap = new WeakMap()
+      var data = []
       for (var i=0; i<els.length; i++) {
         var el = els[i]
-        var pel = el.parentNode
-        if (!el.getBoundingClientRect)
-        debugger;
-        var eof = el.getBoundingClientRect()
-        var pof = pel.getBoundingClientRect()
+        var pel = clippedParent(el.parentNode)
+        var startY = parmap.get(pel)|0
+        var d = {
+          startY: startY,
+          pel: pel, 
+          eof: el.getBoundingClientRect(),
+          pof: pel.getBoundingClientRect()
+        }
+        parmap.set (pel, startY + d.eof.height + heightMargin (el))
+        data.push(d)
+      }
+      for (var i=0; i<els.length; i++) {
+        var d = data[i]
+        var el = els[i]
+        var pel = d.pel
+        var eof = d.eof
+        var pof = d.pof
+        var startY = d.startY
+        var endY = parmap.get(pel)
+
         var ael = verifyAfterElement (el, eof)
         var offx = el.getAttribute('reef-sticky-x') | 0
         var offy = el.getAttribute('reef-sticky-y') | 0
         var nposx = Math.min (Math.max(pof.leftt, offx), pof.right - eof.width)
-        var nposy = Math.min (Math.max(pof.top, offy) + topAdjust(el), pof.bottom - eof.height - bottomAdjust(el))
+        var nposy = Math.min (Math.max(pof.top, offy) + topAdjust(el) + startY, pof.bottom - (endY-startY) + topAdjust(el))// - bottomAdjust(el))
         var aof 
         if (ael.style.display === 'none') {
           if (eof.top < nposy) {
@@ -169,8 +209,8 @@
             var cl = el.getAttribute ('reef-sticky-class')
             if (cl) el.classList.add.apply (el.classList, cl.split(' '))
             aof = ael.getBoundingClientRect()
-            aof.width = window.getComputedStyle(ael).width
             ael.style.margin = window.getComputedStyle(el).margin
+            ael.style.width = eof.width
           }
         } else {
           aof = ael.getBoundingClientRect()
@@ -193,16 +233,17 @@
           if (el.style.left !== nposx) el.style.left = nposx
           if (el.style.top !== nposy) el.style.top = nposy - topAdjust(el)
           if (aof) {
-            el.style.width = aof.width- widthAdjust(el)
+          //  el.style.width = aof.width- widthAdjust(el)
           }
           //if (aof) el.style.height = aof.height
         }
       }
     }
-    reefStickyScroll.listener = function () {
-      reefStickyScroll()
+    reefStickyScroll.listener = function (event) {
+      reefStickyScroll(event)
+      return
       if (!reefStickyScroll.ticking) {
-        reefStickyScroll()
+        reefStickyScroll(event)
         reefStickyScroll.ticking = false;
 /*
         window.requestAnimationFrame(function() {
@@ -221,7 +262,7 @@
           if (!reefStickyScroll.wm.has(el)) {
             reefStickyScroll.wm.set(el)
             el.addEventListener('scroll', reefStickyScroll.listener)
-            if (el!==window) window.addResizeListener (el, reefStickyScroll.listener)
+            //if (el!==window) window.addResizeListener (el, reefStickyScroll.listener)
           }
 
           el = el.parentNode
@@ -268,7 +309,10 @@
             obj.type = 'text/html';
             if (isIE) element.appendChild(obj);
             obj.data = 'about:blank';
-            if (!isIE) element.appendChild(obj);
+            if (!isIE) {
+              var sdom = element//.attachShadow({mode:'open'});
+              sdom.appendChild(obj)
+            }
           }
         }
         element.__resizeListeners__.push(fn);
@@ -293,22 +337,24 @@
         todos: [],
         datasrc: 'data.todos',
         datactx: 'data',
+        dataslot: 'render',
         genkey: true,
         checked: false,
         addClass: ''
       },
       decorators: ['addClass'],
       slots: {
-        default: {
+        render: {
           script: reefer.template('d,i,ctx', 
-                                  "<div class='${(ctx.__hmap__[d.__key__])  ? (d.leaving===ctx.__xs__.s ? 'remove' : '') : ctx.addClass}'><label>\
+                                  "<div class='${(d.inTransition===ctx.__xs__.s ? 'remove' : (d.inTransition && ctx.addClass))}'><label>\
                                       <input type='checkbox' \
                                              reef@click='methods.checkAndAssign' \
-                                             ${ctx.checked ?  'checked' : ''}></input>${(!ctx.__hmap__[d.__key__]) || 0? '(new)' : '(old)'}\
+                                             ${ctx.checked ?  'checked' : ''}></input>\
                                       <span class=textshadow>${d[0]}</span>\
                                     </label></div>")
         }
       },
+//                                  "<div class='${(ctx.__hmap__[d.__key__])  ? (d.inTransition===ctx.__xs__.s ? 'remove' : '') : ctx.addClass}'><label>\
       methods: {
         checkAndAssign: function (event) {
           var rf = this
@@ -316,13 +362,13 @@
           var targetReef = reefer.find (rf.data.targetlist)
           if (!targetReef && targetReef.name!='todos') throw Error ("no target todo list found")
           var todo = rf.data.todos[idx]
-          if (todo.leaving) return 
+          if (todo.inTransition) return 
 
 
           var elem = this.htmlChild(event.target)
-          if (todo.leaving) 
+          if (todo.inTransition) 
             return //already moving
-          todo.leaving = this.data.__xs__.s
+          todo.inTransition = this.data.__xs__.s
           xs.observe (todo)
           targetReef.data.todos.splice (0, 0, todo)
           return
@@ -338,9 +384,9 @@
           var idx = this.htmlToIdx (event.target) - 1
           if (idx>=0) {
             var todo = this.data.todos[idx]
-            if (todo.leaving!==this.data.__xs__.s) return
-            todo.leaving = null
+            if (todo.inTransition!==this.data.__xs__.s) return
             if (idx>=0) this.data.todos.splice (idx, 1)
+            todo.inTransition = null
           }
         }
       },
@@ -354,7 +400,7 @@
           this.data.todos.splice (0, 0, todo)
           this.data.addClass = 'add'
         },
-        'todos.*.leaving': function () {
+        'todos.*.inTransition': function () {
           //return 'done'
         }
       }      

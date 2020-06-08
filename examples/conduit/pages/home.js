@@ -14,16 +14,16 @@ reefer.register('*articlesList', {
   mutate: function (updates) {
     var url = baseurl + '/articles?'
     var tag = this.data.tag; if (tag) url += '&tag=' + tag
-    this.bind('data.articlesdata', '$json:' + url)
+    this.bind('data.articlesdata', '$json$' + url)
   },
   observers: {
     'tagsdata': function (updates) {
-      this.bind('data.tagsdata', '$json:' + baseurl + '/tags')
+      this.bind('data.tagsdata', '$json$' + baseurl + '/tags')
     }
   }
 })
 
-reeferHTML(function () { /**
+coral.ui.clientSideInclude (function () {/*
   <div class="home-page">
 
   <div class="banner">
@@ -92,4 +92,4 @@ reeferHTML(function () { /**
   </div>
 
 </div>
-**/ })
+*/ })

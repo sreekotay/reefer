@@ -1,4 +1,4 @@
-reeferHTML(function () { /**
+coral.ui.clientSideInclude(function () { /*
   <nav class="navbar navbar-light">
   <div class="container">
     <a class="navbar-brand" href="#">conduit</a>
@@ -23,4 +23,4 @@ reeferHTML(function () { /**
     </ul>
   </div>
 </nav>
-**/ })
+*/ })

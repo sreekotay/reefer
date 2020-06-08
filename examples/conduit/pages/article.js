@@ -18,13 +18,13 @@ reefer.register('*article', {
     resource: function () {
       if (this.data.resource) {
         var url = baseurl + '/articles/' + this.data.resource
-        this.bind('data.articledata', '$json:' + url)
+        this.bind('data.articledata', '$json$' + url)
       }
     }
   }
 })
 
-reeferHTML(function () { /**
+coral.ui.clientSideInclude (function (d) {return  /*
 <div class="article-page" reef=article>
   <script type=reef-template(d)>
   <div>
@@ -146,4 +146,4 @@ reeferHTML(function () { /**
   </div>
   </script>
 </div>
-`**/ })
+*/})

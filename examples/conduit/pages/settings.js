@@ -1,4 +1,4 @@
-reeferHTML (function() {/**
+coral.ui.clientSideInclude (function() {/*
 <div class="settings-page">
   <div class="container page">
     <div class="row">
@@ -33,4 +33,4 @@ reeferHTML (function() {/**
     </div>
   </div>
 </div>
-**/})
+*/})

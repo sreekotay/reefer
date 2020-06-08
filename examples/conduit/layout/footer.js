@@ -1,4 +1,4 @@
-reeferHTML (function() {/**
+coral.ui.clientSideInclude(function () { /*
 <footer>
   <div class="container">
     <a href="/" class="logo-font">conduit</a>
@@ -7,4 +7,4 @@ reeferHTML (function() {/**
     </span>
   </div>
 </footer>
-**/})
+*/ })

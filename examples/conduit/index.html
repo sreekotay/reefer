@@ -6,10 +6,12 @@
   <meta name='viewport' content='width=device-width'>
   <meta name='theme-color' content='#aa1e1e'>
   
-  <script src='../../dist/reefer-min.js'></script>
+  <script src='../../src/xs-observe.js'></script>
+  <script src='../../src/reefer.js'></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.0.0/animate.min.css"/>
 
   <!--
+  <script src='../../dist/reefer-min.js'></script>
   <script src='../../dist/js/reefer-min.js'></script>
   <script src='../../public/js/xs.js'></script>
   <script src='../../public/js/xs_linkspeed.js'></script>
@@ -29,6 +31,8 @@ s  -->
 </head>
 <body style='overflow-y:scroll'>
   <script src='layout/header.js'></script>
+ <!-- <script src='pages/profile.js'></script>-->
+  <!-- <div reef reef-p-src='~rootEl.innerHTML~$js$pages/profile.js'></div> -->
   <div reef='switcher' 
        reef-p-pagedata='~rootEl.innerHTML'
        reef-o-page='methods.loadPageData'></div>
@@ -43,7 +47,7 @@ s  -->
     template: function () {return 'done'},
     data:['page', 'resource', 'tag'],
     mutate: function () {
-      if (this.data.page) this.bind ('data.pagedata', '$html:pages/' + this.data.page + '.js') 
+      if (this.data.page) this.bind ('data.pagedata', '$js$pages/' + this.data.page + '.js') 
     },
     listeners: {
       hashchange: function() {

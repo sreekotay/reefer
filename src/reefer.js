@@ -459,7 +459,8 @@ function ReeferFactory (opts) {
         // fall through
     }
 
-    var dp = dot(rf, proppath)
+    // /var dp = dot(rf, proppath)
+    var dp = realizeSource(rf, proppath)
     if (!dp.obj) reefError('data bind not found: ' + proppath)
     var f = function (u) {
       if (!rf.rootEl || rf.rootEl.getRootNode() !== document) {

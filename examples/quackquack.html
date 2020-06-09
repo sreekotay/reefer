@@ -21,7 +21,9 @@
           <a  href='http://duckduckgo.com' style='font-variant:small-caps;''>DuckDuckGo </a>
           <div id='reefinput' style='position:relative' reef-p-datasrc='data' reef-p-inputtext reef reef.input>
             <script type='reef-template(d)' reef-children=2>
-              <input  id='searchinput' placeholder='Type here - powered by Instant Answers' value="${d.inputtext}" reef.input=methods.submitInput oninput="updateSearch(this.value)" >
+              <input  id='searchinput' placeholder='Type here - powered by Instant Answers' 
+                    value="${d.inputtext}" reef.input=methods.submitInput 
+                    _oninput="updateSearch(this.value)" >
               <span reef style='position:absolute; right:8px; top:8px; opacity: 0.0'>✖️</span>
             </script>
             <script name=submitInput type='reef-method($event)'>this.data.inputtext = $event.target.value</script>

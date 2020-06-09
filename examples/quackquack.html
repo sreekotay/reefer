@@ -5,23 +5,26 @@
   <script src='../src/reefer.js'></script>
   <script src='../src/csi-coral-header.js'></script>
   <style>
-    .block {padding: 0 8px; padding-bottom:8px; border-left:1px dotted #ddd; }
-    .block:before { content: ''; width:0;}
-    .coral-card img {max-height:128px; max-width:50%; margin-right:8px;}
-    .coral-card { min-width: 128px }
-    .list {font-style:normal; margin-bottom:8px; color:#E37151; font-size:16px;}
-    a {text-decoration-color:#E37151;}
-    a:link {font-weight: 500; font-style:normal; color:#E37151; }
-    article {font-size:13px; font-weight:400; font-style:italic;}
-    input {margin:8px; min-width:280px; border: 1px solid #E37151; padding: 8px;}
+      .block            {padding: 0 8px; padding-bottom:8px; border-left:1px dotted #ddd; }
+      .block:before     {content: ''; width:0;}
+      .coral-card img   {max-height:128px; max-width:50%; margin-right:8px;}
+      .coral-card       {min-width: 128px }
+      .list             {font-style:normal; margin-bottom:8px; color:#E37151; font-size:16px;}
+      a                 {text-decoration-color:#E37151;}
+      a:link            {font-weight: 500; font-style:normal; color:#E37151; }
+      article           {font-size:13px; font-weight:400; font-style:italic;}
+      input             {margin:8px; min-width:280px; border: 1px solid #E37151; padding: 8px;}
   </style>
-
   <body class='coral-horizontal' style='justify-content: center;overflow-y:scroll;'>
-    <div class='coral-vertical' style='max-width:calc(100vw - 16px); width:640px; overflow: auto;'
-    >
+    <div class='coral-vertical' style='max-width:calc(100vw - 16px); width:640px; overflow: auto;'>
         <h2 id='duckduckgo' class='coral-wide coral-center coral-space-children' style='font-variant:small-caps; margin-top:8px;'>
-          <a href='http://duckduckgo.com' style='font-variant:small-caps;''>DuckDuckGo </a>
-          <input id='searchinput' placeholder='Type here - powered by Instant Answers' onkeyup="updateSearch(this.value)" >
+          <a  href='http://duckduckgo.com' style='font-variant:small-caps;''>DuckDuckGo </a>
+          <div style='position:relative' reef-p-datasrc='data' reef>
+            <script type='reef-template(d)@2'>
+              <input  id='searchinput' placeholder='Type here - powered by Instant Answers' oninput="updateSearch(this.value)" >
+              <span reef style='position:absolute; right:8px; top:8px; opacity: 0.0'>✖️</span>
+            </script>
+          </div>
           <a href='http://duckduckgo.com'><img for='duckduckgo' width=64 src='img/duckduckgo.png'> </a>
         </h2>
         <div reef id=searchlist
@@ -50,15 +53,13 @@
 
   <script>
     function updateSearch(value) {
-      if (value !== window.location.hash.substring(1)) {
-        window.location.hash = (value &&  ('#' + value)) || ''
-      }
-      if (value && value.length>2) {
+      if (value !== window.location.hash.substring(1)) window.location.hash = (value &&  ('#' + value)) || ''
+      value = value ||'rock' // some default just because
+      if (value && value.length>2)
         reefer.find('#searchlist').bind ('data.answer', 
                                          '$jsonp$https://api.duckduckgo.com/?q=' + encodeURIComponent(value) + 
                                          '&format=json&callback={JSONP}')
       }
-    }
     function dohashchange(e) { 
       var v = decodeURIComponent (window.location.hash.substring(1))
       if (!e) searchinput.value = v     
@@ -69,5 +70,12 @@
       dohashchange()
       searchinput.focus()
     })
+    /*
+    t('div').a({class: 'coral-card coral-horizontal coral-anim coral-anim-add', style:'' }).c([
+      t('img').a({src: (d.Icon && d.Icon.UR) || '', style: 'max-width:20%'},
+      t('article').a(class:'', )
+
+    ])*/  
   </script>
 </html>
+

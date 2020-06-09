@@ -13,7 +13,7 @@
         <div reef='todos' reef-slot='under'></div>
       </div>
       <div reef='wizard' reef-p-selected='neville'></div>
-      <div reef='typer' reef@input></div>
+      <div reef='typer' reef.input></div>
       <div><h2>To Dos</h2>To Dos
         <div reef='todos'></div>  
       </div>
@@ -65,7 +65,7 @@
         var props = this.data
         return '\
           <label for="mirror">Whatever you type shows up below the field</label>\
-          <input type="text" id="mirror" value="' + props.text +'" reef@input=data.text> \
+          <input type="text" id="mirror" value="' + props.text +'" reef.input=data.text> \
           <div><em aria-live="polite">' + (props.text.length ? props.text : 'Type something above to change this text') + "</em></div>";
         return html;
       },

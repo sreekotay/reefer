@@ -52,7 +52,7 @@
     </blockquote>
     <hr>
     <div class='coral-horizontal' style='margin-top:16px;'> 
-      <div reef=todos id=todo class='coral-vertical' reef-p-targetlist='#done' _reef-p-inputtext='~data.target~[reef=typer]' reef@click  reef-p-checkclass = 'redo'>
+      <div reef=todos id=todo class='coral-vertical' reef-p-targetlist='#done' reef-p-inputtext='~data.target~[reef=typer]' reef.click  reef-p-checkclass = 'redo'>
         <script type='reef-p-todos'>
           [
           ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"],
@@ -66,7 +66,7 @@
         <div reef-slot='footer'><div id='b'>Done footer.</div></div>
       </div>
       <div style='flex-grow:1'></div> 
-      <div reef=todos id=done class='coral-vertical' reef-p-targetlist='#todo' reef-p-checked=true reef@click reef-p-checkclass = 'add'>
+      <div reef=todos id=done class='coral-vertical' reef-p-targetlist='#todo' reef-p-checked=true reef.click reef-p-checkclass = 'add'>
         <script type='reef-p-todos'> 
           [
           ["Much longer item that we are using.  But still pretty short in the grand scheme of things"],
@@ -97,7 +97,7 @@
         return '\<div style="display:flex; align-items:center">\
           <label for="mirror"><b>New Task</b> </label>\
           <input style="margin-left: 6px; flex-grow:1" type="text" id="mirror" value="' + props.text +'"> \
-          <button style="margin-left:4px" reef@click="methods.submitInput">Add</button></div>\
+          <button style="margin-left:4px" reef.click="methods.submitInput">Add</button></div>\
           <div style="text-align:center"><em aria-live="polite">' + (props.text.length ? props.text + hinttext: prompttext) + "</em></div>";
         return html;
       },
@@ -349,7 +349,7 @@
           script: reefer.template('d,i,ctx', 
                                   "<div class='${(d.inTransition===ctx.__xs__.s ? 'remove' : (d.inTransition && ctx.addClass))}'><label>\
                                       <input type='checkbox' \
-                                             reef@click='methods.checkAndAssign' \
+                                             reef.click='methods.checkAndAssign' \
                                              ${ctx.checked ?  'checked' : ''}></input>\
                                       <span class=textshadow>${d[0]}</span>\
                                     </label></div>")
@@ -395,6 +395,7 @@
         inputtext: function() {
           if (!this.data.inputtext) return
           var todo =  [this.data.inputtext]
+          todo.inTransition = true
           this.data.inputtext = ''
 
           //animating it

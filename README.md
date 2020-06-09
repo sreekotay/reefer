@@ -124,13 +124,22 @@ Note that we both passed in the property `name` via HTML, as a default when regi
     - for example, the following will set the initial value to 1, and fire a custom DOM event names `selectedtab` whenever the value `whichtab` changes in the component:
       -	`<div reef-p-whichtab="somelabel::selectedtab">`
 
-		selector maybe: '.class' '#id' '[attribute...]' or '$json:PATH' or '$html:PATH'
+		selector maybe: `.class` `#id` `[attribute...]` or `$json$PATH` or `$html$PATH` or `$json-raw$PATH` or `$jsonp$PATH` (where PATH should included the literal string `{JSONP}`
+			one special selector `^` indicate "this" compomnent (may be extending to included parent with ^1 for parent for example)
 
-reef@EVENTNAME=functionname(LITERAL,...,LITERAL)
-reef@EVENTNAME=property(LITERAL)
+#TODO
+- rename to coral.ui
+- style section in component def
+- data => state
+- data for non-reactive, state for reactive
+
+reef.EVENTNAME=functionname(LITERAL,...,LITERAL)
+reef.EVENTNAME=property(LITERAL)
+reef.click@stop
 
 # Events #
-- includes the closest reef as `event.reef`
+- includes the closest reef as `event.reef` in the event
+
 
 # Slots #
 - reef-slot -- slots.name.text (for string) or as array for dom elements

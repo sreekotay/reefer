@@ -153,7 +153,7 @@ function ReeferFactory (opts) {
         try { val = JSON.parse(val) } catch (err) {}
         if (!d) alwaysobj(attrBag, 'props')[p] = val; else alwaysobj(attrBag, 'bind')[p] = d
         if (ev) alwaysobj(attrBag, 'events')[p] = ev
-      } else if (n.indexOf('reef@') === 0) {
+      } else if (n.indexOf('reef.') === 0) {
         var lis = n.substring(5)
         attrBag = attrBag || { }
         alwaysobj(attrBag, 'listeners')[lis] = attr.value
@@ -209,46 +209,52 @@ function ReeferFactory (opts) {
   function listenerFactory (type) {
     return function (event) {
       var el = (event.detail && event.detail.reefEmitRootEl) || event.target; var rr
-      var evattr = 'reef@' + type
+      var evattr = 'reef.' + type
       var handlers = []
       while (el) {
-        var evvalue = el.getAttribute && el.getAttribute(evattr)
-        if (evvalue) { evvalue = evvalue.split('@'); handlers.push(evvalue) }
-        var reef = el.reef
-        if (!event.reef) event.reef = reef
-        if (reef && handlers.length) { // parse the handler for the event
-          for (var i = 0; i < handlers.length; i++) {
-            var ev = handlers[i]
-            var fn = ev[0].trim()
-            /*
-            var func = function (event) { eval(fn) }
-            try { func.call(reef, event) } catch (err) { reefWarn('reef@Error') }
-            /* // old syntax - you do do prop(value)
-            */
-            var parseArgs = function (str) {
-              var argsets = str.match(/\(([^)]*)\)/)
-              return (argsets && argsets[1]) || ''
-            }
-            var args = parseArgs(fn)
-            if (args) {
-              args = args.split(',')
-              fn = fn.split('(')[0]
-              var idx = args.indexOf('$event') // allow substition
-              if (idx >= 0) args[idx] = event
-            }
-            var f = reef.dot(fn); var rval
-            if (f.value !== undefined) {
-              if (isfunction(f.value)) rval = f.value.apply(f.obj, args || [event])
-              else reef.dot(fn, args[0])
-              if (rval === 'stop' || ev[1] === 'stop') return
+        if (el.getAttribute) {
+          var evvalue = el.getAttribute(evattr)
+          if (!evvalue) {
+            evvalue = el.getAttribute(evattr + '@stop')
+            if (evvalue) evvalue.stop = true
+          } 
+          if (evvalue) handlers.push(evvalue.trim())
+          var reef = el.reef
+          if (!event.reef) event.reef = reef
+          if (reef && handlers.length) { // parse the handler for the event
+            for (var i = 0; i < handlers.length; i++) {
+              var ev = handlers[i]
+              var fn = ev
+              /*
+              var func = function (event) { eval(fn) }
+              try { func.call(reef, event) } catch (err) { reefWarn('reef-event-Error') }
+              /* // old syntax - you do do prop(value)
+              */
+              var parseArgs = function (str) {
+                var argsets = str.match(/\(([^)]*)\)/)
+                return (argsets && argsets[1]) || ''
+              }
+              var args = parseArgs(fn)
+              if (args) {
+                args = args.split(',')
+                fn = fn.split('(')[0]
+                var idx = args.indexOf('$event') // allow substition
+                if (idx >= 0) args[idx] = event
+              }
+              var f = reef.dot(fn); var rval
+              if (f.value !== undefined) {
+                if (isfunction(f.value)) rval = f.value.apply(f.obj, args || [event])
+                else reef.dot(fn, args[0])
+                if (rval === 'stop' || ev.stop) return
+              }
             }
           }
-        }
-        var rn = reef && reef.name
-        if (rf_registry[rn]) {
-          rr = rf_registry[rn]
-          if (rr.listeners && rr.listeners[type]) {
-            if (rr.listeners[type].call(reef, event) === 'stop' || rr.listeners[type].reefStop) { return } // hmm - should we support bubbling?
+          var rn = reef && reef.name
+          if (rf_registry[rn]) {
+            rr = rf_registry[rn]
+            if (rr.listeners && rr.listeners[type]) {
+              if (rr.listeners[type].call(reef, event) === 'stop' || rr.listeners[type].reefStop) { return } // hmm - should we support bubbling?
+            }
           }
         }
         el = el.parentNode
@@ -421,15 +427,15 @@ function ReeferFactory (opts) {
     return dot(refobj, pp)
   }
 
-  function jsonp(str, rf, proppath) {
+  function jsonp (str, rf, proppath) {
     var ind = str.indexOf('{JSONP}')
-    if (ind<0) return str
+    if (ind < 0) return str
     var fname = 'jsonp_rf_' + rf_counter++
     window[fname] = function (data) {
-      rf.dot (proppath, data)
+      rf.dot(proppath, data)
       delete window[fname]
     }
-    return str.replace ('{JSONP}', fname)
+    return str.replace('{JSONP}', fname)
   }
 
   function doDataBind (rf, proppath, sel, copyprop, selctx) {
@@ -460,7 +466,7 @@ function ReeferFactory (opts) {
           case 'html':
           case 'json-raw': loadData.call(rf, proppath, els[2]); break
           case 'json': loadData.call(rf, proppath, els[2], { sanitize: true }); break
-          case 'jsonp': els[2] = jsonp (els[2], rf, proppath) // fall through
+          case 'jsonp': els[2] = jsonp(els[2], rf, proppath) // fall through
           case 'js': loadHTML.call(rf, proppath, els[2]); break
           default:
             reefError('unknown data bind: ' + proppath + ': ' + sel)

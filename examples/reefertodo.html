@@ -114,6 +114,86 @@
       }
     })
 
+        // ================  todos
+        reefer.register ('todos', {
+      data: {
+        todos: [],
+        datasrc: 'data.todos',
+        datactx: 'data',
+        dataslot: 'render',
+        genkey: true,
+        checked: false,
+        addClass: ''
+      },
+      decorators: ['addClass'],
+      slots: {
+        render: {
+          script: reefer.template('d,i,ctx', 
+                                  "<div class='${(d.inTransition===ctx.__xs__.s ? 'remove' : (d.inTransition && ctx.addClass))}'><label>\
+                                      <input type='checkbox' \
+                                             reef.click='methods.checkAndAssign' \
+                                             ${ctx.checked ?  'checked' : ''}></input>\
+                                      <span class=textshadow>${d[0]}</span>\
+                                    </label></div>")
+        }
+      },
+      methods: {
+        checkAndAssign: function (event) {
+          var rf = this
+          var idx = this.htmlToIdx(event.target) - 1
+          var targetReef = reefer.find (rf.data.targetlist)
+          if (!targetReef && targetReef.name!='todos') throw Error ("no target todo list found")
+          var todo = rf.data.todos[idx]
+          if (todo.inTransition) return 
+
+
+          var elem = this.htmlChild(event.target)
+          if (todo.inTransition) 
+            return //already moving
+          todo.inTransition = this.data.__xs__.s
+          xs.observe (todo)
+          targetReef.data.todos.splice (0, 0, todo)
+          return
+        } 
+      },
+      lifecycle: {
+        afterRender: function () {
+          this.data.addClass = this.data.checkclass
+        }
+      },
+      listeners: {
+        animationend: function (event) {
+          var idx = this.htmlToIdx (event.target) - 1
+          if (idx>=0) {
+            var todo = this.data.todos[idx]
+            if (todo.inTransition!==this.data.__xs__.s) {
+              if (todo.inTransition===true) todo.inTransition = null
+              return
+            }
+            if (idx>=0) this.data.todos.splice (idx, 1)
+            todo.inTransition = null
+          }
+        }
+      },
+      observers: {
+        inputtext: function() {
+          if (!this.data.inputtext) return
+          var todo =  [this.data.inputtext]
+          todo.inTransition = true
+          this.data.inputtext = ''
+
+          //animating it
+          this.data.todos.splice (0, 0, todo)
+          this.data.addClass = 'add'
+        },
+        'todos.*.inTransition': function () {
+          //return 'done'
+        }
+      }      
+    })
+
+
+
     function verifyAfterElement (el, eof) {
       var a = el.previousSibling 
       if (!a || !a.reefHolder) {
@@ -332,81 +412,6 @@
     })();
     reefStickyScroll.apply()
 
-    // ================  todos
-    reefer.register ('todos', {
-      data: {
-        todos: [],
-        datasrc: 'data.todos',
-        datactx: 'data',
-        dataslot: 'render',
-        genkey: true,
-        checked: false,
-        addClass: ''
-      },
-      decorators: ['addClass'],
-      slots: {
-        render: {
-          script: reefer.template('d,i,ctx', 
-                                  "<div class='${(d.inTransition===ctx.__xs__.s ? 'remove' : (d.inTransition && ctx.addClass))}'><label>\
-                                      <input type='checkbox' \
-                                             reef.click='methods.checkAndAssign' \
-                                             ${ctx.checked ?  'checked' : ''}></input>\
-                                      <span class=textshadow>${d[0]}</span>\
-                                    </label></div>")
-        }
-      },
-//                                  "<div class='${(ctx.__hmap__[d.__key__])  ? (d.inTransition===ctx.__xs__.s ? 'remove' : '') : ctx.addClass}'><label>\
-      methods: {
-        checkAndAssign: function (event) {
-          var rf = this
-          var idx = this.htmlToIdx(event.target) - 1
-          var targetReef = reefer.find (rf.data.targetlist)
-          if (!targetReef && targetReef.name!='todos') throw Error ("no target todo list found")
-          var todo = rf.data.todos[idx]
-          if (todo.inTransition) return 
-
-
-          var elem = this.htmlChild(event.target)
-          if (todo.inTransition) 
-            return //already moving
-          todo.inTransition = this.data.__xs__.s
-          xs.observe (todo)
-          targetReef.data.todos.splice (0, 0, todo)
-          return
-        } 
-      },
-      lifecycle: {
-        afterRender: function () {
-          this.data.addClass = this.data.checkclass
-        }
-      },
-      listeners: {
-        animationend: function (event) {
-          var idx = this.htmlToIdx (event.target) - 1
-          if (idx>=0) {
-            var todo = this.data.todos[idx]
-            if (todo.inTransition!==this.data.__xs__.s) return
-            if (idx>=0) this.data.todos.splice (idx, 1)
-            todo.inTransition = null
-          }
-        }
-      },
-      observers: {
-        inputtext: function() {
-          if (!this.data.inputtext) return
-          var todo =  [this.data.inputtext]
-          todo.inTransition = true
-          this.data.inputtext = ''
-
-          //animating it
-          this.data.todos.splice (0, 0, todo)
-          this.data.addClass = 'add'
-        },
-        'todos.*.inTransition': function () {
-          //return 'done'
-        }
-      }      
-    })
 
     
     function getOffset(el) {

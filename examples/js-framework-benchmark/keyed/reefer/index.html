@@ -52,7 +52,7 @@ td_ {
             return '<tr class="' + (d.id == store.selected ? 'danger' : '') +  '" reef.click=data.store.select(' + d.id + ')>' +
                 '<td class="col-md-1">' + d.id + '</td>' +
                 '<td class="col-md-4"><a class="lbl">' + d.label + '</a></td>' +
-                '<td class="col-md-1" reef.click=data.store.delete(' + d.id + ')@stop>' +
+                '<td class="col-md-1" reef.click.stop=data.store.delete(' + d.id + ')>' +
                     '<a class="remove"><span class="remove glyphicon glyphicon-remove" aria-hidden="true"></span></a>' +
                 '</td>' +
                 '<td class="col-md-6"></td>' +

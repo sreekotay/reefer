@@ -90,12 +90,14 @@ function ReeferFactory (opts) {
 
       if (ftext) {
         switch (type.split('(')[0].trim()) {
+          case 'reef-method': alwaysobj(attrBag, 'methods')[c.getAttribute('name') || 'default'] = new Function(args, ftext); break
+          case 'reef-observer': alwaysobj(attrBag, 'observers')[c.getAttribute('name') || 'default'] = new Function(args, ftext); break
           case 'reef-function': c.reefScript = new Function(args, ftext); break
           case 'reef-template': c.reefScript = templateEngine(args, ftext); break
           default:
             var p = type.split('reef-p-')[1]
             if (p) { try { ftext = JSON.parse(ftext) } catch (err) {} props[p.trim()] = ftext; return true }
-            reefWarn('unknown reef slot type')
+            reefWarn('unknown reef slot type', type)
             break
         }
       }
@@ -183,15 +185,17 @@ function ReeferFactory (opts) {
 
     // make Reefer
     var defaultData = rf_registry[name]
-    var reef = el.reef = new opts.use(el, defaultData, localData)
+    var reef = new opts.use(el, defaultData, localData)
     reef.name = name
     el.setAttribute('reef-stage', 'mounted')
 
     // register listeners
     if (reef.listeners) {
+      var al = []
       var rl = reef.listeners
       for (var k in rl) {
-        var ev = k.split('@')
+        al.push(k)
+        var ev = k.split('.')
         var e = ev[0]
         if (!rf_listeners[e]) { // we only need to add it once
           rf_listeners[e] = listenerFactory(e)
@@ -200,7 +204,7 @@ function ReeferFactory (opts) {
         rl[e] = rl[k]
         if (rl[ev[1]] === 'stop') rl[e].reefStop = true
       }
-      reef.listeners = null // keep the tag so we know we had listeners - but they are source from the registry
+      reef.listeners = al // keep the tag so we know we had listeners - but they are source from the registry
     }
 
     return reef
@@ -215,9 +219,9 @@ function ReeferFactory (opts) {
         if (el.getAttribute) {
           var evvalue = el.getAttribute(evattr)
           if (!evvalue) {
-            evvalue = el.getAttribute(evattr + '@stop')
+            evvalue = el.getAttribute(evattr + '.stop')
             if (evvalue) evvalue.stop = true
-          } 
+          }
           if (evvalue) handlers.push(evvalue.trim())
           var reef = el.reef
           if (!event.reef) event.reef = reef
@@ -308,6 +312,7 @@ function ReeferFactory (opts) {
     var sh = this.methods; if (sh) for (var k in sh) sh[k] = isfunction(sh[k]) ? sh[k].bind(rf) : sh[k] // bind to reef
 
     this.rootEl = rootEl
+    rootEl.reef = this
     _.obsf = Reefer.prototype.react.bind(rf)
     var _d = this.data = xs.observe({}, _.obsf) // public as well -- our main "react" core
     xs.assign(_d, _.decorators, setup.data, localSetup.props) // make our data

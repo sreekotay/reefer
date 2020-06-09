@@ -19,11 +19,13 @@
     <div class='coral-vertical' style='max-width:calc(100vw - 16px); width:640px; overflow: auto;'>
         <h2 id='duckduckgo' class='coral-wide coral-center coral-space-children' style='font-variant:small-caps; margin-top:8px;'>
           <a  href='http://duckduckgo.com' style='font-variant:small-caps;''>DuckDuckGo </a>
-          <div style='position:relative' reef-p-datasrc='data' reef>
-            <script type='reef-template(d)@2'>
-              <input  id='searchinput' placeholder='Type here - powered by Instant Answers' oninput="updateSearch(this.value)" >
+          <div id='reefinput' style='position:relative' reef-p-datasrc='data' reef-p-inputtext reef reef.input>
+            <script type='reef-template(d)' reef-children=2>
+              <input  id='searchinput' placeholder='Type here - powered by Instant Answers' value="${d.inputtext}" reef.input=methods.submitInput oninput="updateSearch(this.value)" >
               <span reef style='position:absolute; right:8px; top:8px; opacity: 0.0'>✖️</span>
             </script>
+            <script name=submitInput type='reef-method($event)'>this.data.inputtext = $event.target.value</script>
+            <script name=inputtext type='reef-observer(updates)'>updateSearch(updates.value)</script>
           </div>
           <a href='http://duckduckgo.com'><img for='duckduckgo' width=64 src='img/duckduckgo.png'> </a>
         </h2>
@@ -53,17 +55,15 @@
 
   <script>
     function updateSearch(value) {
-      if (value !== window.location.hash.substring(1)) window.location.hash = (value &&  ('#' + value)) || ''
       value = value ||'rock' // some default just because
-      if (value && value.length>2)
-        reefer.find('#searchlist').bind ('data.answer', 
-                                         '$jsonp$https://api.duckduckgo.com/?q=' + encodeURIComponent(value) + 
-                                         '&format=json&callback={JSONP}')
+      var reef = reefer.find('#searchlist')
+      if (reef && value && value.length>2)
+        reef.bind ('data.answer', '$jsonp$https://api.duckduckgo.com/?q=' + encodeURIComponent(value) + 
+                                  '&format=json&callback={JSONP}')
       }
     function dohashchange(e) { 
       var v = decodeURIComponent (window.location.hash.substring(1))
-      if (!e) searchinput.value = v     
-      updateSearch (v)
+      reefer.find('#reefinput').data.inputtext = v 
     }
     window.addEventListener('hashchange', dohashchange) // since this event is at the window level, reflect it to out component
     reefer.ready(function () {

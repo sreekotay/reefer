@@ -135,7 +135,7 @@ Note that we both passed in the property `name` via HTML, as a default when regi
 
 reef.EVENTNAME=functionname(LITERAL,...,LITERAL)
 reef.EVENTNAME=property(LITERAL)
-reef.click@stop
+reef.click.stop
 
 # Events #
 - includes the closest reef as `event.reef` in the event

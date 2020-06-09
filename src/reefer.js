@@ -604,7 +604,7 @@ function ReeferFactory (opts) {
       var cc = c.childNodes
       var nc = n.childNodes
       var il = i = Math.min(cc.length, nc.length)
-      while (il < cc.length) c.removeChild(cc[il++])
+      while (il < cc.length) c.removeChild(cc[i])
       while (il < nc.length) c.appendChild(nc[il++])
       while (--i >= 0) {
         var ccn = cc[i]

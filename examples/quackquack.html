@@ -18,7 +18,10 @@
   <body class='coral-horizontal' style='justify-content: center;overflow-y:scroll;'>
     <div class='coral-vertical' style='max-width:calc(100vw - 16px); width:640px; overflow: auto;'>
         <h2 id='duckduckgo' class='coral-wide coral-center coral-space-children' style='font-variant:small-caps; margin-top:8px;'>
-          <a  href='http://duckduckgo.com' style='font-variant:small-caps;''>DuckDuckGo </a>
+          <div class='coral-horizontal coral-center'>
+            <a href='http://duckduckgo.com'><img for='duckduckgo' width=64 src='img/duckduckgo.png'></a>
+            <a  href='http://duckduckgo.com' style='font-variant:small-caps;''>DuckDuckGo </a>
+          </div>
           <div id='reefinput' style='position:relative' reef-p-datasrc='data' reef-p-inputtext reef reef.input>
             <script type='reef-template(d)' reef-children=2>
               <input  id='searchinput' placeholder='Type here - powered by Instant Answers' 
@@ -29,7 +32,6 @@
             <script name=submitInput type='reef-method($event)'>this.data.inputtext = $event.target.value</script>
             <script name=inputtext type='reef-observer(updates)'>updateSearch(updates.value)</script>
           </div>
-          <a href='http://duckduckgo.com'><img for='duckduckgo' width=64 src='img/duckduckgo.png'> </a>
         </h2>
         <div reef id=searchlist
              reef-p-answer

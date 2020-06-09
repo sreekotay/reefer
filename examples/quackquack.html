@@ -15,23 +15,17 @@
     article {font-size:13px; font-weight:400; font-style:italic;}
     input {margin:8px; min-width:280px; border: 1px solid #E37151; padding: 8px;}
   </style>
-  <script>
-    function updateSearch(value) {
-      if (value && value.length>2) {
-        reefer.find('#searchlist').bind ('data.answer', '$jsonp$https://api.duckduckgo.com/?q=' + encodeURIComponent(value) + '&format=json&callback={JSONP}')
-      }
-    }
-  </script>
+
   <body class='coral-horizontal' style='justify-content: center;overflow-y:scroll;'>
     <div class='coral-vertical' style='max-width:calc(100vw - 16px); width:640px; overflow: auto;'
     >
-        <h2 id='duckduckgo' class='coral-wide coral-center coral-space-children' style='font-variant:small-caps'>
+        <h2 id='duckduckgo' class='coral-wide coral-center coral-space-children' style='font-variant:small-caps; margin-top:8px;'>
           <a href='http://duckduckgo.com' style='font-variant:small-caps;''>DuckDuckGo </a>
-          <input placeholder='Type here - powered by Instant Answers' onkeyup="updateSearch(this.value)" >
+          <input id='searchinput' placeholder='Type here - powered by Instant Answers' onkeyup="updateSearch(this.value)" >
           <a href='http://duckduckgo.com'><img for='duckduckgo' width=64 src='img/duckduckgo.png'> </a>
         </h2>
         <div reef id=searchlist
-             reef-p-answer='~~$json-raw$https://api.duckduckgo.com/?q=simpsons+characters&format=json'
+             reef-p-answer
              reef-p-datasrc='data.answer.RelatedTopics'
              reef-p-datakey='FirstURL'
              class='coral-vertical coral-space-children'>
@@ -53,4 +47,27 @@
 
     </div>
   </body>
+
+  <script>
+    function updateSearch(value) {
+      if (value !== window.location.hash.substring(1)) {
+        window.location.hash = (value &&  ('#' + value)) || ''
+      }
+      if (value && value.length>2) {
+        reefer.find('#searchlist').bind ('data.answer', 
+                                         '$jsonp$https://api.duckduckgo.com/?q=' + encodeURIComponent(value) + 
+                                         '&format=json&callback={JSONP}')
+      }
+    }
+    function dohashchange(e) { 
+      var v = decodeURIComponent (window.location.hash.substring(1))
+      if (!e) searchinput.value = v     
+      updateSearch (v)
+    }
+    window.addEventListener('hashchange', dohashchange) // since this event is at the window level, reflect it to out component
+    reefer.ready(function () {
+      dohashchange()
+      searchinput.focus()
+    })
+  </script>
 </html>

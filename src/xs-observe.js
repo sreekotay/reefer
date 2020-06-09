@@ -175,7 +175,7 @@
       obsobj[obsp] = refobj[refp] // "realize" it
       if (!obsobj.__observer__) xs.observe(obsobj)
       var objpd = Object.getOwnPropertyDescriptor(obsobj, obsp)
-
+/*
       switch (refp) {
         case 'value': {
           refobj.addEventListener ('input', function() {
@@ -184,7 +184,7 @@
           })
         }
       }
-
+*/
       Object.defineProperty(obsobj, obsp, {
         get: function () { return refobj[refp] },
         set: function (v) { refobj[refp] = v; return objpd.set(v) },

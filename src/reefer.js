@@ -421,6 +421,17 @@ function ReeferFactory (opts) {
     return dot(refobj, pp)
   }
 
+  function jsonp(str, rf, proppath) {
+    var ind = str.indexOf('{JSONP}')
+    if (ind<0) return str
+    var fname = 'jsonp_rf_' + rf_counter++
+    window[fname] = function (data) {
+      rf.dot (proppath, data)
+      delete window[fname]
+    }
+    return str.replace ('{JSONP}', fname)
+  }
+
   function doDataBind (rf, proppath, sel, copyprop, selctx) {
     var refobj, sp
     sel = sel || '^'
@@ -449,6 +460,7 @@ function ReeferFactory (opts) {
           case 'html':
           case 'json-raw': loadData.call(rf, proppath, els[2]); break
           case 'json': loadData.call(rf, proppath, els[2], { sanitize: true }); break
+          case 'jsonp': els[2] = jsonp (els[2], rf, proppath) // fall through
           case 'js': loadHTML.call(rf, proppath, els[2]); break
           default:
             reefError('unknown data bind: ' + proppath + ': ' + sel)

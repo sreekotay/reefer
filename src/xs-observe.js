@@ -171,9 +171,19 @@
       }
     }
     if (refobj instanceof Node) {
-      if (!(obsp in obsobj)) obsobj[obsp] = obsobj[obsp] // "realize" it
+      //if (!(obsp in obsobj)) 
+      obsobj[obsp] = refobj[refp] // "realize" it
       if (!obsobj.__observer__) xs.observe(obsobj)
       var objpd = Object.getOwnPropertyDescriptor(obsobj, obsp)
+
+      switch (refp) {
+        case 'value': {
+          refobj.addEventListener ('input', function() {
+            console.log(refobj[refp])
+            obsobj[obsp] = refobj[refp]
+          })
+        }
+      }
 
       Object.defineProperty(obsobj, obsp, {
         get: function () { return refobj[refp] },

@@ -10,18 +10,16 @@
     .coral-card img {max-height:128px; max-width:50%; margin-right:8px;}
     .coral-card { min-width: 128px }
     .list {font-style:normal; margin-bottom:8px; color:#E37151; font-size:16px;}
-    a:link {font-weight: 500; font-style:normal; color:#E37151;}
-    article {font-size:13px; font-weight:200; font-style:italic;}
-    input {margin:8px; min-width:280px;}
+    a {text-decoration-color:#E37151;}
+    a:link {font-weight: 500; font-style:normal; color:#E37151; }
+    article {font-size:13px; font-weight:400; font-style:italic;}
+    input {margin:8px; min-width:280px; border: 1px solid #E37151; padding: 8px;}
   </style>
   <script>
     function updateSearch(value) {
       if (value && value.length>2) {
-        reefer.find('*').bind ('data.answer', '$js$https://api.duckduckgo.com/?q=' + encodeURIComponent(value) + '&format=json&callback=loadjson')
+        reefer.find('#searchlist').bind ('data.answer', '$jsonp$https://api.duckduckgo.com/?q=' + encodeURIComponent(value) + '&format=json&callback={JSONP}')
       }
-    }
-    function loadjson (data) {  
-      if (data && data.RelatedTopics && data.RelatedTopics.length) reefer.find('*').data.answer = data 
     }
   </script>
   <body class='coral-horizontal' style='justify-content: center;overflow-y:scroll;'>
@@ -29,11 +27,10 @@
     >
         <h2 id='duckduckgo' class='coral-wide coral-center coral-space-children' style='font-variant:small-caps'>
           <a href='http://duckduckgo.com' style='font-variant:small-caps;''>DuckDuckGo </a>
-          <input placeholder='Type here - powered by Instant Answers' onkeyup="updateSearch(this.value)" 
-                 >
+          <input placeholder='Type here - powered by Instant Answers' onkeyup="updateSearch(this.value)" >
           <a href='http://duckduckgo.com'><img for='duckduckgo' width=64 src='img/duckduckgo.png'> </a>
         </h2>
-        <div reef 
+        <div reef id=searchlist
              reef-p-answer='~~$json-raw$https://api.duckduckgo.com/?q=simpsons+characters&format=json'
              reef-p-datasrc='data.answer.RelatedTopics'
              reef-p-datakey='FirstURL'

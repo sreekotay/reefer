@@ -18,8 +18,8 @@
         <script type='reef-function(arr)' reef-slot=samples>
           var s=''; for (var i=0; i<arr.length; i++) {
             var q = arr[i]
-            s += "<td class='" + q.elapsedClassName + "'>" + (q.formatElapsed||'') + 
-                  "<div class='popover left'> <div class='popover-content'>" + (q.query || '') + 
+            s += "<td class='" + q.elapsedClassName + "'>" + (q.formatElapsed||' ') + 
+                  "<div class='popover left'> <div class='popover-content'>" + (q.query || ' ') + 
                   "</div><div class='arrow'></div></div></td>"
           }
           return s 
@@ -32,10 +32,73 @@
             </td> ${ctx.samples.script(db.lastSample.topFiveQueries)}
           </tr>
         </script>
+        <!--
+        <script type='reef-function'>
+          <tr data-id="dbs">
+            <td class="dbname" data-id="dbname"></td>
+            <td class="query-count"><span data-id="lastSample"></span></td>
+            <td data-id="topFiveQueries">
+               <span data-id="elapsed"></span>
+               <div class="popover left">
+                  <div class="popover-content" data-id="query"></div>
+                  <div class="arrow"></div>
+               </div>
+            </td>
+         </tr>
+          <tr>
+            <td class="dbname">${db.dbname}</td>
+            <td class="query-count">
+              <span class="${db.lastSample.countClassName}">${db.lastSample.nbQueries}</span>
+            </td>
+            <tr>
+              <td class="dbname">${db.dbname}</td>
+              <td class="query-count">
+                <span class="${db.lastSample.countClassName}">${db.lastSample.nbQueries}</span>
+              </td> ${ctx.samples.script(db.lastSample.topFiveQueries)}
+            </tr>  
+            {{ ctx.samples.script(db.lastSample.topFiveQueries }}
+            <td class='${q.elapsedClassName}'>${q.formatElapsed}
+              <span data-id="elapsed"></span>
+              <div class="popover left">
+                 <div class="popover-content" data-id="query"></div>
+                 <div class="arrow"></div>
+              </div>
+           {{ }}
+          </tr>
+        </script>-->
+        <script type='reef-function(db,i,ctx)' reef-slot=row_>
+
+          var htag = this.htag 
+          var hdata = this.hdata 
+
+          var c = []; var qt = db.lastSample.topFiveQueries
+          for (var i=0; i<qt.length; i++) {
+            var q = qt[i]
+            c[i] = htag('td').a({class:q.elapsedClassName}).c([
+              hdata(q.formatElapsed||'_'),
+              htag('div').a({class:'popover left'}).c([
+                htag('div').a({class:'popover-content'}).c([
+                  hdata(q.query.replace('<IDLE>', '') || '_'), 
+                  htag('div').a({class:'arrow'})
+                ])
+              ])
+            ])
+          }
+
+          var t = htag('tr').c([
+          htag('td').a({class:'dname'}).c([hdata(db.dbname)]),
+          htag('td').a({class:'query-count'}).c([
+            htag('span').a({class:db.lastSample.countClassName}).c([hdata(db.lastSample.nbQueries)])
+            ])
+          ].concat(c))
+          return t
+          return '<tr><td>test</td></tr>'
+        </script>
     </tbody>
   </table>
 
   </div>
+  <script src='../../src/morphdom.js'></script>
   <script src='../../src/xs-observe.js'></script>
   <script src='../../src/reefer.js'></script>
   <script src="ENV.js"></script>

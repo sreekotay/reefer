@@ -15,8 +15,15 @@
       article           {font-size:13px; font-weight:400; font-style:italic;}
       input             {margin:8px; min-width:280px; border: 1px solid #E37151; padding: 8px;}
   </style>
-  <body class='coral-horizontal' style='justify-content: center;overflow-y:scroll;'>
-    <div class='coral-vertical' style='max-width:calc(100vw - 16px); width:640px; overflow: auto;'>
+  <body style='center;overflow-y:scroll;'>
+    <nav class="menu" style='background-color:#E37151;'>
+      <ul style=''>
+        <li><a href="#">Home</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>  
+    <div class='coral-vertical' style='margin:auto; max-width:calc(100vw - 16px); width:640px; overflow: auto;'>
         <h2 id='duckduckgo' class='coral-wide coral-center coral-space-children' style='font-variant:small-caps; margin-top:8px;'>
           <div class='coral-horizontal coral-center'>
             <a href='http://duckduckgo.com'><img for='duckduckgo' width=64 src='img/duckduckgo.png'></a>
@@ -24,10 +31,12 @@
           </div>
           <div id='reefinput' style='position:relative' reef-p-datasrc='data' reef-p-inputtext reef reef.input>
             <script type='reef-template(d)' reef-children=2>
-              <input  id='searchinput' placeholder='Type here - powered by Instant Answers' 
+              <div> 
+                <input  id='searchinput' placeholder='Type here - powered by Instant Answers' 
                     value="${d.inputtext}" reef.input=methods.submitInput 
                     _oninput="updateSearch(this.value)" >
               <span reef style='position:absolute; right:8px; top:8px; opacity: 0.0'>✖️</span>
+              </div>
             </script>
             <script name=submitInput type='reef-method($event)'>this.data.inputtext = $event.target.value</script>
             <script name=inputtext type='reef-observer(updates)'>updateSearch(updates.value)</script>

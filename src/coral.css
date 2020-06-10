@@ -17,6 +17,36 @@
   }
 }
 
+nav {
+  width:100%;
+  display:flex;
+  justify-content: center;
+  background-color: #2196F3;
+  padding: 2px 0;
+  overflow-x:auto;
+  overflow-y:hidden;
+  white-space: nowrap;
+}
+nav ul {
+  padding: 0;
+}
+nav li {
+  display: inline-flex;
+  padding: 0px 16px;
+}
+nav a {
+  text-decoration: none;
+}
+nav a:link {
+  font-weight: 400;
+  color: white;
+
+}
+nav a:visited {
+  color: white;
+
+}
+
 
 @keyframes coral-keys-appear { 0%   { max-height: 0; opacity: 1; } 100% { max-height: 800px; opacity: 1;} }
 @keyframes coral-keys-disappear { 0%   { max-height: 200px; opacity: 1} 100% { max-height: 0; opacity: 0;} }

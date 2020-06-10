@@ -47,7 +47,7 @@
     </div>
     <hr>
     <blockquote>
-      A simple To-Do app with some with some stick inputs and headers, and some animated transitions.
+      A simple To-Do app with some with some sticky inputs and headers, and some animated transitions.
       The sticky headers are *close* but not quite right....
     </blockquote>
     <hr>
@@ -83,6 +83,7 @@
   <div style='background-color:red; height:1000px; width: 40px'></div>
 </div>
 <script>
+
   
     // ================  typer
     reefer.register('typer', {
@@ -94,12 +95,14 @@
         var slots = this.slots
         var hinttext = (slots && slots.hinttext && slots.hinttext.text) || ''
         var prompttext = (slots && slots.prompttext && slots.prompttext.text ) || ''
-        return '\<div style="display:flex; align-items:center">\
+
+      
+        this.html (1, '<div style="display:flex; align-items:center">\
           <label for="mirror"><b>New Task</b> </label>\
           <input style="margin-left: 6px; flex-grow:1" type="text" id="mirror" value="' + props.text +'"> \
-          <button style="margin-left:4px" reef.click="methods.submitInput">Add</button></div>\
-          <div style="text-align:center"><em aria-live="polite">' + (props.text.length ? props.text + hinttext: prompttext) + "</em></div>";
-        return html;
+          <button style="margin-left:4px" reef.click="methods.submitInput">Add</button></div>')
+        this.html (2, '<div style="text-align:center"><em aria-live="polite">' + (props.text.length ? props.text + hinttext: prompttext) + '</em></div>')
+        return
       },
       methods: {
         submitInput: function() {
@@ -114,8 +117,8 @@
       }
     })
 
-        // ================  todos
-        reefer.register ('todos', {
+    // ================  todos
+    reefer.register ('todos', {
       data: {
         todos: [],
         datasrc: 'data.todos',

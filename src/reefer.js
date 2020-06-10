@@ -51,6 +51,7 @@ function ReeferFactory (opts) {
           if (dl[i]) uk = key === undefined ? dl[i].__key__ : dl[i][key]
           if (gk && uk === undefined && t === 'object') uk = xs.privateprop(dl[i], '__key__', 'k' + rf_key++)
           var row = gen.script ? gen.script(dl[i], i, dc) : gen.text
+          //          var row = gen.script ? gen.script.call(this, dl[i], i, dc) : this.htag('div').c([this.hdata(' ')])//gen.text
           this.html(uk || i, row)
         }
         delete dc.__hmap__
@@ -549,6 +550,7 @@ function ReeferFactory (opts) {
     }
   }
   function hash (str) {
+    // if (typeof (str) === 'object') str = JSON.stringify(str)
     var hash = 0; var len = str.length
     for (var i = 0; i < len; i++) {
       hash = hash * 31 + str.charCodeAt(i)
@@ -576,33 +578,43 @@ function ReeferFactory (opts) {
     return p ? p.nextSibling : pn.childNodes[0]
   }
 */
-  function copyAttributes (c, n) {
-    try {
-      var a = {}; var at
-      var na = n.attributes; var nal = na.length
-      for (var i = 0; i < nal; i++) {
-        at = na[i]; a[at.name] = true
-        if (c.getAttribute(at.name) !== at.value) c.setAttribute(at.name, at.value)
-      }
-      var ca = c.attributes; var cal = ca.length
-      if (cal === nal) return true
-      for (i = 0; i < cal; i++) {
-        at = ca[i]; if (a[at.name]) continue
-        c.removeAttribute(at.name)
-      }
-    } catch (err) { return true }
+  const rf_tagvalue = {
+    'INPUT': true,
+    'TEXTAREA': true
   }
-  function attemptMerge (c, n) {
+  function copyAttributes (c, n) {
+    // try {
+    var a = {}; var at
+    var na = n.attributes; var nal = na.length
+    if (rf_tagvalue[c.nodeName] && c.value !== n.value) { c.value = n.value } // for textarea and input
+    for (var i = 0; i < nal; i++) {
+      at = na[i]; a[at.name] = true
+      if (c.getAttribute(at.name) !== at.value) {
+        c.setAttribute(at.name, at.value)
+      }
+    }
+    var ca = c.attributes; var cal = ca.length
+    if (cal === nal) return true
+    for (i = 0; i < cal; i++) {
+      at = ca[i]; if (a[at.name]) continue
+      c.removeAttribute(at.name)
+    }
+    return true
+    // } catch (err) { return false }
+  }
+  function mergeNode (c, n) {
     if (c.nodeType === 3 && n.nodeType === 3) {
       c.nodeValue = n.nodeValue
-      return true
+      return c
     }
-    if ((c.nodeName !== n.nodeName) ||
-        (!copyAttributes(c, n))) return false
-    if (c.childNodes.length || n.childNodes.length) {
+    if ((c.nodeName !== n.nodeName) || (!copyAttributes(c, n))) {
+      c.parentNode.replaceChild(n, c)
+      return n
+    }
+    var cc = c.childNodes
+    var nc = n.childNodes
+    if (cc.length || nc.length) {
       var i
-      var cc = c.childNodes
-      var nc = n.childNodes
       var il = i = Math.min(cc.length, nc.length)
       while (il < cc.length) c.removeChild(cc[i])
       while (il < nc.length) c.appendChild(nc[i])
@@ -611,18 +623,10 @@ function ReeferFactory (opts) {
         var ncn = nc[i]
         if (ccn.nodeType === 3 && ncn.nodeType === 3) { if (ccn.nodeValue !== ncn.nodeValue) ccn.nodeValue = ncn.nodeValue; continue }
         if (ccn.isEqualNode(ncn)) continue
-        if (ccn.nodeName !== ncn.nodeName || !attemptMerge(ccn, ncn)) {
+        if (ccn.nodeName !== ncn.nodeName || !mergeNode(ccn, ncn)) {
           c.replaceChild(ncn, ccn)
         }
       }
-    }
-    return true
-  }
-
-  function mergeNode (c, n) {
-    if (c.nodeName !== n.nodeName || !attemptMerge(c, n)) {
-      c.parentNode.replaceChild(n, c)
-      return n
     }
     return c
   }
@@ -679,16 +683,34 @@ function ReeferFactory (opts) {
       hc = ha[i]
       var c = hc.el
       var h = hc.h
+      // if (typeof (h) === 'object') h = h.html()
       if (typeof (h) === 'number') {
         var n = div.childNodes[hc.h - cnt]
+        /*
+        if (typeof (hc.hh) === 'object') {
+          var ch = c.c
+          var nh = hc.hh
+          nh.el = n
+          ch.el = c
+          nh = hmerge(ch, nh)
+          if (nh !== ch) {
+            hc.el = c = nh.el
+            cnt++
+          }
+          c.c = nh
+        } else {
+        */
+        // n = morphdom(c,n)
         n = mergeNode(c, n)
         if (n !== c) {
           hc.el = c = n
           cnt++
         }
+        // }
       } else if (h) {
-        if (i >= root.childNodes.length) hta += h
+        if (/* 0 && */i >= root.childNodes.length) hta += h
         else hc.el = c = hydrate(root, h).firstChild
+        // c.c = hc.h
       }
       hc.idx = i
       hc.h = ''
@@ -772,6 +794,10 @@ function ReeferFactory (opts) {
       ha[idx] = hc // set the position
       if (hc.hsh === hsh) return
       hc.h = ha.htmlIdx++
+      /*
+      hc.hh = typeof(htmlGen)==='object' && htmlGen
+      ha.html += (typeof (htmlGen) === 'object' ? htmlGen.html() : htmlGen)
+      */
       ha.html += htmlGen
       hc.hsh = hsh
       // hc.split = splitter(htmlGen)
@@ -781,7 +807,112 @@ function ReeferFactory (opts) {
       hm[id] = hc
     }
   }
+  /*
+  function hcopy (c, n) {
+    c.tag = n.tag
+    c.d = n.d
+    c.c = n.c
+    c.el = n.el
+  }
+  function hcopyAttributes (c, n) {
+    try {
+      var ca = c.a
+      var na = n.a
+      for (var a in na) {
+        if (ca[a] !== na[a]) {
+          if (rf_tagvalue[c.nodeName] && a === 'value') {
+            c.value = na[a]
+          }
+          ca[a] = na[a]
+          c.el.setAttribute(a, ca[a])
+        }
+      }
+      for (a in ca) {
+        if (!(a in na)) {
+          delete ca[a]
+          c.el.removeAttribute(a)
+        }
+      }
+      return true
+    } catch (err) {
+      console.error(err)
+    }
+    return false
+  }
+  function hmergeAttempt (c, n) {
+    if (!c.tag && !n.tag) {
+      if (c.d !== n.d) {
+        c.d = n.d
+        c.el.nodeValue = n.el.nodeValue
+      }
+      return true
+    }
+    if (c.tag !== n.tag || !hcopyAttributes(c, n)) {
+      return false
+    }
 
+    // copy attributes
+    if (!c.el || !n.el) { debugger}
+
+    if ((c.c && c.c.length) || (n.c && n.c.length)) {
+      var i
+      var cc = (c.c && c.c[0] && c.c) || []; var cce = c.el.childNodes
+      var nc = (n.c && n.c[0] && n.c) || []; var nce = n.el.childNodes
+      var il = i = Math.min(cc.length, nc.length)
+      while (il < cce.length) c.el.removeChild(cce[i])
+      while (il < nce.length) c.el.appendChild(nce[i])
+      c.c.length = n.c.length
+      while (--i >= 0) {
+        var ccn = cc[i]; ccn.el = cce[i]
+        var ncn = nc[i]; ncn.el = nce[i]
+        if (!ccn.tag && !ncn.tag) { if (ccn.d !== ncn.d) { ccn.d = ncn.d; ccn.el.nodeValue = ncn.el.nodeValue } continue }
+        if (ccn.tag !== ncn.tag || !hmergeAttempt(ccn, ncn)) {
+          c.el.replaceChild(ncn.el, ccn.el)
+          hcopy(ccn, ncn)
+        }
+      }
+    }
+    return true
+  }
+
+  function hmerge (c, n) {
+    if (c.tag !== n.tag || !hmergeAttempt(c, n)) {
+      c.el.parentNode.replaceChild(n.el, c.el)
+      hcopy(c, n)
+      return n
+    }
+    return c
+  }
+  function HTAG (t, data) {
+    var p = HTAG.prototype
+    this.tag = t
+    this.a = p.a
+    this.c = p.c
+    this.d = data
+  }
+  HTAG.prototype.a = function (o) {
+    this.a = o; this.a[0] = true; return this
+  }
+  HTAG.prototype.c = function (c) {
+    this.c = c; return this
+  }
+  HTAG.prototype.html = function () {
+    if (!this.tag) return this.d
+    var a = this.a; var attrs = ''
+    if (a && a[0]) {
+      for (var k in a) {
+        if (k !== '0') { attrs += ' ' + k + '="' + a[k].replace(/"/, '\\"') + '"' }
+      }
+    }
+    var c = this.c; var chtml = ''
+    if (c && c[0]) for (var i = 0; i < c.length; i++) chtml += c[i].html()
+    return '<' + this.tag + attrs + '>' + chtml +
+           '</' + this.tag + '>'
+  }
+
+  Reefer.prototype.htag = function (t) { return new HTAG(t) }
+  Reefer.prototype.hdata = function (d) { return new HTAG(false, d) }
+*/
   Reefer.prototype.dot = function (path, value) {
     var v = dot(this, path)
     if (arguments.length > 1) {

@@ -2,10 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Reefer -"keyed"</title>
+    <title>Coral.ui -"keyed"</title>
     <link rel="stylesheet" href="./css/currentStyle.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.0.0/animate.min.css" />
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js'></script>
 </head>
 <body>
 <style>
@@ -22,37 +20,37 @@ td_ {
 </style>
 <div id='main'  class="container">
     <div class="jumbotron">
-        <div class="row"  reef_='bench-buttons' reef.click >
+        <div class="row" >
             <div class="col-md-6">
                 <h1>Reefer -"keyed"</h1>
             </div>
-            <div class='col-md-6' reef=mybuttons reef.click reef-p-datasrc='data.list' reef-p-list='[
+            <div class='col-md-6' coral=mybuttons coral-on-click coral-s-datasrc='state.list' coral-s-list='[
                 ["Create 1,000 rows","methods.run"],
                 ["Create 10,000 rows","methods.runlots"],
-                ["Append 1,000 rows","data.store.add"],
-                ["Update Every 10th row","data.store.update"],
-                ["Clear","data.store.clear"],
-                ["Swap Rows","data.store.swapRows"]
+                ["Append 1,000 rows","state.store.add"],
+                ["Update Every 10th row","state.store.update"],
+                ["Clear","state.store.clear"],
+                ["Swap Rows","state.store.swapRows"]
                 ]'>
-                <script type='reef-template(d,i)' reef-slot='list-generator'>
+                <script type='coral-template(d,i)' coral-slot='list-generator'>
                     <div class="col-sm-6 smallpad">
-                        <button type='button' class='btn btn-primary btn-block' reef.click='${d[1]}'>${d[0]}</button>
+                        <button type='button' class='btn btn-primary btn-block' coral-on-click='${d[1]}'>${d[0]}</button>
                     </div>
                 </script>
             </div>
         </div>
     </div>
-    <table reef='simple-loop' class="table table-hover table-striped test-data" 
-            reef-p-datasrc='data.store.data' 
-            reef-p-datakey='id' 
-            reef.click 
-            reef-p-store='~~[reef=mybuttons]'>
-        <script type='reef-function(d,i)'  reef-slot='list-generator'>
-            store = this.data.store || {}
-            return '<tr class="' + (d.id == store.selected ? 'danger' : '') +  '" reef.click=data.store.select(' + d.id + ')>' +
+    <table coral='simple-loop' class="table table-hover table-striped test-data" 
+            coral-s-datasrc='state.store.data' 
+            coral-s-datakey='id' 
+            coral-on-click 
+            coral-s-store='~~[coral=mybuttons]'>
+        <script type='coral-function(d,i)'  coral-slot='list-generator'>
+            store = this.state.store || {}
+            return '<tr class="' + (d.id == store.selected ? 'danger' : '') +  '" coral-on-click=state.store.select(' + d.id + ')>' +
                 '<td class="col-md-1">' + d.id + '</td>' +
                 '<td class="col-md-4"><a class="lbl">' + d.label + '</a></td>' +
-                '<td class="col-md-1" reef.click.stop=data.store.delete(' + d.id + ')>' +
+                '<td class="col-md-1" coral-on-click.stop=state.store.delete(' + d.id + ')>' +
                     '<a class="remove"><span class="remove glyphicon glyphicon-remove" aria-hidden="true"></span></a>' +
                 '</td>' +
                 '<td class="col-md-6"></td>' +
@@ -61,37 +59,37 @@ td_ {
     </table>
     <span class="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
 </div>
-<script src='../../../../src/xs-observe.js'></script>
-<script src='../../../../src/reefer.js'></script>
+<script src='../../../../src/coral-observe.js'></script>
+<script src='../../../../src/coral-ui.js'></script>
 <script src='src/Main.js'></script>
 <script>
-    reefer.register ('simple-loop', {
-        template: function () {
-            var dl = this.dot(this.data.datasrc).value// || this
-            var id = this.data.datakey
+    coral.ui.register ('simple-loop', {
+        update: function () {
+            var dl = this.dot(this.state.datasrc).value// || this
+            var id = this.state.datakey
             var gen = this.slots['list-generator']
             if (!dl) return ''
             if (!Array.isArray(dl)) return gen.script ? gen.script.call (this, dl, 0) : gen.text
             for (var i=0; i<dl.length; i++) {
                 var row = gen.script ? gen.script.call (this, dl[i], i) : gen.text
-                this.html(this.data.datakey && dl[i][this.data.datakey], row)
+                this.html(this.state.statekey && dl[i][this.state.statekey], row)
             }
         },
         observers: {
             datasrc: function(updates) {
-                var datasrc = this.data.datasrc
+                var datasrc = this.state.datasrc
                 var watcher = datasrc.split('.')
                 watcher.shift(); 
                 watcher = watcher.join('.') + '.*'
                 this.observe (watcher, function(updates) {
                     if (updates.action !== 'set') return
-                    if (!this.data.datakey) return
+                    if (!this.state.statekey) return
                     var dl = this.dot(datasrc).value
                     var gen = this.slots['list-generator']
                     var o = updates.find(dl)
                     if (o!==undefined) {
                         o = o | 0
-                        this.htmlUpdate (o, this.data.datakey && dl[o][this.data.datakey], gen.script.call(this, dl[o], o))   
+                        this.htmlUpdate (o, this.state.statekey && dl[o][this.state.statekey], gen.script.call(this, dl[o], o))   
                         return 'done'
                     }
                 })
@@ -99,10 +97,10 @@ td_ {
         }
     })
 
-    reefer.register('mybuttons', {
+    coral.ui.register('mybuttons', {
         methods: {
-            run: function () { this.data.store.clear(); this.data.store.run() },
-            runlots: function () { this.data.store.clear(); this.data.store.runLots() }
+            run: function () { this.state.store.clear(); this.state.store.run() },
+            runlots: function () { this.state.store.clear(); this.state.store.runLots() }
         }
     }, 'simple-loop')
 </script>

@@ -1,47 +1,50 @@
+# THIS REPOSITORY HAS MOVED. #
 
+Please visit: 
+https://github.com/sreekotay/coral-ui
 
-# Reefer
+# THIS REPOSITORY HAS MOVED. #
+
+# coral.ui (formerly REEFER)
 A lightweight fully reactive, low boilerplate UI library.
 Inspired by Vue, Svelte, and (of course) Reef.
 
-Reefer can be used both programatically and declaratively.
+coral.ui can be used both programatically and declaratively.
 
 # Getting Started
 
 No build is required. 
-Check out some examples: <https://sreekotay.github.io/reefer/examples/>.
+Check out some examples: <https://sreekotay.github.io/coral.ui/examples/>.
 
 Simply include:
 ```
-	<script src=reefer-min.js>
+	<script src=coral-ui-min.js>
 ```
 or 
 ```
-	<script src=xs_observe.js>
-	<script src=reefer.js>
+	<script src=coral-observe.js>
+	<script src=coral-ui.js>
 ```
-This will add 3 items to your global namespace.
+This will add 1 item to your global namespace.
 ```
-	reefer
-	reeferHTML
-	xs (this is the reactive observer used by reefer)
+	coral
 ```
 
-Note that the core of reefer runs with polyfill in IE11.  If you wish to use events, the a polyfill for custom events is required (provided here also.)
+Note that the core of coral.ui runs with polyfill in IE11.  If you wish to use events, the a polyfill for custom events is required (provided here also.)
 You can conditionally include with this line:
 ```
-	  <script>window.MSInputMethodContext && document.documentMode && document.write('<script src="../../public/js/reeferIE11.js"><\x2fscript>');</script>
+	  <script>window.MSInputMethodContext && document.documentMode && document.write('<script src="../../public/js/coral.uiIE11.js"><\x2fscript>');</script>
 ```
 
 # Hello World #
 ```
 <html>
-<script src=reefer-min.js></script>
+<script src=coral.ui-min.js></script>
 <body>
-	example: <div reef=hello></div>		
+	example: <div coral=hello></div>		
 </body>
 <script>
-	reefer.register ('hello', {
+	coral.ui.register ('hello', {
 		template: function() {
 			this.html (0, 'Hello World!')
 		}
@@ -53,12 +56,12 @@ and a slightly more complicated example
 ```
 <html>
   <script src=xs_observe.js></script>
-  <script src=reefer.js></script>
+  <script src=coral.ui.js></script>
 <body>
-  example: <div reef=hello reef-p-name='Alice'></div>		
+  example: <div coral=hello coral-p-name='Alice'></div>		
 <script>
-	var helloTempl = reefer.template ('name', 'Hello World ${name||""}!')
-	reefer.register ('hello', {
+	var helloTempl = coral.ui.template ('name', 'Hello World ${name||""}!')
+	coral.ui.register ('hello', {
 		data: {
 			name: 'Sree'
 		},
@@ -67,7 +70,7 @@ and a slightly more complicated example
 		}
 	})
 	setTimeout(function () {
-		reefer.find('[reef=hello]').data.name = 'Bob'
+		coral.ui.find('[coral=hello]').data.name = 'Bob'
 	}, 2000)
 </script>
 </body>
@@ -77,7 +80,8 @@ Note that we both passed in the property `name` via HTML, as a default when regi
 
 
 # Sections #
-- `data`: maybe object or array (will be converted to object with all properties undefined)
+- `state`: maybe object or array (will be converted to object with all properties undefined)
+- `data`: your non-reactive component data
 - `mutate`: function called whenever data is updates
 - `template`: function() called when you should render to this.rootEl. The preferred model is to provide a series of html updates via `this.html()`
 - `listeners`: map of function(props, el) DOM handlers
@@ -87,7 +91,7 @@ Note that we both passed in the property `name` via HTML, as a default when regi
 - `methods`: functions will be bound to this automatically
 - `decorators`: array list of data to NOT re-render always
 
-# Reefer Component properties#
+# coral.ui Component properties#
 - rootEl
 - data
 - observers
@@ -95,14 +99,14 @@ Note that we both passed in the property `name` via HTML, as a default when regi
 - methods
 - shared (globally shared for this component)
 
-# Reefer Component methods #
+# coral.ui Component methods #
 - render
 - observe
 - watch 
 - bind
 - emit
 
-# Reefer Registiry #
+# coral.ui Registiry #
 - register
 - find
 - findAll
@@ -110,19 +114,19 @@ Note that we both passed in the property `name` via HTML, as a default when regi
 - emit
 
 # Syntax #
-- on HTML attributes `reef-p-PROPERTYNAME` = `VALUE`
-	- where `PROPERTYNAME` is the data name in your javascript.
+- on HTML attributes `coral-s-PROPERTYNAME` = `VALUE`
+	- where `PROPERTYNAME` is the state name in your javascript.
 	- where `VALUE` is the value
 - or `VALUE` may specific a refererence instead, if:
 	- of the format `~PROPERTYREFERENCE~LOCATION`
 		- `PROPERTYREFERENCE` is the name of the data in other component or store
 		- `LOCATION` is a css selector to reach that `PROPERTYREFERENCE`
 		- `~~LOCATION` may be used if if the `PROPERTYREFRENCE` is the same as the location, e.g:
-		- `<div reef-p-whichtab="~~#othertabdiv"></div>`  
+		- `<div coral-s-whichtab="~~#othertabdiv"></div>`  
 	- may end with ::EVENTNAME (where VALUE is literal or a reference
     - note that property events will be preprended by the registered component-name
     - for example, the following will set the initial value to 1, and fire a custom DOM event names `selectedtab` whenever the value `whichtab` changes in the component:
-      -	`<div reef-p-whichtab="somelabel::selectedtab">`
+      -	`<div coral-s-whichtab="somelabel::selectedtab">`
 
 		selector maybe: `.class` `#id` `[attribute...]` or `$json$PATH` or `$html$PATH` or `$json-raw$PATH` or `$jsonp$PATH` (where PATH should included the literal string `{JSONP}`
 			one special selector `^` indicate "this" compomnent (may be extending to included parent with ^1 for parent for example)
@@ -133,17 +137,17 @@ Note that we both passed in the property `name` via HTML, as a default when regi
 - data => state
 - data for non-reactive, state for reactive
 
-reef.EVENTNAME=functionname(LITERAL,...,LITERAL)
-reef.EVENTNAME=property(LITERAL)
-reef.click.stop
+coral-on-EVENTNAME=functionname(LITERAL,...,LITERAL)
+coral-on-EVENTNAME=property(LITERAL)
+coral-on-click.stop
 
 # Events #
-- includes the closest reef as `event.reef` in the event
+- includes the closest coral as `event.coral` in the event
 
 
 # Slots #
-- reef-slot -- slots.name.text (for string) or as array for dom elements
-- type='reef()' for compiled function - available as reefFunc
+- coral-slot -- slots.name.text (for string) or as array for dom elements
+- type='coral()' for compiled function - available as coralFunc
 - otherwise default
 - update vs template (can force update by returning null)
 

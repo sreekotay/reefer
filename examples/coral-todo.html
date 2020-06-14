@@ -1,7 +1,7 @@
 <html>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src=../src/xs-observe.js></script>
-  <script src=../src/reefer.js></script>
+  <script src=../src/coral-observe.js></script>
+  <script src=../src/coral-ui.js></script>
   <script src=../src/coral.js></script>
   <link rel="stylesheet" href="../src/coral.css">
 <body>
@@ -15,35 +15,35 @@
 .add { animation-name: leftAppear; }
 .redo { animation-name: rightAppear; }
 
-[reef=todos] {
+[coral=todos] {
   width: 50%;
 }
-[reef=todos] > div {
+[coral=todos] > div {
   position: relative; 
   _overflow: hidden;
   animation-duration: 1s;
   animation-fill-mode: forwards;
 }
-[reef=todos] label {
+[coral=todos] label {
   margin: 4px; 
   background-color: #f7f7f7;
   display: flex;
 }
-[reef=typer] {
+[coral=typer] {
   padding: 12px 0px;
   background-color: rgb(255,255,255, 0.9);
   border-bottom: 1px solid #fff;
 }
-[reef=typer].reef-stuck {
+[coral=typer].coral-stuck {
   border-bottom: 1px solid #f0f0f0;
 }
 </style>
-<div class='coral-vertical' style='width:100%; align-items:center; padding-top: 16px;'>
+<div class='cui-vertical' style='width:100%; align-items:center; padding-top: 16px;'>
   <div style='background-color:red; height:100px; width: 40px'></div>
   <div style='max-width:500px;margin:8px; overflow:visible'>
-    <div reef=typer class='reef-sticky' reef-sticky-y=0 reef-sticky-class='' style='margin:5px; padding:10px'>
-      <small reef-slot='hinttext' style="margin-left:4px">(press enter to add)</small>
-      <span reef-slot='prompttext'>Type something above to change this text</span>
+    <div coral=typer class='coral-sticky' coral-sticky-y=0 coral-sticky-class='' style='margin:5px; padding:10px'>
+      <small coral-slot='hinttext' style="margin-left:4px">(press enter to add)</small>
+      <span coral-slot='prompttext'>Type something above to change this text</span>
     </div>
     <hr>
     <blockquote>
@@ -51,9 +51,9 @@
       The sticky headers are *close* but not quite right....
     </blockquote>
     <hr>
-    <div class='coral-horizontal' style='margin-top:16px;'> 
-      <div reef=todos id=todo class='coral-vertical' reef-p-targetlist='#done' reef-p-inputtext='~data.target~[reef=typer]' reef.click  reef-p-checkclass = 'redo'>
-        <script type='reef-p-todos'>
+    <div class='cui-horizontal' style='margin-top:16px;'> 
+      <div coral=todos id=todo class='cui-vertical' coral-s-targetlist='#done' coral-s-inputtext='~state.target~[coral=typer]' coral-on-click  coral-s-checkclass = 'redo'>
+        <script type='coral-s-todos'>
           [
           ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"],
           ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"],
@@ -62,12 +62,12 @@
           ["item1"], ["item2"], ["third item"], [ "Darth Vader"], ["me"], ["you"]
           ]        
         </script>
-        <div reef-slot='header' ><b class='reef-sticky'>TODO.</b></div>
-        <div reef-slot='footer'><div id='b'>Done footer.</div></div>
+        <div coral-slot='header' ><b class='coral-sticky'>TODO.</b></div>
+        <div coral-slot='footer'><div id='b'>Done footer.</div></div>
       </div>
       <div style='flex-grow:1'></div> 
-      <div reef=todos id=done class='coral-vertical' reef-p-targetlist='#todo' reef-p-checked=true reef.click reef-p-checkclass = 'add'>
-        <script type='reef-p-todos'> 
+      <div coral=todos id=done class='cui-vertical' coral-s-targetlist='#todo' coral-s-checked=true coral-on-click coral-s-checkclass = 'add'>
+        <script type='coral-s-todos'> 
           [
           ["Much longer item that we are using.  But still pretty short in the grand scheme of things"],
           ["item 4"],
@@ -75,8 +75,8 @@
           ["animated slowly to show the intergrity of the animation"]
           ]
         </script>
-        <div reef-slot='header'><b  class='reef-sticky'>DONE.</b></div>
-        <div reef-slot='footer'><div id='b'>Done footer.</div></div>
+        <div coral-slot='header'><b  class='coral-sticky'>DONE.</b></div>
+        <div coral-slot='footer'><div id='b'>Done footer.</div></div>
       </div>
     </div>  
   </div>
@@ -84,14 +84,13 @@
 </div>
 <script>
 
-  
     // ================  typer
-    reefer.register('typer', {
-      data: {
+    coral.ui.register('typer', {
+      state: {
         text: ''
       },
-      template: function () {
-        var props = this.data
+      update: function () {
+        var props = this.state
         var slots = this.slots
         var hinttext = (slots && slots.hinttext && slots.hinttext.text) || ''
         var prompttext = (slots && slots.prompttext && slots.prompttext.text ) || ''
@@ -100,29 +99,29 @@
         this.html (1, '<div style="display:flex; align-items:center">\
           <label for="mirror"><b>New Task</b> </label>\
           <input style="margin-left: 6px; flex-grow:1" type="text" id="mirror" value="' + props.text +'"> \
-          <button style="margin-left:4px" reef.click="methods.submitInput">Add</button></div>')
+          <button style="margin-left:4px" coral-on-click="methods.submitInput">Add</button></div>')
         this.html (2, '<div style="text-align:center"><em aria-live="polite">' + (props.text.length ? props.text + hinttext: prompttext) + '</em></div>')
         return
       },
       methods: {
         submitInput: function() {
-          if (!this.data.text || !('target' in this.data)) return
-          this.data.target = this.data.text
-          this.data.text = ''
+          if (!this.state.text || !('target' in this.state)) return
+          this.state.target = this.state.text
+          this.state.text = ''
         }
       },
       listeners: {
-        input: function(e) {var props = this.data; props.text = e.target.value},
+        input: function(e) {var props = this.state; props.text = e.target.value},
         keydown: function (e) { if (e.key==='Enter') this.methods.submitInput() }
       }
     })
 
     // ================  todos
-    reefer.register ('todos', {
-      data: {
+    coral.ui.register ('todos', {
+      state: {
         todos: [],
-        datasrc: 'data.todos',
-        datactx: 'data',
+        datasrc: 'state.todos',
+        datactx: 'state',
         dataslot: 'render',
         genkey: true,
         checked: false,
@@ -131,10 +130,10 @@
       decorators: ['addClass'],
       slots: {
         render: {
-          script: reefer.template('d,i,ctx', 
+          script: coral.ui.template('d,i,ctx', 
                                   "<div class='${(d.inTransition===ctx.__xs__.s ? 'remove' : (d.inTransition && ctx.addClass))}'><label>\
                                       <input type='checkbox' \
-                                             reef.click='methods.checkAndAssign' \
+                                             coral-on-click='methods.checkAndAssign' \
                                              ${ctx.checked ?  'checked' : ''}></input>\
                                       <span class=textshadow>${d[0]}</span>\
                                     </label></div>")
@@ -144,50 +143,50 @@
         checkAndAssign: function (event) {
           var rf = this
           var idx = this.htmlToIdx(event.target) - 1
-          var targetReef = reefer.find (rf.data.targetlist)
-          if (!targetReef && targetReef.name!='todos') throw Error ("no target todo list found")
-          var todo = rf.data.todos[idx]
+          var targetcoral = coral.ui.find (rf.state.targetlist)
+          if (!targetcoral && targetcoral.name!='todos') throw Error ("no target todo list found")
+          var todo = rf.state.todos[idx]
           if (todo.inTransition) return 
 
 
           var elem = this.htmlChild(event.target)
           if (todo.inTransition) 
             return //already moving
-          todo.inTransition = this.data.__xs__.s
-          xs.observe (todo)
-          targetReef.data.todos.splice (0, 0, todo)
+          todo.inTransition = this.state.__xs__.s
+          coral.observe (todo)
+          targetcoral.state.todos.splice (0, 0, todo)
           return
         } 
       },
       lifecycle: {
         afterRender: function () {
-          this.data.addClass = this.data.checkclass
+          this.state.addClass = this.state.checkclass
         }
       },
       listeners: {
         animationend: function (event) {
           var idx = this.htmlToIdx (event.target) - 1
           if (idx>=0) {
-            var todo = this.data.todos[idx]
-            if (todo.inTransition!==this.data.__xs__.s) {
+            var todo = this.state.todos[idx]
+            if (todo.inTransition!==this.state.__xs__.s) {
               if (todo.inTransition===true) todo.inTransition = null
               return
             }
-            if (idx>=0) this.data.todos.splice (idx, 1)
+            if (idx>=0) this.state.todos.splice (idx, 1)
             todo.inTransition = null
           }
         }
       },
       observers: {
         inputtext: function() {
-          if (!this.data.inputtext) return
-          var todo =  [this.data.inputtext]
+          if (!this.state.inputtext) return
+          var todo =  [this.state.inputtext]
           todo.inTransition = true
-          this.data.inputtext = ''
+          this.state.inputtext = ''
 
           //animating it
-          this.data.todos.splice (0, 0, todo)
-          this.data.addClass = 'add'
+          this.state.todos.splice (0, 0, todo)
+          this.state.addClass = 'add'
         },
         'todos.*.inTransition': function () {
           //return 'done'
@@ -199,10 +198,10 @@
 
     function verifyAfterElement (el, eof) {
       var a = el.previousSibling 
-      if (!a || !a.reefHolder) {
+      if (!a || !a.coralHolder) {
         var d = document.createElement ('div')
         d.setAttribute ('style', 'padding:0;margin:0;border:none;display:none;')
-        d.reefHolder = true
+        d.coralHolder = true
         el.parentNode.insertBefore (d, el)
         a = d
       }
@@ -241,8 +240,8 @@
       return document.body
     }
     var genid = 0
-    function reefStickyScroll(event) {
-      var els = document.getElementsByClassName ('reef-sticky')
+    function coralStickyScroll(event) {
+      var els = document.getElementsByClassName ('coral-sticky')
       var parmap = new WeakMap()
       var data = []
       for (var i=0; i<els.length; i++) {
@@ -268,8 +267,8 @@
         var endY = parmap.get(pel)
 
         var ael = verifyAfterElement (el, eof)
-        var offx = el.getAttribute('reef-sticky-x') | 0
-        var offy = el.getAttribute('reef-sticky-y') | 0
+        var offx = el.getAttribute('coral-sticky-x') | 0
+        var offy = el.getAttribute('coral-sticky-y') | 0
         var nposx = Math.min (Math.max(pof.leftt, offx), pof.right - eof.width)
         var nposy = Math.min (Math.max(0, pof.top, offy) + topAdjust(el) + startY, pof.bottom - (endY-startY) + topAdjust(el))// - bottomAdjust(el))
         var aof 
@@ -289,8 +288,8 @@
             el.style.width = eof.width - widthAdjust(el)
             //el.style.height = eof.height
             el.style.zIndex = 1000
-            el.classList.add ('reef-stuck')
-            var cl = el.getAttribute ('reef-sticky-class')
+            el.classList.add ('coral-stuck')
+            var cl = el.getAttribute ('coral-sticky-class')
             if (cl) el.classList.add.apply (el.classList, cl.split(' '))
             aof = ael.getBoundingClientRect()
             ael.style.margin = window.getComputedStyle(el).margin
@@ -308,8 +307,8 @@
             elsty.width = es.width
             elsty.left = es.left
             elsty.height = es.height
-            el.classList.remove ('reef-stuck')
-            var cl = el.getAttribute ('reef-sticky-class')
+            el.classList.remove ('coral-stuck')
+            var cl = el.getAttribute ('coral-sticky-class')
             if (cl) el.classList.remove.apply (el.classList, cl.split(' '))
           } 
         }
@@ -323,37 +322,37 @@
         }
       }
     }
-    reefStickyScroll.listener = function (event) {
-      reefStickyScroll(event)
+    coralStickyScroll.listener = function (event) {
+      coralStickyScroll(event)
       return
-      if (!reefStickyScroll.ticking) {
-        reefStickyScroll(event)
-        reefStickyScroll.ticking = false;
+      if (!coralStickyScroll.ticking) {
+        coralStickyScroll(event)
+        coralStickyScroll.ticking = false;
 /*
         window.requestAnimationFrame(function() {
-          reefStickyScroll.ticking = false;
-          reefStickyScroll()
+          coralStickyScroll.ticking = false;
+          coralStickyScroll()
         });*/
-        reefStickyScroll.ticking = true;
+        coralStickyScroll.ticking = true;
       }
     }
-    reefStickyScroll.apply = function (el) {
-      reefStickyScroll.wm = new WeakMap()
-      var els = el ? (Array.isArray(el) ? el : [el]) : document.getElementsByClassName ('reef-sticky')
+    coralStickyScroll.apply = function (el) {
+      coralStickyScroll.wm = new WeakMap()
+      var els = el ? (Array.isArray(el) ? el : [el]) : document.getElementsByClassName ('coral-sticky')
       for (var i=0; i<els.length; i++) {
         var el = els[i]
         while (el) {
-          if (!reefStickyScroll.wm.has(el)) {
-            reefStickyScroll.wm.set(el)
-            el.addEventListener('scroll', reefStickyScroll.listener)
-            //if (el!==window) window.addResizeListener (el, reefStickyScroll.listener)
+          if (!coralStickyScroll.wm.has(el)) {
+            coralStickyScroll.wm.set(el)
+            el.addEventListener('scroll', coralStickyScroll.listener)
+            //if (el!==window) window.addResizeListener (el, coralStickyScroll.listener)
           }
 
           el = el.parentNode
           if (el===document.body) el = window
         }
       }
-      reefStickyScroll()
+      coralStickyScroll()
     };
     (function(){
       var attachEvent = document.attachEvent;
@@ -413,7 +412,7 @@
         }
       }
     })();
-    reefStickyScroll.apply()
+    coralStickyScroll.apply()
 
 
     
@@ -448,8 +447,8 @@
       }
       nel1.removeAttribute ('id')
       nel2.removeAttribute ('id')
-      reefer.styleBag (d1,ds)
-      reefer.styleBag (d2,ds)
+      coral.ui.styleBag (d1,ds)
+      coral.ui.styleBag (d2,ds)
       document.body.appendChild (d1)
       document.body.appendChild (d2)
       d1.appendChild (nel1)
@@ -463,8 +462,8 @@
       }
       d1.style.opacity = 1
       d2.style.opacity = 0
-      reefer.styleBag (d1, p1)
-      reefer.styleBag (d2, p1)
+      coral.ui.styleBag (d1, p1)
+      coral.ui.styleBag (d2, p1)
       requestAnimationFrame(function () {
         var p2 =  {
           left: tpos.left + 'px',
@@ -472,8 +471,8 @@
           width: tpos.width + 'px',
           height: tpos.height + 'px',
         }
-        reefer.styleBag (d1,p2)
-        reefer.styleBag (d2,p2)
+        coral.ui.styleBag (d1,p2)
+        coral.ui.styleBag (d2,p2)
         d1.style.opacity = 0
         d2.style.opacity = 1
         setTimeout (function () {

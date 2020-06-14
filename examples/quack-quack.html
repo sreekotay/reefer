@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
   <link href="../src/coral.css" rel="stylesheet" type="text/css" >
-  <script src='../src/xs-observe.js'></script>
-  <script src='../src/reefer.js'></script>
+  <script src='../src/coral-observe.js'></script>
+  <script src='../src/coral-ui.js'></script>
   <script src='../src/csi-coral-header.js'></script>
   <style>
       .block            {padding: 0 8px; padding-bottom:8px; border-left:1px dotted #ddd; }
       .block:before     {content: ''; width:0;}
-      .coral-card img   {max-height:128px; max-width:50%; margin-right:8px;}
-      .coral-card       {min-width: 128px }
+      .cui-card img     {max-height:128px; max-width:50%; margin-right:8px;}
+      .cui-card         {min-width: 128px }
       .list             {font-style:normal; margin-bottom:8px; color:#E37151; font-size:16px;}
       a                 {text-decoration-color:#E37151;}
       a:link            {font-weight: 500; font-style:normal; color:#E37151; }
-      article           {font-size:13px; font-weight:400; font-style:italic;}
+      article           {font-size:13px; font-weight:400; font-style:italic; min-width:72px;}
       input             {margin:8px; min-width:280px; border: 1px solid #E37151; padding: 8px;}
   </style>
   <body style='center;overflow-y:scroll;'>
@@ -23,37 +23,37 @@
         <li><a href="#">Contact</a></li>
       </ul>
     </nav>  
-    <div class='coral-vertical' style='margin:auto; max-width:calc(100vw - 16px); width:640px; overflow: auto;'>
-        <h2 id='duckduckgo' class='coral-wide coral-center coral-space-children' style='font-variant:small-caps; margin-top:8px;'>
-          <div class='coral-horizontal coral-center'>
+    <div class='cui-vertical' style='margin:auto; max-width:calc(100vw - 16px); width:640px; overflow: auto;'>
+        <h2 id='duckduckgo' class='cui-wide cui-center cui-space-children' style='font-variant:small-caps; margin-top:px;'>
+          <div class='cui-horizontal cui-center'>
             <a href='http://duckduckgo.com'><img for='duckduckgo' width=64 src='img/duckduckgo.png'></a>
-            <a  href='http://duckduckgo.com' style='font-variant:small-caps;''>DuckDuckGo </a>
+            <a href='http://duckduckgo.com' style='font-variant:small-caps;''>DuckDuckGo</a>
           </div>
-          <div id='reefinput' style='position:relative' reef-p-datasrc='data' reef-p-inputtext reef reef.input>
-            <script type='reef-template(d)' reef-children=2>
-              <div> 
+          <div coral id='coralinput' style='position:relative' coral-s-datasrc='state' coral-s-inputtext  coral-on-input>
+            <script type='coral-template(d)' coral-children=2>
+              <div style='position:relative'> 
                 <input  id='searchinput' placeholder='Type here - powered by Instant Answers' 
-                    value="${d.inputtext}" reef.input=methods.submitInput 
-                    _oninput="updateSearch(this.value)" >
-              <span reef style='position:absolute; right:8px; top:8px; opacity: 0.0'>✖️</span>
+                    coral-on-input=methods.submitInput 
+                    _oninput="updateSearch(this.value)" coral coral-s-value='~rootEl.value'>
+                <span style='position:absolute; right:8px; top:8px; opacity: 0.0'>✖️</span>
               </div>
             </script>
-            <script name=submitInput type='reef-method($event)'>this.data.inputtext = $event.target.value</script>
-            <script name=inputtext type='reef-observer(updates)'>updateSearch(updates.value)</script>
+            <script name=submitInput type='coral-method($event)'>this.state.inputtext = $event.target.value</script>
+            <script name=inputtext type='coral-observer(updates)'>updateSearch(updates.value)</script>
           </div>
         </h2>
-        <div reef id=searchlist
-             reef-p-answer
-             reef-p-datasrc='data.answer.RelatedTopics'
-             reef-p-datakey='FirstURL'
-             class='coral-vertical coral-space-children'>
-          <script type='reef-template(d, i, ctx)'>
-            <div class='coral-card coral-horizontal coral-anim coral-anim-add'style='overflow:auto; overflow-y:hidden'>
+        <div coral id=searchlist
+             coral-s-answer
+             coral-s-datasrc='state.answer.RelatedTopics'
+             coral-s-datakey='FirstURL'
+             class='cui-vertical cui-space-children'>
+          <script type='coral-template(d, i, ctx)'>
+            <div class='cui-card cui-horizontal cui-anim cui-anim-add'style='overflow:auto; overflow-y:hidden'>
               <img style='max-width:20%' src=${(d.Icon && d.Icon.URL) || ''}>
               <article class='${d.Result && d.Icon && d.Icon.URL ? 'block' : ''}' >
                 <div class='${d.Result ? '' : 'list'}'>${(d.Result || d.Name || '').replace(/<br>/g, '')}</div>
-                ${d.Topics ? "<div class='coral-horizontal'>" + d.Topics.map(function(dd) { return `
-                <div class='coral-vertical ' style='align-items:flex-start'>
+                ${d.Topics ? "<div class='cui-horizontal'>" + d.Topics.map(function(dd) { return `
+                <div class='cui-vertical ' style='align-items:flex-start'>
                   <article class='${dd.Result ? 'block' : ''}'>${dd.Result || dd.Text}</article>
                   <img src=${(dd.Icon && dd.Icon.URL) || ''}>
                 </div>`
@@ -69,22 +69,22 @@
   <script>
     function updateSearch(value) {
       value = value ||'rock' // some default just because
-      var reef = reefer.find('#searchlist')
-      if (reef && value && value.length>2)
-        reef.bind ('data.answer', '$jsonp$https://api.duckduckgo.com/?q=' + encodeURIComponent(value) + 
+      var ui = coral.ui.find('#searchlist')
+      if (ui && value && value.length>2)
+        ui.bind ('state.answer', '$jsonp$https://api.duckduckgo.com/?q=' + encodeURIComponent(value) + 
                                   '&format=json&callback={JSONP}')
       }
     function dohashchange(e) { 
       var v = decodeURIComponent (window.location.hash.substring(1))
-      reefer.find('#reefinput').data.inputtext = v 
+      coral.ui.find('#coralinput').state.inputtext = v 
     }
     window.addEventListener('hashchange', dohashchange) // since this event is at the window level, reflect it to out component
-    reefer.ready(function () {
+    coral.ui.ready(function () {
       dohashchange()
       searchinput.focus()
     })
     /*
-    t('div').a({class: 'coral-card coral-horizontal coral-anim coral-anim-add', style:'' }).c([
+    t('div').a({class: 'cui-card cui-horizontal coral-anim coral-anim-add', style:'' }).c([
       t('img').a({src: (d.Icon && d.Icon.UR) || '', style: 'max-width:20%'},
       t('article').a(class:'', )
 

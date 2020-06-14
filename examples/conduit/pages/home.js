@@ -2,23 +2,23 @@
 // ============================
 // our articles control
 // ============================
-reefer.register('*articlesList', {
-  data: {
-    datasrc: 'data.articlesdata.articles',
+coral.ui.register('*articlesList', {
+  state: {
+    datasrc: 'state.articlesdata.articles',
     articlesdata: null,
     tagsdata: null
   },
   bind: {
-    tag: { selector: '[reef=switcher]' } //  same as: reef-p-tag="~~[reef=switcher]"
+    tag: { selector: '[coral=switcher]' } //  same as: coral-s-tag="~~[coral=switcher]"
   },
   mutate: function (updates) {
     var url = baseurl + '/articles?'
-    var tag = this.data.tag; if (tag) url += '&tag=' + tag
-    this.bind('data.articlesdata', '$json$' + url)
+    var tag = this.state.tag; if (tag) url += '&tag=' + tag
+    this.bind('state.articlesdata', '$json$' + url)
   },
   observers: {
     'tagsdata': function (updates) {
-      this.bind('data.tagsdata', '$json$' + baseurl + '/tags')
+      this.bind('state.tagsdata', '$json$' + baseurl + '/tags')
     }
   }
 })
@@ -47,8 +47,8 @@ coral.ui.clientSideInclude (function () {/*
             </li>
           </ul>
         </div>
-        <div reef=articlesList >
-          <script type='reef-template(d)'>
+        <div coral=articlesList >
+          <script type='coral-template(d)'>
             <div class="article-preview">
               <div class="article-meta">
                 <a href="profile.html"><img src="${d.author.image}" /></a>
@@ -81,8 +81,8 @@ coral.ui.clientSideInclude (function () {/*
         <div class="sidebar">
           <p>Popular Tags</p>
 
-          <div reef class="tag-list" reef-p-datasrc="data.tagsdata.tags" reef-p-tagsdata="~~[reef=articlesList]" >
-            <script type='reef-template(d)'>
+          <div coral class="tag-list" coral-s-datasrc="state.tagsdata.tags" coral-s-tagsdata="~~[coral=articlesList]" >
+            <script type='coral-template(d)'>
               <a href='#?tag=${d}'  class="tag-pill tag-default" style='cursor:pointer' >${d}</a>
             </script>
           </div>

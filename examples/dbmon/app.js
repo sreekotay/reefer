@@ -27,15 +27,15 @@ var anim = true
 var render = function () {
   Monitoring.renderRate.ping()
   databases = ENV.generateData(true).toArray()
-  var reef = reefer.find('#reeftable')
-  reef.render()
+  var ui = coral.ui.find('#coraltable')
+  ui.render()
   if (anim) setTimeout(render, ENV.timeout)
 }
 
-reefer.ready(function () {
+coral.ui.ready(function () {
   var databases = ENV.generateData().toArray()
-  var reef = reefer.find('#reeftable')
-  reef.data.w = { databases: databases }
-  reef.render()
+  var ui = coral.ui.find('#coraltable')
+  ui.state.w = { databases: databases }
+  ui.render()
   render()
 })

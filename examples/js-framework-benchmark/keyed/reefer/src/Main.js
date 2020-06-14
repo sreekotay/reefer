@@ -7,8 +7,8 @@ function Main () {
   var store = this.store = new Store()
 
   // connect the store to our UI....
-  reefer.ready(function () {
-    var btns = document.querySelector('[reef=mybuttons]').reef
+  coral.ui.ready(function () {
+    var btns = coral.ui.find('[coral=mybuttons]')
     btns.watch('store', store) // observe the store as an external entity
     btns.decorate('store')
   })
@@ -28,7 +28,7 @@ function Store () {
 }
 var sp = Store.prototype
 sp.buildData = function (count) {
-  count = count || 10
+  count = count || 1000
   var adjectives = ['pretty', 'large', 'big', 'small', 'tall', 'short', 'long', 'handsome', 'plain', 'quaint', 'clean', 'elegant', 'easy', 'angry', 'crazy', 'helpful', 'mushy', 'odd', 'unsightly', 'adorable', 'important', 'inexpensive', 'cheap', 'expensive', 'fancy']
   var colours = ['red', 'yellow', 'blue', 'green', 'pink', 'brown', 'purple', 'brown', 'white', 'black', 'orange']
   var nouns = ['table', 'chair', 'house', 'bbq', 'desk', 'car', 'pony', 'cookie', 'sandwich', 'burger', 'pizza', 'mouse', 'keyboard']

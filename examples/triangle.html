@@ -3,10 +3,10 @@
 <head>
   <title>Sierpinski</title>
   <meta name='viewport' content='width=device-width'>
-  <script src='../dist/reefer-min.js'></script>
+  <script src='../dist/coral-ui-min.js'></script>
 </head>
 <style>
-[reef=dot]  {
+[coral=dot]  {
   position: absolute;
   background: #61dafb;
   font: normal 15px sans-serif;
@@ -24,27 +24,27 @@
 }
 </style>
 <body>
-  <div reef=myapp class=container reef-p-seconds=1></div>
+  <div coral=myapp  class=container coral-s-seconds=1></div>
 <script>
     // =====================
     // triangle
     // =====================
-    reefer.register ('myapp',  {
-      data: {
+    coral.ui.register ('myapp',  {
+      state: {
         seconds: 0,
         elapsed: 0
       },
-      template:function () {
-        var elapsed = this.data.elapsed
+      update:function () {
+        var elapsed = this.state.elapsed
         const t = (elapsed / 1000) % 10;
         const scale = 1 + (t > 5 ? 10 - t : t) / 10;
         const transform = 'scaleX(' + (scale / 2.1) + ') scaleY(0.7) translateZ(0.1px)';
         this.rootEl.style.transform = transform
 
-        this.html (0,  '<div reef=triangle reef-p-x=0 reef-p-y=0 reef-p-s=1000 reef-p-seconds=' + (1||this.data.seconds) + '></div>')
+        this.html (0,  '<div coral=triangle coral-s-x=0 coral-s-y=0 coral-s-s=1000 coral-s-seconds=' + (1||this.state.seconds) + '></div>')
       },
       observers: {
-        elapsed: function() {this.data.seconds = ((this.data.elapsed/1000)|0) % 10}
+        elapsed: function() {this.state.seconds = ((this.state.elapsed/1000)|0) % 10}
       }
     })
 
@@ -52,8 +52,9 @@
     var doanim = true
     var cdiv
     function update() {
-      if (!cdiv) cdiv = reefer.find('.container')
-      cdiv.data.elapsed = new Date().getTime() - start
+      if (!cdiv) cdiv = coral.ui.find('.container')
+      if (!cdiv) return
+      cdiv.state.elapsed = new Date().getTime() - start
       if (doanim) requestAnimationFrame(update);
     }
     requestAnimationFrame(update);
@@ -66,14 +67,14 @@
     // triangle
     // =====================
     var targetSize = 25
-    var dottempl = reefer.template ("x, y, targetSize, seconds", 
-                                    "<div reef=dot reef-p-x=${x - targetSize/2} reef-p-y=${y - targetSize /2} reef-p-size=${targetSize} reef-p-text='~data.seconds~.container'></div>")//'${seconds}'></div>") 
-    var tritempl = reefer.template ("x, y, s, seconds", 
-                                    "<div reef=triangle reef-p-x=${x} reef-p-y=${y} reef-p-s=${s}></div>")// reef-p-seconds=${seconds}></div>")
-    reefer.register ('triangle',  {
-      template: function () {
-        var s = this.data.s | 0; var x = this.data.x | 0; var y = this.data.y | 0
-        var seconds = this.data.seconds || '*'
+    var dottempl = coral.ui.template ("x, y, targetSize, seconds", 
+                                    "<div coral=dot coral-s-x=${x - targetSize/2} coral-s-y=${y - targetSize /2} coral-s-size=${targetSize} coral-s-text='~state.seconds~.container'></div>")//'${seconds}'></div>") 
+    var tritempl = coral.ui.template ("x, y, s, seconds", 
+                                    "<div coral=triangle coral-s-x=${x} coral-s-y=${y} coral-s-s=${s}></div>")// coral-s-seconds=${seconds}></div>")
+    coral.ui.register ('triangle',  {
+      update: function () {
+        var s = this.state.s | 0; var x = this.state.x | 0; var y = this.state.y | 0
+        var seconds = this.state.seconds || '*'
         if (s <= targetSize) {
           this.html (0, dottempl (x, y, targetSize, seconds  ))
           return
@@ -88,16 +89,16 @@
     // =====================
     // dot
     // =====================
-    reefer.register ('dot', {
-      data: {
+    coral.ui.register ('dot', {
+      state: {
         hover: false
       }, 
       methods: {
-        enter: function() {this.data.hover=true},
-        leave: function() {this.data.hover=false}
+        enter: function() {this.state.hover=true},
+        leave: function() {this.state.hover=false}
       },
-      template: function() {
-        var props = this.data
+      update: function() {
+        var props = this.state
         if (!this.rootEl.onmouseenter) { // attaching event handlers is slow
           this.rootEl.onmouseenter = this.methods.enter
           this.rootEl.onmouseleave = this.methods.leave
@@ -115,7 +116,7 @@
       },
       observers: {
         text: function () {
-          var props = this.data
+          var props = this.state
           this.htmlUpdate (0, 0, (props.hover ? '*' + props.text + '*' : props.text) + '')
           return 'done'
         }

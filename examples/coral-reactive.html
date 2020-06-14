@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../src/coral.css">
+ <!--<script src='../dist/coral-ui-min.js'></script>-->
+  <script src='../src/coral-observe.js'></script>
+  <script src='../src/coral-ui.js'></script>
+  <body style='margin:8px 24px'>
+    <div style='display:flex; flex-direction:column; align-items: center;'>
+      Test - Hello World, Wizard, Typer, and Todos (nested also)
+      <div id='hello' coral='hello' coral-p-greeting='Yo :) Yo'>
+        <span style='color:red'> YEP </span>
+        <div coral='todos' coral-slot='under'></div>
+      </div>
+      <div coral='wizard' coral-p-selected='neville'></div>
+      <div coral='typer' coral.input></div>
+      <div><h2>To Dos</h2>To Dos
+        <div coral='todos'></div>  
+      </div>
+    </div>
+   <script>
+    // ================ hello world
+    coral.ui.register('hello',  {
+      state: {
+        greeting: 'Hello',
+        name: 'world'
+      },
+      update: function (slots) {
+        var props = this.state
+        slots = slots || {}
+        this.html (0, '<h2>' + props.greeting + (slots.default.text||'') + props.name + '!</h2>')
+        this.html (1, (slots.under.text||''))
+      }
+    })
+    // ================  wizard
+    coral.ui.register('wizard',  {
+      state: {
+        selected: 'harry'
+      },
+      update: function () { 
+        var props = this.state
+        var sel = function (v) { return (props.selected==v) ? '"' + v + '" selected' : '"' + v + '"' } 
+        this.html (0, '<label for=wizards>Who is the best wizard?</label>')
+        this.html (1, "<select>\
+            <option value=" + sel('harry') + ">Harry</option>\
+            <option value=" + sel('hermione') + ">Hermione</option>\
+            <option value=" + sel('neville') + ">Neville</option>\
+          </select> ")
+        this.html (2, props.selected=='hermione'?'agree!':'')
+      },
+      listeners: {
+        'change':function  (e)  {
+          var props = this.state
+          var t = e.target
+          props.selected = t.options[t.selectedIndex].value
+        }
+      }
+    })
+
+    // ================  typer
+    coral.ui.register('typer', {
+      state: {
+        text: ''
+      },
+      update: function () {
+        var props = this.state
+        this.html (0, '<label for="mirror">Whatever you type shows up below the field</label>')
+        this.html (1, '<input type="text" id="mirror" value="' + props.text + '" coral.input=state.text>')
+        this.html (2, '<div><em aria-live="polite">' + (props.text.length ? props.text : 'Type something above to change this text') + '</em></div>')
+      },
+      listeners: {
+        input: function(e) {this.state.text = e.target.value}
+      }
+    })
+
+    // ================  todos
+    coral.ui.register('todos', {
+      state: {
+        todos: ['Swim', 'Climb', 'Jump', 'Play']
+      },
+      update: function () {
+        var props = this.state 
+        this.html (0,'<ul>' +
+            props.todos.map(function (todo) {
+              return '<li>' + todo + '</li>';
+            }).join('') +
+          '</ul>');
+      },
+    });
+
+    function changeGreeting (t) {
+      document.getElementById('hello').coral.state.greeting = t
+    }
+     
+     
+
+   </script>
+  </body>
+</html>

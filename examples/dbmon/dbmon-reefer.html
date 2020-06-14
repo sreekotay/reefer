@@ -9,13 +9,13 @@
 <body>
   <div id="app" >
     <table class="table table-striped latest-data" >
-    <tbody id=reeftable 
-          reef
-          reef-p-datasrc='data.w.databases' 
-          reef-p-datactx='slots'
-          _reef-p-w='{"databases":[]}'
-          reef-p-dataslot='row'>
-        <script type='reef-function(arr)' reef-slot=samples>
+    <tbody id=coraltable 
+          coral
+          coral-s-datasrc='state.w.databases' 
+          coral-s-datactx='slots'
+          _coral-s-w='{"databases":[]}'
+          coral-s-dataslot='row'>
+        <script type='coral-function(arr)' coral-slot=samples>
           var s=''; for (var i=0; i<arr.length; i++) {
             var q = arr[i]
             s += "<td class='" + q.elapsedClassName + "'>" + (q.formatElapsed||' ') + 
@@ -24,7 +24,7 @@
           }
           return s 
         </script>
-        <script type='reef-template(db,i,ctx)' reef-slot=row>
+        <script type='coral-template(db,i,ctx)' coral-slot=row>
           <tr>
             <td class="dbname">${db.dbname}</td>
             <td class="query-count">
@@ -33,7 +33,7 @@
           </tr>
         </script>
         <!--
-        <script type='reef-function'>
+        <script type='coral-function'>
           <tr data-id="dbs">
             <td class="dbname" data-id="dbname"></td>
             <td class="query-count"><span data-id="lastSample"></span></td>
@@ -66,7 +66,7 @@
            {{ }}
           </tr>
         </script>-->
-        <script type='reef-function(db,i,ctx)' reef-slot=row_>
+        <script type='coral-function(db,i,ctx)' coral-slot=row_>
 
           var htag = this.htag 
           var hdata = this.hdata 
@@ -99,8 +99,8 @@
 
   </div>
   <script src='../../src/morphdom.js'></script>
-  <script src='../../src/xs-observe.js'></script>
-  <script src='../../src/reefer.js'></script>
+  <script src='../../src/coral-observe.js'></script>
+  <script src='../../src/coral-ui.js'></script>
   <script src="ENV.js"></script>
   <script src="lib/perf-monitor.js"></script>
   <script src="lib/memory-stats.js"></script>

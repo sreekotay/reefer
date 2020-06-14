@@ -1,18 +1,18 @@
-.coral-vertical {
+.cui-vertical {
   display: flex;
   flex-direction: column;
 }
-.coral-horizontal, .coral-wide{
+.cui-horizontal, .cui-wide{
   display: flex;
   flex-direction: row;
 }
-.coral-center {
+.cui-center {
   align-items:center  !important;
   justify-content: center !important;
 }
 
 @media screen and (max-width: 600px) {
-  .coral-wide {
+  .cui-wide {
     flex-direction: column;
   }
 }
@@ -48,15 +48,15 @@ nav a:visited {
 }
 
 
-@keyframes coral-keys-appear { 0%   { max-height: 0; opacity: 1; } 100% { max-height: 800px; opacity: 1;} }
-@keyframes coral-keys-disappear { 0%   { max-height: 200px; opacity: 1} 100% { max-height: 0; opacity: 0;} }
-@keyframes coral-keys-left-appear { 0%   { max-height: 0; opacity: 0; left:-100px} 100% { max-height: 200px; opacity: 1; left:0} }
-@keyframes coral-keys-right-appear { 0%   { max-height: 0; opacity: 0; left:100px} 100% { max-height: 200px; opacity: 1; left:0} }
-.coral-anim-remove { animation-name: coral-keys-disappear; }
-.coral-anim-add { animation-name: coral-keys-appear; }
-.coral-anim-redo { animation-name: coral-keys-right-appear; }
+@keyframes cui-keys-appear { 0%   { max-height: 0; opacity: 1; } 100% { max-height: 800px; opacity: 1;} }
+@keyframes cui-keys-disappear { 0%   { max-height: 200px; opacity: 1} 100% { max-height: 0; opacity: 0;} }
+@keyframes cui-keys-left-appear { 0%   { max-height: 0; opacity: 0; left:-100px} 100% { max-height: 200px; opacity: 1; left:0} }
+@keyframes cui-keys-right-appear { 0%   { max-height: 0; opacity: 0; left:100px} 100% { max-height: 200px; opacity: 1; left:0} }
+.cui-anim-remove { animation-name: cui-keys-disappear; }
+.cui-anim-add { animation-name: cui-keys-appear; }
+.cui-anim-redo { animation-name: cui-keys-right-appear; }
 
-.coral-card {
+.cui-card {
   align-items: flex-start;
   padding: 6px; 
   border: 1px dotted #ccc;
@@ -66,24 +66,24 @@ nav a:visited {
   min-width:64px;
   flex-grow:1;
 }
-.coral-card img {
+.cui-card img {
   max-width: 100%;
 }
 
-.coral-anim {
+.cui-anim {
   position: relative; 
   animation-duration: 1.25s;
   animation-fill-mode: forwards;
   will-change: auto;
 }
 
-.coral-vertical.coral-space-children > * {
+.cui-vertical.cui-space-children > * {
   margin-bottom: 8px;
 }
-.coral-horizontal.coral-space-children > * {
+.cui-horizontal.cui-space-children > * {
   margin-right: 8px;
 }
-.coral-space-children > *:last-child {
+.cui-space-children > *:last-child {
   margin: 0;
 }
 
@@ -180,11 +180,11 @@ tr {
   text-align:left; 
 }
 
-.coraltabs {
+.cuitabs {
   display: flex;
   flex-direction: row;
 }
-.coraltabs > label {
+.cuitabs > label {
   cursor: pointer;
   background-color: #2196F3;
   color: white;
@@ -198,14 +198,14 @@ tr {
   background-color: #2196F3;
   color: white;
 }
-.coraltabs > input {
+.cuitabs > input {
   display:none;
 }
-.coraltabs.down > label {
+.cuitabs.down > label {
   margin-right: 1px;
   border-radius: 14px 14px 0 0;
 }
-.coraltabs.up > label {
+.cuitabs.up > label {
   border-radius: 0 0 14px 14px;
   margin-right: 1px;
 }

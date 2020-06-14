@@ -209,6 +209,16 @@
   // ==============
   // helper stuff
   // ==============
+  function dot (obj, path) {
+    if (typeof (path) === 'string') path = path.split('.')
+    var l = path.length
+    for (var i = 0; i < l; i++) {
+      var k = path[i]; var o = obj; obj = o[k]
+      if ((!obj || typeof (obj) !== 'object') && ((i + 1 < l) || (!(k in o)))) return { last: { obj: o, prop: k } }
+    }
+    return { value: obj, obj: o, prop: k }
+  }
+
   function objmerge (a, b) {
     if (b === undefined) return a
     if (typeof (b) !== 'object' || b === null) return b
@@ -255,12 +265,13 @@
   }
 
   // export
-  var xs = window.xs = window.xs || {}
+  var xs = window.coral = window.coral || {}
   xs.observe = deepObserver
   xs.unobserve = deepUnobserver
   xs.alias = alias
   xs.assign = objassign
   xs.clone = objclone
   xs.tick = tick
+  xs.dot = dot
   xs.privateprop = privateprop
 }).call(this)

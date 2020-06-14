@@ -189,6 +189,14 @@
     f.push(el)
     return el.c
   }
+  /* =========================
+    [
+      [c...c]  .tag = tag
+               .d = data
+               .p = parent
+               .c = [] children
+    ]
+      ========================= */
   xs.parseHTML = function (s, mode) {
     if (!nocloseend) filltags()
     s = s.split('</')
@@ -213,12 +221,11 @@
   xs.createCSS = function (name, rules) {
     var style = document.getElementById('__dynamic_styles__')
     if (!style) {
-      style = document.createElement('style') 
+      style = document.createElement('style')
       style.id = '__dynamic_styles__'; style.type = 'text/css'
       document.getElementsByTagName('head')[0].appendChild(style)
     }
     var sheet = style.sheet
     sheet.insertRule(name + '{' + rules + '}', 0)
   }
-
 })()

@@ -1,0 +1,24 @@
+<html>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+ <!--<script src='../dist/coral-ui-min.js'></script>-->
+ <script src='../src/coral-observe.js'></script>
+ <script src='../src/coral-ui.js'></script>
+<body>
+example: 
+<div coral=hello coral-s-name='Alice'>
+  <div style='display:inline; color:red'>BRIGHT</div>
+</div>		
+<script>
+  var helloTempl = coral.ui.template ('name,slot', '<div>Hello ${slot||""} World ${name||""}!</div>')
+  coral.ui.register ('hello', {
+    update: function() {
+      var slots = this.slots
+      this.html (0, helloTempl(this.state.name, slots.default.text || ''))
+    }
+  })
+  setTimeout(function () {
+    coral.ui.find('[coral=hello]').state.name = 'BOBBY!'
+  }, 2000)
+</script>
+</body>
+</html>

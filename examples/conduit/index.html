@@ -6,13 +6,13 @@
   <meta name='viewport' content='width=device-width'>
   <meta name='theme-color' content='#aa1e1e'>
   
-  <script src='../../src/xs-observe.js'></script>
-  <script src='../../src/reefer.js'></script>
+  <script src='../../src/coral-observe.js'></script>
+  <script src='../../src/coral-ui.js'></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.0.0/animate.min.css"/>
 
   <!--
-  <script src='../../dist/reefer-min.js'></script>
-  <script src='../../dist/js/reefer-min.js'></script>
+  <script src='../../dist/coral.ui-min.js'></script>
+  <script src='../../dist/js/coral.ui-min.js'></script>
   <script src='../../public/js/xs.js'></script>
   <script src='../../public/js/xs_linkspeed.js'></script>
 s  -->
@@ -23,7 +23,7 @@ s  -->
   <link href="https://fonts.googleapis.com/css?family=Titillium+Web:700|Source+Serif+Pro:400,700|Merriweather+Sans:400,700|Source+Sans+Pro:400,300,600,700,300italic,400italic,600italic,700italic" rel="stylesheet" type="text/css">
   <link rel='icon' href='favicon.ico'>
 
-  <script>window.MSInputMethodContext && document.documentMode && document.write('<script src="../../public/js/reeferIE11.js"><\x2fscript>');</script>
+  <script>window.MSInputMethodContext && document.documentMode && document.write('<script src="../../public/js/coral.uiIE11.js"><\x2fscript>');</script>
 
 
   <!-- <script src='layout/head.js'></script> -->
@@ -33,9 +33,8 @@ s  -->
   <script src='layout/header.js'></script>
  <!-- <script src='pages/profile.js'></script>-->
 <!-- <div reef reef-p-src='~rootEl.outerHTML~$js$pages/profile.js'></div> -->
-  <div reef='switcher' 
-       reef-p-pagedata='~rootEl.innerHTML'
-       reef-o-page='methods.loadPageData'></div>
+  <div coral='switcher' 
+       coral-s-pagedata='~rootEl.innerHTML'></div>
   <script src='layout/footer.js'></script>
   <script>
   var baseurl = 'https://conduit.productionready.io/api'
@@ -43,28 +42,28 @@ s  -->
   // ============================
   // our "router"
   // ============================
-  reefer.register ('switcher', {
-    template: function () {return 'done'},
-    data:['page', 'resource', 'tag'],
+  coral.ui.register ('switcher', {
+    update: function () {return 'done'},
+    state :['page', 'resource', 'tag'],
     mutate: function () {
-      if (this.data.page) this.bind ('data.pagedata', '$js$pages/' + this.data.page + '.js') 
+      if (this.state.page) this.bind ('state.pagedata', '$js$pages/' + this.state.page + '.js') 
     },
     listeners: {
       hashchange: function() {
         var parts = window.location.hash.split('/')
-        this.data.page = parts[1] || 'home'
-        this.data.resource = parts[2]
-        this.data.tag = getUrlParameter('tag')
+        this.state.page = parts[1] || 'home'
+        this.state.resource = parts[2]
+        this.state.tag = getUrlParameter('tag')
       }, 
-      reefLoadHTMLFail: function () {
-        this.data.pagedata = '<h1 style="justify-content:center; height:300px; align-items:center; display:flex;">404 - dang 😯 it.</h1>'
+      coralLoadHTMLFail: function () {
+        this.state.pagedata = '<h1 style="justify-content:center; height:300px; align-items:center; display:flex;">404 - dang 😯 it.</h1>'
       }
     }
   })
 
   function dohashchange(e) {
-    var reef = reefer.find ('[reef=switcher]')
-    if (reef) reefer.emit (reef.rootEl, 'hashchange')
+    var ui = coral.ui.find ('[coral=switcher]')
+    if (ui) coral.ui.emit (ui.rootEl, 'hashchange')
   }
   window.addEventListener('hashchange', dohashchange) // since this event is at the window level, reflect it to out component
 
@@ -78,8 +77,8 @@ s  -->
     return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
   }
 
-  reefer.ready(function () {
-    dohashchange() // do this after reefer is ready
+  coral.ui.ready(function () {
+    dohashchange() // do this after coral.ui is ready
   })
 
   </script>
